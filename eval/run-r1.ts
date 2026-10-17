@@ -46,6 +46,7 @@ interface Annotation {
   surface: string;
   why: string;
   exact_scene: boolean;
+  split: "dev" | "holdout";
 }
 interface MustNotFlag { character: string; scene: string; surface: string; why: string }
 interface LeaksFile {
@@ -141,6 +142,10 @@ async function loadCache(): Promise<CacheShape> {
 async function main(): Promise<void> {
   loadEnv(join(here, "..", ".env"));
   const ann = JSON.parse(readFileSync(join(here, "leaks.json"), "utf8")) as LeaksFile;
+  // ── 留出集封存：默认只用 dev 裁决；--holdout 才解封 ──
+  const useHoldout = process.argv.includes("--holdout");
+  const scoredLeaks = ann.leaks.filter((a) => useHoldout || a.split === "dev");
+  const sealed = ann.leaks.filter((a) => a.split === "holdout").length;
   const scenes = parseScenes(readFileSync(SCRIPT, "utf8"));
   const sceneOrder = new Map(scenes.map((s, i) => [s.id, i]));
   const cache = await loadCache();
@@ -193,7 +198,7 @@ async function main(): Promise<void> {
 
   for (const iss of issues) {
     const surface = strip(iss.surface);
-    const matched = ann.leaks.filter(
+    const matched = scoredLeaks.filter(
       (a) =>
         a.character === iss.character &&
         (a.exact_scene ? a.scene === iss.useScene : true) &&
@@ -217,13 +222,13 @@ async function main(): Promise<void> {
     trace.push(JSON.stringify({ kind: "issue", verdict: mn ? "should_allow" : "false_positive", scene: iss.useScene, character: iss.character, surface: iss.surface, propositionId: iss.propositionId, mustNotFlag: mn ? `${mn.character}|${mn.surface}` : null }));
   }
 
-  const missed = ann.leaks.filter((a) => !hitLeak.has(a.id));
+  const missed = scoredLeaks.filter((a) => !hitLeak.has(a.id));
   const tp = hitLeak.size;
   const fp = fps.length;
   const fn = missed.length;
 
   // ── 逐条报 ──
-  console.log(`\n${"═".repeat(62)}\n注入的泄漏 ${ann.leaks.length} 处:`);
+  console.log(`\n${"═".repeat(62)}\n注入的泄漏 ${scoredLeaks.length} 处${useHoldout ? "（含 holdout）" : `　·　holdout ${sealed} 条已封存（--holdout 解封）`}:`);
   for (const a of ann.leaks) {
     const got = hitLeak.has(a.id);
     console.log(`  ${got ? "✅ 抓到" : "❌ 漏掉"}  ${a.id}（${a.kind === "timing" ? "时序" : "无源"}）${a.scene} ${a.character}「${a.surface}」`);
@@ -303,10 +308,11 @@ async function main(): Promise<void> {
         reported: tp + fp,
         precision: tp + fp === 0 ? 0 : tp / (tp + fp),
         recall: tp + fn === 0 ? 0 : tp / (tp + fn),
-        annotations: ann.leaks.length,
+        annotations: scoredLeaks.length,
       },
       extra: {
-        devSet: { version: ann.meta.name, size: ann.leaks.length },
+        devSet: { version: ann.meta.name, size: scoredLeaks.length },
+        split: useHoldout ? "all" : "dev",
         ledger: { propositions: ledger.length, usages: usages.length, knowledge: facts.length },
         flags: FLAGS,
         ledgerCache: CACHE,
