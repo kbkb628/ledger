@@ -1,3 +1,4 @@
+import { hungarianMin } from "../src/rsi/hungarian.js";
 /**
  * 命题匹配 —— 抽取层评测与端到端评测共用的唯一实现。
  *
@@ -72,22 +73,44 @@ export function pairScore(
 export function assignPropositions<G extends { id: string; aliases: Array<{ surface: string }> }>(
   golden: G[],
   props: PropositionLike[],
+  opts: { greedy?: boolean } = {},
 ): Map<string, PropositionLike> {
-  const pairs: Array<{ g: G; p: PropositionLike; score: number; hits: number }> = [];
-  for (const g of golden) {
-    for (const p of props) {
-      const { score, hits } = pairScore(g.aliases, p);
-      if (score > 0) pairs.push({ g, p, score, hits });
+  if (props.length === 0) return new Map();
+
+  // 匹配强度矩阵：rows = golden，cols = 抽出命题
+  const score = golden.map((g) => props.map((p) => pairScore(g.aliases, p).score));
+
+  // 贪心（旧行为，仅用于对比）：按强度降序抢，先到先得
+  if (opts.greedy) {
+    const pairs: Array<{ gi: number; pi: number; s: number }> = [];
+    for (let gi = 0; gi < golden.length; gi++) {
+      for (let pi = 0; pi < props.length; pi++) {
+        if (score[gi]![pi]! > 0) pairs.push({ gi, pi, s: score[gi]![pi]! });
+      }
     }
+    pairs.sort((a, b) => b.s - a.s);
+    const out = new Map<string, PropositionLike>();
+    const used = new Set<number>();
+    for (const pair of pairs) {
+      if (out.has(golden[pair.gi]!.id) || used.has(pair.pi)) continue;
+      out.set(golden[pair.gi]!.id, props[pair.pi]!);
+      used.add(pair.pi);
+    }
+    return out;
   }
-  pairs.sort((a, b) => b.score - a.score || b.hits - a.hits);
+
+  // 最优一对一指派（CEAF-e 的标准做法）。
+  // 贪心会把先抢到的候选锁死，导致另一条 gold 再无匹配 → recall 系统性偏低。
+  // 用「最大权」转成「最小代价」：cost = MAX - score，且只允许 score>0 的边（其余给大代价）。
+  const BIG = 1e6;
+  const maxScore = Math.max(1, ...score.flat());
+  const cost = score.map((row) => row.map((s) => (s > 0 ? maxScore - s : BIG)));
+  const { assignment } = hungarianMin(cost);
 
   const out = new Map<string, PropositionLike>();
-  const used = new Set<string>();
-  for (const pair of pairs) {
-    if (out.has(pair.g.id) || used.has(pair.p.id)) continue;
-    out.set(pair.g.id, pair.p);
-    used.add(pair.p.id);
+  for (let gi = 0; gi < golden.length; gi++) {
+    const pi = assignment[gi] ?? -1;
+    if (pi >= 0 && score[gi]![pi]! > 0) out.set(golden[gi]!.id, props[pi]!);
   }
   return out;
 }

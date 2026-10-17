@@ -1,3 +1,4 @@
+import { scorerStamp } from "../src/rsi/scorer.js";
 import { formatRate } from "../src/rsi/metrics.js";
 import { stamp } from "../src/rsi/testset.js";
 /**
@@ -499,6 +500,7 @@ async function main(): Promise<void> {
         context: process.env.EVAL_CONTEXT ?? "line",
         order: process.env.EVAL_ORDER ?? "recall",
         testset: stamp("golden"),
+        scorer: scorerStamp("judge"),
       },
       evalCost: { usd: cost, seconds: 0 },
     },

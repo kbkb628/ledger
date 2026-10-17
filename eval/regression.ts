@@ -87,6 +87,8 @@ interface RegressionBaseline {
   r1: { trial: { tp: number; fp: number; fn: number }; cost: number; trials: number[] };
   /** 真实剧本误报数（零标注精确率） */
   real: { issues: number; usages: number };
+  /** 打分器版本（数据集之外的另一半可比性） */
+  scorers?: Record<string, string | undefined>;
 }
 
 function loadEnv(path: string): void {
@@ -201,6 +203,13 @@ function main(): void {
   console.log(`  r1    ${formatMetrics(r1Metrics)}　（各次 cost ${r1Costs.join(", ")}）`);
   console.log(`  real  ${realIssues} 条报出 / ${realUsages} 使用点`);
 
+  const scorers: Record<string, string | undefined> = {
+    judge: (judgeArt?.extra as Record<string, string> | undefined)?.scorer,
+    e2e: (readResult(join(base, "trial-1"), "e2e")?.extra as Record<string, string> | undefined)?.scorer,
+    r1: (readResult(join(base, "trial-1"), "r1")?.extra as Record<string, string> | undefined)?.scorer,
+    real: (realArt?.extra as Record<string, string> | undefined)?.scorer,
+  };
+
   const current: RegressionBaseline = {
     at: new Date().toISOString(),
     k,
@@ -210,11 +219,31 @@ function main(): void {
     e2e: { median: e2eMedian, total: trials[0]?.e2e.total ?? 48, trials: e2eOk },
     r1: { trial: r1MedianTrial, cost: r1MedianCost, trials: r1Costs },
     real: { issues: realIssues, usages: realUsages },
+    scorers,
   };
 
   // ── 与基线比对 ──
   const before = existsSync(BASELINE) ? (JSON.parse(readFileSync(BASELINE, "utf8")) as RegressionBaseline) : null;
   const regressions: string[] = [];
+
+  // ── 可比性闸门：打分器变了 → 分数不可比，只记录新基线，不生成差值 ──
+  const scorerDrift = before?.scorers
+    ? Object.keys(scorers).filter((k) => scorers[k] && before.scorers![k] && scorers[k] !== before.scorers![k])
+    : [];
+
+  if (before && scorerDrift.length > 0) {
+    console.log(`\n⚠️ 打分器已变化，**不该与旧基线比较**：`);
+    for (const k of scorerDrift) console.log(`   ${k}: ${before.scorers![k]} → ${scorers[k]}`);
+    console.log(`   打分器变了，差值没有意义（这是"内容变了就拒绝跑"的对偶）。`);
+    if (save) {
+      writeFileSync(BASELINE, JSON.stringify(current, null, 2), "utf8");
+      console.log(`   已用 --save 建立新基线 ${BASELINE}`);
+    } else {
+      console.log(`   请用 --save 建立新基线，之后的新比对以它为准。\n`);
+    }
+    console.log(`各次产物在 ${base}\n`);
+    return;
+  }
 
   if (!before) {
     console.log(`\n没有历史基线 —— 这是一次基准测定。`);

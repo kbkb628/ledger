@@ -1,3 +1,4 @@
+import { scorerStamp } from "../src/rsi/scorer.js";
 import { formatRate } from "../src/rsi/metrics.js";
 import { stamp } from "../src/rsi/testset.js";
 /**
@@ -196,7 +197,7 @@ async function main(): Promise<void> {
   const provider = pickProvider();
 
   // golden 命题 id → 账本命题 id（一对一指派）
-  const assign = assignPropositions(golden.propositions, ledger);
+  const assign = assignPropositions(golden.propositions, ledger, { greedy: process.env.E2E_ASSIGN === "greedy" });
   const toLedger = new Map<string, string>();
   for (const [gid, p] of assign) toLedger.set(gid, p.id);
 
@@ -439,6 +440,7 @@ async function main(): Promise<void> {
         ledgerCache: CACHE,
         goldenSet: process.env.GOLDENSET ?? "goldenset.json",
         testset: stamp("golden"),
+        scorer: scorerStamp("e2e"),
       },
       evalCost: { usd: costUsd, seconds: 0 },
     },

@@ -1,3 +1,4 @@
+import { scorerStamp } from "../src/rsi/scorer.js";
 import { formatRate } from "../src/rsi/metrics.js";
 import { stamp } from "../src/rsi/testset.js";
 /**
@@ -318,6 +319,7 @@ async function main(): Promise<void> {
         devSet: { version: ann.meta.name, size: scoredLeaks.length },
         split: useHoldout ? "all" : "dev",
         testset: stamp("leaks"),
+        scorer: scorerStamp("r1"),
         ledger: { propositions: ledger.length, usages: usages.length, knowledge: facts.length },
         flags: FLAGS,
         ledgerCache: CACHE,
