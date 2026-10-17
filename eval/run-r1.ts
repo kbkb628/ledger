@@ -75,6 +75,8 @@ const FLAGS = {
   units: flag("R1_UNITS", false),
   /** 归并判定时附人物别称表（实测让 P/R 从 66.7% 掉到 50%/33.3% → 默认关闭） */
   charHint: flag("R1_CHAR_HINT", false),
+  /** 用派生识别键匹配短引用（测「说法匹配」这一条成因） */
+  shortKey: flag("R1_SHORTKEY", false),
 };
 
 interface CacheShape {
@@ -146,7 +148,8 @@ async function main(): Promise<void> {
   for (const d of defaults) {
     facts.push({ ...d, kind: "learns", evidence: "(默认:施事/在场)", source: "default" });
   }
-  const { usages } = buildUsages(ledger, scenes);
+  const usagesRes = buildUsages(ledger, scenes, { shortKeys: FLAGS.shortKey });
+  const usages = usagesRes.usages;
 
   // ── 把知识与使用一并提升到审计单元层，再跑 R1 ──
   //
@@ -176,7 +179,7 @@ async function main(): Promise<void> {
 
   console.log(`\n${"─".repeat(62)}`);
   console.log(`账本 : ${ledger.length} 条命题 / ${usages.length} 个使用点 / ${facts.length} 条知识状态`);
-  console.log(`报出 : ${issues.length} 条问题`);
+  console.log(`报出 : ${issues.length} 条问题${FLAGS.shortKey ? `（识别键新增使用点 ${usagesRes.keyMatches}）` : ""}`);
 
   // ── 匹配标注 ──
   const hitLeak = new Set<string>();

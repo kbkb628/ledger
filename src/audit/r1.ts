@@ -66,39 +66,115 @@ export function speakerOf(line: string): string | null {
 }
 
 /**
+ * 说法匹配：从命题的**整句表面**里派生短的「识别键」。
+ *
+ * ## 为什么需要（实测，test-plan.md §5.11 / rsi-protocol 第 6 回合）
+ *
+ * 抽取记下的说法常常是整句（「真正的那份遗嘱，在书房暗格里」），
+ * 而别人只会用**短引用**去提它（「暗格里那份」）——双向包含都不成立，
+ * 使用点根本扫不到，泄漏自然看不见（L-04/L-06/L-08 就是这么漏的）。
+ *
+ * ## 做法：n-gram + 稀有度过滤（完全确定性，不调模型）
+ *
+ * 1. 把命题的所有说法拼成文本，取 3–4 字的连续片段作为候选键
+ * 2. 只保留**稀有**的：在其他命题里很少出现的键才有辨识度
+ *    （「那份」这类到处都有的会被自动滤掉）
+ * 3. 键必须出现在该命题的**说法**里，而不只是 canonical（避免编造）
+ */
+function deriveKeys(
+  props: Array<{ id: string; aliases: Array<{ surface: string }> }>,
+  gramLen?: number[],
+  maxFreq?: number,
+): Map<string, string[]> {
+  // 参数可调（同一个杠杆的不同档位，见 rsi-protocol 第 6 回合）：
+  //   键越长越有辨识度、命中越少；稀有度上限越严、误报越少
+  const lens =
+    gramLen ??
+    (process.env.R1_KEY_LEN ?? "3,4")
+      .split(",")
+      .map((n) => Number(n.trim()))
+      .filter((n) => Number.isFinite(n) && n >= 2);
+  const freqCap = maxFreq ?? Number(process.env.R1_KEY_FREQ ?? 2);
+  const strip = (s: string): string => s.replace(/\s+/g, "");
+  const keySets = new Map<string, Set<string>>();
+
+  for (const p of props) {
+    const set = new Set<string>();
+    for (const a of p.aliases) {
+      const t = strip(a.surface);
+      for (const n of lens) {
+        for (let i = 0; i + n <= t.length; i++) set.add(t.slice(i, i + n));
+      }
+    }
+    keySets.set(p.id, set);
+  }
+
+  // 每个键出现在多少条命题里
+  const freq = new Map<string, number>();
+  for (const set of keySets.values()) for (const k of set) freq.set(k, (freq.get(k) ?? 0) + 1);
+
+  const out = new Map<string, string[]>();
+  for (const [id, set] of keySets) {
+    out.set(
+      id,
+      [...set].filter((k) => (freq.get(k) ?? 0) <= freqCap),
+    );
+  }
+  return out;
+}
+
+/**
  * 收集 usages：扫描**全部场景**里出现过的该命题的每个说法。
  *
  * 为什么不只用 `firstSeen`：`firstSeen` 只记首次出现的场景，而「使用」发生在每一次
  * 被引用的时候。只取首见会让大量使用点被漏掉（R1 的漏报主要来自这里）。
  *
- * 噪声控制：说法去掉空白后长度必须 ≥ 3 —— 「在。」这种两字片段会命中一切。
+ * 噪声控制：
+ * - 说法去掉空白后长度必须 ≥ 3 —— 「在。」这种两字片段会命中一切
+ * - `shortKeys: true` 时额外用派生识别键去匹配短引用（`R1_SHORTKEY` 开关）
  */
-export function buildUsages(ledger: DraftProposition[], scenes: Scene[]): {
-  usages: Usage[];
-  droppedShort: number;
-} {
+export function buildUsages(
+  ledger: DraftProposition[],
+  scenes: Scene[],
+  opts: { shortKeys?: boolean } = {},
+): { usages: Usage[]; droppedShort: number; keyMatches: number } {
   const usages: Usage[] = [];
   let droppedShort = 0;
+  let keyMatches = 0;
+  const keys = opts.shortKeys ? deriveKeys(ledger) : undefined;
 
   for (const p of ledger) {
     const surfaces = [...new Set(p.aliases.map((a) => a.surface))];
-    for (const surface of surfaces) {
-      const needle = surface.replace(/\s+/g, "");
-      if (needle.length < 3) { droppedShort += 1; continue; }
-      for (const scene of scenes) {
-        for (const line of scene.lines) {
-          if (!line.replace(/\s+/g, "").includes(needle)) continue;
-          const character = speakerOf(line);
-          if (!character) continue; // 叙述/旁白不算角色的使用
-          // 同一条说法在同一场同一人重复出现只记一次
-          if (usages.some((u) => u.surface === surface && u.scene === scene.id && u.character === character)) continue;
-          usages.push({ character, propositionId: p.id, scene: scene.id, surface, line: line.trim() });
-        }
+    const propKeys = keys?.get(p.id) ?? [];
+
+    for (const scene of scenes) {
+      for (const line of scene.lines) {
+        const flat = line.replace(/\s+/g, "");
+        // ① 整句说法包含
+        const direct = surfaces.filter((s) => {
+          const n = s.replace(/\s+/g, "");
+          return n.length >= 3 && flat.includes(n);
+        });
+        // ② 派生识别键（短引用）
+        const viaKey = propKeys.filter((k) => flat.includes(k));
+        if (direct.length === 0 && viaKey.length === 0) continue;
+
+        const character = speakerOf(line);
+        if (!character) continue; // 叙述/旁白不算角色的使用
+
+        const surface = direct[0] ?? viaKey[0]!;
+        if (direct.length === 0) keyMatches += 1;
+        if (usages.some((u) => u.surface === surface && u.scene === scene.id && u.character === character)) continue;
+        usages.push({ character, propositionId: p.id, scene: scene.id, surface, line: line.trim() });
       }
     }
   }
 
-  return { usages, droppedShort };
+  for (const p of ledger) {
+    for (const a of p.aliases) if (a.surface.replace(/\s+/g, "").length < 3) droppedShort += 1;
+  }
+
+  return { usages, droppedShort, keyMatches };
 }
 
 /**

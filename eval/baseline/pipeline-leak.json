@@ -39,14 +39,16 @@
             ]
           },
           {
-            "canonical": "遗嘱做了公证",
+            "canonical": "何静对遗嘱做了公证",
             "surfaces": [
               {
                 "text": "遗嘱做了公证",
                 "kind": "explicit"
               }
             ],
-            "agents": []
+            "agents": [
+              "何静"
+            ]
           }
         ],
         "knowledgeDeltas": [
@@ -64,7 +66,18 @@
       },
       {
         "scene": "S01-03",
-        "propositions": [],
+        "propositions": [
+          {
+            "canonical": "林昭的父亲在暗格里留了一份东西给林昭",
+            "surfaces": [
+              {
+                "text": "暗格里那份",
+                "kind": "explicit"
+              }
+            ],
+            "agents": []
+          }
+        ],
         "knowledgeDeltas": []
       },
       {
@@ -102,7 +115,7 @@
         "scene": "S03-01",
         "propositions": [
           {
-            "canonical": "何静通过同一海外账户转走两千三百万并做平账目",
+            "canonical": "何静转走两千三百万，走的同一个海外账户，账已经做平了",
             "surfaces": [
               {
                 "text": "两千三百万，走的同一个海外账户，账已经做平了",
@@ -124,10 +137,10 @@
             "agents": []
           },
           {
-            "canonical": "何静烧掉了书房暗格里的那份东西",
+            "canonical": "何静烧了书房暗格里那份东西",
             "surfaces": [
               {
-                "text": "烧了。已经烧了",
+                "text": "烧了。已经烧了。",
                 "kind": "vague"
               }
             ],
@@ -161,7 +174,17 @@
         "knowledgeDeltas": [
           {
             "character": "陈立",
+            "about": "两千三百万，走的同一个海外账户，账已经做平了",
+            "kind": "learns"
+          },
+          {
+            "character": "陈立",
             "about": "书房暗格里那份",
+            "kind": "learns"
+          },
+          {
+            "character": "陈立",
+            "about": "烧了。已经烧了。",
             "kind": "learns"
           }
         ]
@@ -170,7 +193,7 @@
         "scene": "S04-01",
         "propositions": [
           {
-            "canonical": "有人从林昭父亲的账户转走了两千三百万，转入同一个海外账户",
+            "canonical": "有人从林昭父亲的账户转走了两千三百万到同一个海外账户",
             "surfaces": [
               {
                 "text": "两千三百万",
@@ -218,21 +241,335 @@
       },
       {
         "scene": "S05-02",
+        "propositions": [
+          {
+            "canonical": "林昭看过暗格里的那份东西",
+            "surfaces": [
+              {
+                "text": "暗格里那份",
+                "kind": "explicit"
+              }
+            ],
+            "agents": [
+              "林昭"
+            ]
+          },
+          {
+            "canonical": "林昭确认暗格里的那份东西是父亲的字",
+            "surfaces": [
+              {
+                "text": "父亲的字",
+                "kind": "explicit"
+              }
+            ],
+            "agents": [
+              "林昭"
+            ]
+          }
+        ],
+        "knowledgeDeltas": [
+          {
+            "character": "何静",
+            "about": "暗格里那份",
+            "kind": "learns"
+          }
+        ]
+      },
+      {
+        "scene": "S06-01",
+        "propositions": [
+          {
+            "canonical": "陈立做了不止一份账",
+            "surfaces": [
+              {
+                "text": "账我不止做了一份",
+                "kind": "descriptive"
+              }
+            ],
+            "agents": [
+              "陈立"
+            ]
+          },
+          {
+            "canonical": "陈立把账本的副本留在家里",
+            "surfaces": [
+              {
+                "text": "账本的副本，我留在家里了",
+                "kind": "descriptive"
+              }
+            ],
+            "agents": [
+              "陈立"
+            ]
+          },
+          {
+            "canonical": "陈立跟了老爷二十年",
+            "surfaces": [
+              {
+                "text": "跟了老爷二十年",
+                "kind": "descriptive"
+              }
+            ],
+            "agents": [
+              "陈立"
+            ]
+          }
+        ],
+        "knowledgeDeltas": [
+          {
+            "character": "林昭",
+            "about": "账我不止做了一份",
+            "kind": "learns"
+          },
+          {
+            "character": "林昭",
+            "about": "账本的副本，我留在家里了",
+            "kind": "learns"
+          },
+          {
+            "character": "林昭",
+            "about": "跟了老爷二十年",
+            "kind": "learns"
+          }
+        ]
+      },
+      {
+        "scene": "S06-02",
         "propositions": [],
         "knowledgeDeltas": []
+      },
+      {
+        "scene": "S06-03",
+        "propositions": [
+          {
+            "canonical": "律师手上还有一份遗嘱",
+            "surfaces": [
+              {
+                "text": "律师手上还有一份遗嘱",
+                "kind": "explicit"
+              }
+            ],
+            "agents": []
+          }
+        ],
+        "knowledgeDeltas": []
+      },
+      {
+        "scene": "S06-04",
+        "propositions": [],
+        "knowledgeDeltas": []
+      },
+      {
+        "scene": "S07-01",
+        "propositions": [
+          {
+            "canonical": "海外账户上的签字人是何静的弟弟何川",
+            "surfaces": [
+              {
+                "text": "海外账户上的签字人，是何静的弟弟，何川",
+                "kind": "explicit"
+              }
+            ],
+            "agents": []
+          }
+        ],
+        "knowledgeDeltas": [
+          {
+            "character": "林昭",
+            "about": "海外账户上的签字人，是何静的弟弟，何川",
+            "kind": "learns"
+          }
+        ]
+      },
+      {
+        "scene": "S07-02",
+        "propositions": [
+          {
+            "canonical": "何川替何静签了字",
+            "surfaces": [
+              {
+                "text": "何川替你签的字",
+                "kind": "explicit"
+              }
+            ],
+            "agents": [
+              "何川"
+            ]
+          }
+        ],
+        "knowledgeDeltas": [
+          {
+            "character": "何静",
+            "about": "何川替你签的字",
+            "kind": "learns"
+          }
+        ]
+      },
+      {
+        "scene": "S07-03",
+        "propositions": [],
+        "knowledgeDeltas": []
+      },
+      {
+        "scene": "S08-01",
+        "propositions": [
+          {
+            "canonical": "沈老先生的遗嘱另有副本存于律师处",
+            "surfaces": [
+              {
+                "text": "沈老先生的遗嘱，另有副本存于我处",
+                "kind": "explicit"
+              }
+            ],
+            "agents": []
+          }
+        ],
+        "knowledgeDeltas": [
+          {
+            "character": "何静",
+            "about": "沈老先生的遗嘱，另有副本存于我处",
+            "kind": "learns"
+          },
+          {
+            "character": "林昭",
+            "about": "沈老先生的遗嘱，另有副本存于我处",
+            "kind": "learns"
+          }
+        ]
+      },
+      {
+        "scene": "S08-02",
+        "propositions": [
+          {
+            "canonical": "周管在沈父去世那晚叫了救护车",
+            "surfaces": [
+              {
+                "text": "老爷走的那晚，救护车是我叫的",
+                "kind": "descriptive"
+              }
+            ],
+            "agents": [
+              "周管"
+            ]
+          },
+          {
+            "canonical": "周管到达时沈父还有一口气",
+            "surfaces": [
+              {
+                "text": "我到的时候，人还有一口气",
+                "kind": "descriptive"
+              }
+            ],
+            "agents": []
+          }
+        ],
+        "knowledgeDeltas": [
+          {
+            "character": "林昭",
+            "about": "老爷走的那晚，救护车是我叫的",
+            "kind": "learns"
+          },
+          {
+            "character": "林昭",
+            "about": "我到的时候，人还有一口气",
+            "kind": "learns"
+          }
+        ]
+      },
+      {
+        "scene": "S09-01",
+        "propositions": [],
+        "knowledgeDeltas": []
+      },
+      {
+        "scene": "S09-02",
+        "propositions": [
+          {
+            "canonical": "苏婉答应给何川一半",
+            "surfaces": [
+              {
+                "text": "夫人答应给何川一半",
+                "kind": "explicit"
+              },
+              {
+                "text": "一半",
+                "kind": "vague"
+              }
+            ],
+            "agents": []
+          }
+        ],
+        "knowledgeDeltas": [
+          {
+            "character": "林昭",
+            "about": "夫人答应给何川一半",
+            "kind": "learns"
+          }
+        ]
+      },
+      {
+        "scene": "S10-01",
+        "propositions": [],
+        "knowledgeDeltas": []
+      },
+      {
+        "scene": "S10-02",
+        "propositions": [
+          {
+            "canonical": "何川把钱转去了海外",
+            "surfaces": [
+              {
+                "text": "何川把钱转去了海外",
+                "kind": "explicit"
+              }
+            ],
+            "agents": [
+              "何川"
+            ]
+          }
+        ],
+        "knowledgeDeltas": [
+          {
+            "character": "周管",
+            "about": "何川把钱转去了海外",
+            "kind": "learns"
+          }
+        ]
+      },
+      {
+        "scene": "S11-01",
+        "propositions": [
+          {
+            "canonical": "沈父在码头落水后并未立即死亡，仍有一口气",
+            "surfaces": [
+              {
+                "text": "老爷那晚，其实还有一口气",
+                "kind": "descriptive"
+              }
+            ],
+            "agents": []
+          }
+        ],
+        "knowledgeDeltas": [
+          {
+            "character": "林昭",
+            "about": "老爷那晚，其实还有一口气",
+            "kind": "learns"
+          }
+        ]
       }
     ],
-    "costUsd": 0.020353390000000002,
-    "latencyMs": 16959,
-    "calls": 9,
+    "costUsd": 0.0515378,
+    "latencyMs": 40892,
+    "calls": 23,
     "failures": [],
     "rejectedSurfaces": 0,
     "kindCounts": {
-      "explicit": 8,
-      "descriptive": 2,
-      "vague": 3
+      "explicit": 17,
+      "descriptive": 8,
+      "vague": 4
     },
-    "knowledgeDeltas": 7,
+    "knowledgeDeltas": 22,
     "rejectedDeltas": 0
   },
   "merged": {
@@ -271,7 +608,7 @@
       },
       {
         "id": "E-003",
-        "canonical": "遗嘱做了公证",
+        "canonical": "何静对遗嘱做了公证",
         "aliases": [
           {
             "surface": "遗嘱做了公证",
@@ -282,10 +619,27 @@
         "scenes": [
           "S01-02"
         ],
-        "agents": []
+        "agents": [
+          "何静"
+        ]
       },
       {
         "id": "E-004",
+        "canonical": "林昭的父亲在暗格里留了一份东西给林昭",
+        "aliases": [
+          {
+            "surface": "暗格里那份",
+            "firstSeen": "S01-03",
+            "kind": "explicit"
+          }
+        ],
+        "scenes": [
+          "S01-03"
+        ],
+        "agents": []
+      },
+      {
+        "id": "E-005",
         "canonical": "沈父将真正的遗嘱放在书房暗格里",
         "aliases": [
           {
@@ -305,8 +659,8 @@
         "agents": []
       },
       {
-        "id": "E-005",
-        "canonical": "何静通过同一海外账户转走两千三百万并做平账目",
+        "id": "E-006",
+        "canonical": "何静转走两千三百万，走的同一个海外账户，账已经做平了",
         "aliases": [
           {
             "surface": "两千三百万，走的同一个海外账户，账已经做平了",
@@ -322,7 +676,7 @@
         ]
       },
       {
-        "id": "E-006",
+        "id": "E-007",
         "canonical": "书房暗格里有一份东西",
         "aliases": [
           {
@@ -337,11 +691,11 @@
         "agents": []
       },
       {
-        "id": "E-007",
-        "canonical": "何静烧掉了书房暗格里的那份东西",
+        "id": "E-008",
+        "canonical": "何静烧了书房暗格里那份东西",
         "aliases": [
           {
-            "surface": "烧了。已经烧了",
+            "surface": "烧了。已经烧了。",
             "firstSeen": "S03-01",
             "kind": "vague"
           }
@@ -354,7 +708,7 @@
         ]
       },
       {
-        "id": "E-008",
+        "id": "E-009",
         "canonical": "账上有几笔对不上",
         "aliases": [
           {
@@ -376,8 +730,8 @@
         ]
       },
       {
-        "id": "E-009",
-        "canonical": "有人从林昭父亲的账户转走了两千三百万，转入同一个海外账户",
+        "id": "E-010",
+        "canonical": "有人从林昭父亲的账户转走了两千三百万到同一个海外账户",
         "aliases": [
           {
             "surface": "两千三百万",
@@ -396,7 +750,7 @@
         "agents": []
       },
       {
-        "id": "E-010",
+        "id": "E-011",
         "canonical": "两千三百万是经陈立的手走的",
         "aliases": [
           {
@@ -410,6 +764,207 @@
         ],
         "agents": [
           "陈立"
+        ]
+      },
+      {
+        "id": "E-012",
+        "canonical": "林昭看过暗格里的那份东西",
+        "aliases": [
+          {
+            "surface": "暗格里那份",
+            "firstSeen": "S05-02",
+            "kind": "explicit"
+          },
+          {
+            "surface": "父亲的字",
+            "firstSeen": "S05-02",
+            "kind": "explicit"
+          }
+        ],
+        "scenes": [
+          "S05-02"
+        ],
+        "agents": [
+          "林昭"
+        ]
+      },
+      {
+        "id": "E-013",
+        "canonical": "陈立做了不止一份账",
+        "aliases": [
+          {
+            "surface": "账我不止做了一份",
+            "firstSeen": "S06-01",
+            "kind": "descriptive"
+          }
+        ],
+        "scenes": [
+          "S06-01"
+        ],
+        "agents": [
+          "陈立"
+        ]
+      },
+      {
+        "id": "E-014",
+        "canonical": "陈立把账本的副本留在家里",
+        "aliases": [
+          {
+            "surface": "账本的副本，我留在家里了",
+            "firstSeen": "S06-01",
+            "kind": "descriptive"
+          }
+        ],
+        "scenes": [
+          "S06-01"
+        ],
+        "agents": [
+          "陈立"
+        ]
+      },
+      {
+        "id": "E-015",
+        "canonical": "陈立跟了老爷二十年",
+        "aliases": [
+          {
+            "surface": "跟了老爷二十年",
+            "firstSeen": "S06-01",
+            "kind": "descriptive"
+          }
+        ],
+        "scenes": [
+          "S06-01"
+        ],
+        "agents": [
+          "陈立"
+        ]
+      },
+      {
+        "id": "E-016",
+        "canonical": "律师手上还有一份遗嘱",
+        "aliases": [
+          {
+            "surface": "律师手上还有一份遗嘱",
+            "firstSeen": "S06-03",
+            "kind": "explicit"
+          },
+          {
+            "surface": "沈老先生的遗嘱，另有副本存于我处",
+            "firstSeen": "S08-01",
+            "kind": "explicit"
+          }
+        ],
+        "scenes": [
+          "S06-03",
+          "S08-01"
+        ],
+        "agents": []
+      },
+      {
+        "id": "E-017",
+        "canonical": "海外账户上的签字人是何静的弟弟何川",
+        "aliases": [
+          {
+            "surface": "海外账户上的签字人，是何静的弟弟，何川",
+            "firstSeen": "S07-01",
+            "kind": "explicit"
+          }
+        ],
+        "scenes": [
+          "S07-01"
+        ],
+        "agents": []
+      },
+      {
+        "id": "E-018",
+        "canonical": "何川替何静签了字",
+        "aliases": [
+          {
+            "surface": "何川替你签的字",
+            "firstSeen": "S07-02",
+            "kind": "explicit"
+          }
+        ],
+        "scenes": [
+          "S07-02"
+        ],
+        "agents": [
+          "何川"
+        ]
+      },
+      {
+        "id": "E-019",
+        "canonical": "周管在沈父去世那晚叫了救护车",
+        "aliases": [
+          {
+            "surface": "老爷走的那晚，救护车是我叫的",
+            "firstSeen": "S08-02",
+            "kind": "descriptive"
+          }
+        ],
+        "scenes": [
+          "S08-02"
+        ],
+        "agents": [
+          "周管"
+        ]
+      },
+      {
+        "id": "E-020",
+        "canonical": "周管到达时沈父还有一口气",
+        "aliases": [
+          {
+            "surface": "我到的时候，人还有一口气",
+            "firstSeen": "S08-02",
+            "kind": "descriptive"
+          },
+          {
+            "surface": "老爷那晚，其实还有一口气",
+            "firstSeen": "S11-01",
+            "kind": "descriptive"
+          }
+        ],
+        "scenes": [
+          "S08-02",
+          "S11-01"
+        ],
+        "agents": []
+      },
+      {
+        "id": "E-021",
+        "canonical": "苏婉答应给何川一半",
+        "aliases": [
+          {
+            "surface": "夫人答应给何川一半",
+            "firstSeen": "S09-02",
+            "kind": "explicit"
+          },
+          {
+            "surface": "一半",
+            "firstSeen": "S09-02",
+            "kind": "vague"
+          }
+        ],
+        "scenes": [
+          "S09-02"
+        ],
+        "agents": []
+      },
+      {
+        "id": "E-022",
+        "canonical": "何川把钱转去了海外",
+        "aliases": [
+          {
+            "surface": "何川把钱转去了海外",
+            "firstSeen": "S10-02",
+            "kind": "explicit"
+          }
+        ],
+        "scenes": [
+          "S10-02"
+        ],
+        "agents": [
+          "何川"
         ]
       }
     ],
@@ -432,7 +987,15 @@
       },
       {
         "scene": "S01-02",
-        "canonical": "遗嘱做了公证",
+        "canonical": "何静对遗嘱做了公证",
+        "choice": "NEW",
+        "candidates": [],
+        "confidence": 1,
+        "reason": "no_candidate"
+      },
+      {
+        "scene": "S01-03",
+        "canonical": "林昭的父亲在暗格里留了一份东西给林昭",
         "choice": "NEW",
         "candidates": [],
         "confidence": 1,
@@ -442,13 +1005,15 @@
         "scene": "S02-01",
         "canonical": "沈父将真正的遗嘱放在书房暗格里",
         "choice": "NEW",
-        "candidates": [],
-        "confidence": 1,
-        "reason": "no_candidate"
+        "candidates": [
+          "E-004"
+        ],
+        "confidence": 0.72,
+        "reason": "new"
       },
       {
         "scene": "S03-01",
-        "canonical": "何静通过同一海外账户转走两千三百万并做平账目",
+        "canonical": "何静转走两千三百万，走的同一个海外账户，账已经做平了",
         "choice": "NEW",
         "candidates": [],
         "confidence": 1,
@@ -459,20 +1024,22 @@
         "canonical": "书房暗格里有一份东西",
         "choice": "NEW",
         "candidates": [
-          "E-004"
+          "E-004",
+          "E-005"
         ],
-        "confidence": 0.86,
+        "confidence": 0.81,
         "reason": "new"
       },
       {
         "scene": "S03-01",
-        "canonical": "何静烧掉了书房暗格里的那份东西",
+        "canonical": "何静烧了书房暗格里那份东西",
         "choice": "NEW",
         "candidates": [
-          "E-006",
-          "E-004"
+          "E-007",
+          "E-004",
+          "E-005"
         ],
-        "confidence": 0.83,
+        "confidence": 0.92,
         "reason": "new"
       },
       {
@@ -486,21 +1053,21 @@
       {
         "scene": "S03-01",
         "canonical": "陈立压着账上对不上的几笔",
-        "choice": "E-008",
+        "choice": "E-009",
         "candidates": [
-          "E-008"
+          "E-009"
         ],
-        "confidence": 0.35,
+        "confidence": 0.33,
         "reason": "attached"
       },
       {
         "scene": "S04-01",
-        "canonical": "有人从林昭父亲的账户转走了两千三百万，转入同一个海外账户",
+        "canonical": "有人从林昭父亲的账户转走了两千三百万到同一个海外账户",
         "choice": "NEW",
         "candidates": [
-          "E-005"
+          "E-006"
         ],
-        "confidence": 0.19,
+        "confidence": 0.04,
         "reason": "new"
       },
       {
@@ -508,16 +1075,154 @@
         "canonical": "两千三百万是经陈立的手走的",
         "choice": "NEW",
         "candidates": [
-          "E-009",
+          "E-006",
+          "E-010"
+        ],
+        "confidence": 0.75,
+        "reason": "new"
+      },
+      {
+        "scene": "S05-02",
+        "canonical": "林昭看过暗格里的那份东西",
+        "choice": "NEW",
+        "candidates": [
+          "E-007",
+          "E-004",
+          "E-008",
           "E-005"
         ],
-        "confidence": 0.57,
+        "confidence": 0.87,
         "reason": "new"
+      },
+      {
+        "scene": "S05-02",
+        "canonical": "林昭确认暗格里的那份东西是父亲的字",
+        "choice": "E-012",
+        "candidates": [
+          "E-012",
+          "E-004",
+          "E-007",
+          "E-008",
+          "E-005"
+        ],
+        "confidence": 0.53,
+        "reason": "attached"
+      },
+      {
+        "scene": "S06-01",
+        "canonical": "陈立做了不止一份账",
+        "choice": "NEW",
+        "candidates": [],
+        "confidence": 1,
+        "reason": "no_candidate"
+      },
+      {
+        "scene": "S06-01",
+        "canonical": "陈立把账本的副本留在家里",
+        "choice": "NEW",
+        "candidates": [],
+        "confidence": 1,
+        "reason": "no_candidate"
+      },
+      {
+        "scene": "S06-01",
+        "canonical": "陈立跟了老爷二十年",
+        "choice": "NEW",
+        "candidates": [],
+        "confidence": 1,
+        "reason": "no_candidate"
+      },
+      {
+        "scene": "S06-03",
+        "canonical": "律师手上还有一份遗嘱",
+        "choice": "NEW",
+        "candidates": [
+          "E-007"
+        ],
+        "confidence": 0.92,
+        "reason": "new"
+      },
+      {
+        "scene": "S07-01",
+        "canonical": "海外账户上的签字人是何静的弟弟何川",
+        "choice": "NEW",
+        "candidates": [
+          "E-006"
+        ],
+        "confidence": 0.88,
+        "reason": "new"
+      },
+      {
+        "scene": "S07-02",
+        "canonical": "何川替何静签了字",
+        "choice": "NEW",
+        "candidates": [],
+        "confidence": 1,
+        "reason": "no_candidate"
+      },
+      {
+        "scene": "S08-01",
+        "canonical": "沈老先生的遗嘱另有副本存于律师处",
+        "choice": "E-016",
+        "candidates": [
+          "E-005",
+          "E-016"
+        ],
+        "confidence": 0.84,
+        "reason": "attached"
+      },
+      {
+        "scene": "S08-02",
+        "canonical": "周管在沈父去世那晚叫了救护车",
+        "choice": "NEW",
+        "candidates": [],
+        "confidence": 1,
+        "reason": "no_candidate"
+      },
+      {
+        "scene": "S08-02",
+        "canonical": "周管到达时沈父还有一口气",
+        "choice": "NEW",
+        "candidates": [
+          "E-016"
+        ],
+        "confidence": 0.95,
+        "reason": "new"
+      },
+      {
+        "scene": "S09-02",
+        "canonical": "苏婉答应给何川一半",
+        "choice": "NEW",
+        "candidates": [
+          "E-018"
+        ],
+        "confidence": 0.89,
+        "reason": "new"
+      },
+      {
+        "scene": "S10-02",
+        "canonical": "何川把钱转去了海外",
+        "choice": "NEW",
+        "candidates": [
+          "E-017"
+        ],
+        "confidence": 0.89,
+        "reason": "new"
+      },
+      {
+        "scene": "S11-01",
+        "canonical": "沈父在码头落水后并未立即死亡，仍有一口气",
+        "choice": "E-020",
+        "candidates": [
+          "E-020"
+        ],
+        "confidence": 0.22,
+        "reason": "attached"
       }
     ],
-    "costUsd": 0.000203616,
-    "latencyMs": 1311,
-    "calls": 5,
+    "costUsd": 0.000595518,
+    "latencyMs": 3895,
+    "calls": 15,
     "unsure": 0
   },
   "characters": [
@@ -534,13 +1239,6 @@
       ]
     },
     {
-      "name": "沈父",
-      "aliases": [
-        "父亲",
-        "老爷"
-      ]
-    },
-    {
       "name": "何静",
       "aliases": [
         "夫人"
@@ -550,6 +1248,22 @@
       "name": "陈立",
       "aliases": [
         "陈叔"
+      ]
+    },
+    {
+      "name": "何川",
+      "aliases": []
+    },
+    {
+      "name": "律师",
+      "aliases": []
+    },
+    {
+      "name": "沈父",
+      "aliases": [
+        "父亲",
+        "老爷",
+        "沈老先生"
       ]
     }
   ]
