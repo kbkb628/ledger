@@ -1,5 +1,6 @@
 {
   "id": "exp-030",
+  "kind": "measurement",
   "parent": "exp-029",
   "createdAt": "2026-10-17T16:49:45.003Z",
   "version": {

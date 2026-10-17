@@ -154,6 +154,7 @@ npm run eval             # 判定层单点评测
 | `docs/rsi-log.md` | 判定层的 RSI 迭代记录（v0→v3，含效度教训） |
 | `docs/test-plan.md` | 测试计划、已完成实验与结论、失败分类、headroom 排序 |
 | `docs/handoff.md` | 交接说明：当前基线、可复现命令、下一步与已知坑 |
+| `docs/next-steps.md` | 工作单：剩下的活、推荐顺序、每项的验收标准与「不要做的事」 |
 
 ## 技术栈
 
