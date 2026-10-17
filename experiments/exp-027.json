@@ -1,0 +1,47 @@
+{
+  "id": "exp-027",
+  "parent": "exp-025",
+  "createdAt": "2026-10-17T14:03:44.414Z",
+  "version": {
+    "hash": "aaf9bb008705",
+    "commit": "424307d-dirty",
+    "extractModel": "deepseek-v4-pro",
+    "judgeModel": "jev-latest",
+    "promptHash": "0b8239f6aa03",
+    "flags": {
+      "R1_AGENT": "default",
+      "R1_PRESENCE": "default",
+      "R1_UNITS": "default",
+      "R1_CHAR_HINT": "default",
+      "R1_SHORTKEY": "default",
+      "R1_KEY_LEN": "default",
+      "R1_KEY_FREQ": "default",
+      "E2E_PAD": "default",
+      "EVAL_CONTEXT": "default",
+      "EVAL_ORDER": "default",
+      "JEV_CRITERIA_MODE": "default"
+    }
+  },
+  "change": {
+    "bucket": "should_allow",
+    "hypothesis": "当事人知道自己被卷入的事，可用抽取层的 patients 字段建规则",
+    "file": "src/extraction/prompt.ts",
+    "switch": "R1_PATIENT",
+    "params": {}
+  },
+  "result": {
+    "dev": {
+      "reported": 6,
+      "tp": 3,
+      "fp": 3,
+      "fn": 7,
+      "precision": 0.5,
+      "recall": 0.3,
+      "cost": 24,
+      "fpRate": 0.5,
+      "unusable": false
+    }
+  },
+  "status": "rejected",
+  "note": "规则零效果（dev/real 均无差别）；prompt 加长有抽取风险，已全部回退"
+}
