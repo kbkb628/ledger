@@ -16,6 +16,7 @@
     "eval:e2e": "tsx eval/run-e2e.ts",
     "audit": "tsx eval/run-audit.ts",
     "rsi": "tsx eval/rsi.ts",
+    "testset": "tsx src/rsi/testset.ts",
     "exec": "tsx eval/executor.ts",
     "regression": "tsx eval/regression.ts",
     "controller": "tsx eval/controller.ts",

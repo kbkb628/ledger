@@ -1,3 +1,4 @@
+import { stamp } from "../src/rsi/testset.js";
 /**
  * 黄金集评测脚本 —— docs/design.md 6.8、docs/rsi-log.md 的实现。
  *
@@ -496,6 +497,7 @@ async function main(): Promise<void> {
         criteriaMode: process.env.JEV_CRITERIA_MODE ?? null,
         context: process.env.EVAL_CONTEXT ?? "line",
         order: process.env.EVAL_ORDER ?? "recall",
+        testset: stamp("golden"),
       },
       evalCost: { usd: cost, seconds: 0 },
     },

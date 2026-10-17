@@ -1,3 +1,4 @@
+import { stamp } from "../src/rsi/testset.js";
 /**
  * R1 真阳性验证 —— 在**故意写坏的**剧本上测精确率与召回率。
  *
@@ -315,6 +316,7 @@ async function main(): Promise<void> {
       extra: {
         devSet: { version: ann.meta.name, size: scoredLeaks.length },
         split: useHoldout ? "all" : "dev",
+        testset: stamp("leaks"),
         ledger: { propositions: ledger.length, usages: usages.length, knowledge: facts.length },
         flags: FLAGS,
         ledgerCache: CACHE,

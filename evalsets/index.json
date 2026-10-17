@@ -1,0 +1,58 @@
+{
+  "sets": [
+    {
+      "id": "leaks",
+      "files": [
+        "eval/leaks.json",
+        "eval/script-leak.md"
+      ],
+      "size": {
+        "units": 14
+      },
+      "source": "自造剧本 eval/script-leak.md 内注入泄漏",
+      "changes": "v4：14 条标注（10 dev + 4 holdout），每条带 split 字段；剧本扩到 31 场。",
+      "holdoutSealed": true,
+      "version": 1,
+      "createdAt": "2026-10-17T10:55:52.747Z",
+      "supersedes": null,
+      "hash": "cc59a5ad9de1"
+    },
+    {
+      "id": "chaguan",
+      "files": [
+        "eval/script-chaguan.md",
+        "eval/external/chaguan-act1.wiki",
+        "eval/external/chaguan-act2.wiki",
+        "eval/external/chaguan-act3.wiki",
+        "eval/external/chaguan-xumu.wiki"
+      ],
+      "size": {
+        "units": 259
+      },
+      "source": "老舍《茶馆》(1957)，公有领域（作者 1966 年卒，保护期至 2016 年底）；Wikisource 转录 + eval/import-chaguan.ts 转换。仅用于评测，不分发。",
+      "changes": "v1：零标注精确率测试集，72 场。已知噪声：人物表连写残留 2 条被当成台词。",
+      "holdoutSealed": false,
+      "version": 1,
+      "createdAt": "2026-10-17T10:55:53.679Z",
+      "supersedes": null,
+      "hash": "51913c3244b7"
+    },
+    {
+      "id": "golden",
+      "files": [
+        "eval/goldenset-v3.json",
+        "eval/script-jiuzhang.md"
+      ],
+      "size": {
+        "units": 48
+      },
+      "source": "自造剧本《旧账》+ 人工标注",
+      "changes": "v3：按「客观事实」粒度重标（14→18 条命题），48 样本；修掉 v2 的 4 个无效样本。",
+      "holdoutSealed": false,
+      "version": 1,
+      "createdAt": "2026-10-17T10:55:54.634Z",
+      "supersedes": null,
+      "hash": "b7c851b4766c"
+    }
+  ]
+}

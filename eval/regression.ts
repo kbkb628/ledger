@@ -27,6 +27,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { computeMetrics, formatMetrics, type Metrics } from "../src/rsi/metrics.js";
+import { verify as testsetVerify } from "../src/rsi/testset.js";
 import { versionFingerprint } from "../src/rsi/version.js";
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -124,6 +125,16 @@ function main(): void {
   const save = process.argv.includes("--save") || process.argv.includes("--force-save");
   const forceSave = process.argv.includes("--force-save");
   if (!Number.isFinite(k) || k < 1) throw new Error("--k 必须是正整数");
+
+  // ── 测试集版本校验（规则 R1）：内容变了却没升版本 → 数字不可信，直接拒绝跑 ──
+  const drift = testsetVerify().filter((r) => !r.ok);
+  if (drift.length > 0) {
+    console.log(`\n❌ 测试集内容与注册版本不一致（内容改了但没升版本）：`);
+    for (const d of drift) console.log(`   ${d.id}@${d.version}  登记 ${d.registered}  实际 ${d.actual}`);
+    console.log(`\n先执行：npm run testset -- record <id> --files ... --changes "..."\n`);
+    process.exitCode = 1;
+    return;
+  }
 
   const version = versionFingerprint(root);
   const base = join(root, "runs", `regression-${new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19)}`);

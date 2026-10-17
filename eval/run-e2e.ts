@@ -1,3 +1,4 @@
+import { stamp } from "../src/rsi/testset.js";
 /**
  * 端到端评测 —— **这才是产品的真实指标**。
  *
@@ -436,6 +437,7 @@ async function main(): Promise<void> {
         diag,
         ledgerCache: CACHE,
         goldenSet: process.env.GOLDENSET ?? "goldenset.json",
+        testset: stamp("golden"),
       },
       evalCost: { usd: costUsd, seconds: 0 },
     },

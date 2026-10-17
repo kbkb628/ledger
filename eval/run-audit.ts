@@ -1,3 +1,4 @@
+import { stamp } from "../src/rsi/testset.js";
 /**
  * R1 审计 —— 剧本 → 账本 → 泄漏问题清单。
  *
@@ -145,7 +146,7 @@ async function main(): Promise<void> {
       knowledge: facts.length,
       issueRate: usages.length === 0 ? 0 : Number((issues.length / usages.length).toFixed(4)),
     },
-    extra: { script: SCRIPT, cache: CACHE, nameSkip: process.env.R1_NAME_SKIP !== "0" },
+    extra: { script: SCRIPT, cache: CACHE, nameSkip: process.env.R1_NAME_SKIP !== "0", testset: stamp("chaguan") },
     evalCost: { usd: 0, seconds: 0 },
   }, issues.map((i) => JSON.stringify({ kind: "issue", scene: i.useScene, character: i.character, surface: i.surface, propositionId: i.propositionId })));
 }
