@@ -1,0 +1,30 @@
+{
+    "id":  "exp-016",
+    "kind":  "measurement",
+    "parent":  "exp-015",
+    "createdAt":  "2026-10-17T12:37:34.176Z",
+    "version":  {
+                    "hash":  "measurement",
+                    "commit":  "n/a",
+                    "extractModel":  "n/a",
+                    "judgeModel":  "n/a",
+                    "promptHash":  "n/a",
+                    "flags":  {
+
+                              }
+                },
+    "change":  {
+                   "bucket":  "other",
+                   "hypothesis":  "比例型指标只有点估计时无法判断差异是不是噪声，应报 95% Wilson 区间",
+                   "file":  "src/rsi/metrics.ts",
+                   "switch":  "NONE",
+                   "params":  {
+
+                              }
+               },
+    "result":  {
+
+               },
+    "status":  "released",
+    "note":  "测量回合。加入 wilson()/formatRate()，全部汇总输出强制带区间。后果：R1 的 P/R 区间宽达 62.5pp / 49.5pp，real 仅 4.6pp —— 证明此前所有基于 R1 点估计的比较无效。**历史结论作废**：exp-007 的「P 50%→38.5%」、exp-008 的「P 50%→100%」均在噪声内。"
+}

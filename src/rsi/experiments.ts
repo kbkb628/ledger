@@ -71,8 +71,23 @@ export interface ExperimentResult {
   };
 }
 
+/**
+ * 回合类型 —— **这是协议此前缺失的一类，也是我一路滑过去的原因**。
+ *
+ * - `capability`：改抽取/归并/规则等**能力**。必须用 P/R/cost 裁决，看是否优于父版本。
+ * - `measurement`：改**打分器、指标定义、置信区间、匹配算法**。
+ *   它不改变能力，但**会改变数字**，所以要求不同：
+ *     ① 必须重建基线（旧数字与新数字不可比）
+ *     ② 必须声明哪些历史结论作废
+ *     ③ 不需要 P/R 裁决（没有"更好/更差"，只有"更对/更错"）
+ *
+ * 缺了这个分类，测量类改动就会被当成"顺手做的事"而不进实验库 —— 实际发生过。
+ */
+export type ExperimentKind = "capability" | "measurement";
+
 export interface ExperimentRecord {
   id: string;
+  kind?: ExperimentKind;
   parent: string | null;
   createdAt: string;
   version: VersionFingerprint;

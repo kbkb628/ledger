@@ -1,0 +1,30 @@
+{
+    "id":  "exp-020",
+    "kind":  "measurement",
+    "parent":  "exp-019",
+    "createdAt":  "2026-10-17T12:37:34.236Z",
+    "version":  {
+                    "hash":  "measurement",
+                    "commit":  "n/a",
+                    "extractModel":  "n/a",
+                    "judgeModel":  "n/a",
+                    "promptHash":  "n/a",
+                    "flags":  {
+
+                              }
+                },
+    "change":  {
+                   "bucket":  "other",
+                   "hypothesis":  "测试集版本只做了一半，缺打分器版本；且测试集演进未与指标同步记录",
+                   "file":  "NONE",
+                   "switch":  "NONE",
+                   "params":  {
+
+                              }
+               },
+    "result":  {
+
+               },
+    "status":  "released",
+    "note":  "测量回合。建立 evalsets 注册表（id@version#contenthash）+ 回归漂移校验（内容变了没升版本就拒绝跑）+ docs/testset.md 演进日志 + 外部调研借鉴（STAGE schema／三值标签／balanced accuracy）。**重建回归基线**：judge 44／e2e 26／r1 cost 24／real 9，并首次记录 scorers。"
+}

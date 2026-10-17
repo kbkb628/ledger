@@ -1,0 +1,30 @@
+{
+    "id":  "exp-018",
+    "kind":  "measurement",
+    "parent":  "exp-017",
+    "createdAt":  "2026-10-17T12:37:34.225Z",
+    "version":  {
+                    "hash":  "measurement",
+                    "commit":  "n/a",
+                    "extractModel":  "n/a",
+                    "judgeModel":  "n/a",
+                    "promptHash":  "n/a",
+                    "flags":  {
+
+                              }
+                },
+    "change":  {
+                   "bucket":  "other",
+                   "hypothesis":  "打分逻辑改动会改变结果，但从不版本化，导致新旧分数不可比却看不出来",
+                   "file":  "src/rsi/scorer.ts",
+                   "switch":  "NONE",
+                   "params":  {
+
+                              }
+               },
+    "result":  {
+
+               },
+    "status":  "released",
+    "note":  "测量回合。新增 scorerStamp（对打分器源文件+开关取哈希）写入所有结果；regression 加可比性闸门：打分器变了就拒绝生成差值。疏漏自述：src/audit/r1.ts 改过 6 次却一次没版本化。"
+}

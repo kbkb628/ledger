@@ -1,0 +1,30 @@
+{
+    "id":  "exp-017",
+    "kind":  "measurement",
+    "parent":  "exp-016",
+    "createdAt":  "2026-10-17T12:37:34.224Z",
+    "version":  {
+                    "hash":  "measurement",
+                    "commit":  "n/a",
+                    "extractModel":  "n/a",
+                    "judgeModel":  "n/a",
+                    "promptHash":  "n/a",
+                    "flags":  {
+
+                              }
+                },
+    "change":  {
+                   "bucket":  "other",
+                   "hypothesis":  "一对一杯贪心是 CEAF-e 的退化版（非最优指派），会造成召回系统性偏低",
+                   "file":  "eval/match.ts",
+                   "switch":  "NONE",
+                   "params":  {
+
+                              }
+               },
+    "result":  {
+
+               },
+    "status":  "released",
+    "note":  "测量回合。改用匈牙利最优指派（src/rsi/hungarian.ts），保留 greedy 选项。实测当前数据下 greedy 与 optimal 结果相同（均 25/48、均映射 11 条），故**历史数字未被污染**，但系统性风险消除，方法与事件共指文献（CEAF-e）一致。"
+}

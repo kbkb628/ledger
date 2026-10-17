@@ -1,0 +1,30 @@
+{
+    "id":  "exp-019",
+    "kind":  "measurement",
+    "parent":  "exp-018",
+    "createdAt":  "2026-10-17T12:37:34.227Z",
+    "version":  {
+                    "hash":  "measurement",
+                    "commit":  "n/a",
+                    "extractModel":  "n/a",
+                    "judgeModel":  "n/a",
+                    "promptHash":  "n/a",
+                    "flags":  {
+
+                              }
+                },
+    "change":  {
+                   "bucket":  "other",
+                   "hypothesis":  "只有点估计导致把 2 条样本的抖动当成结论，需要配对检验工具",
+                   "file":  "eval/compare.ts",
+                   "switch":  "NONE",
+                   "params":  {
+
+                              }
+               },
+    "result":  {
+
+               },
+    "status":  "released",
+    "note":  "测量回合。新增 McNemar 精确检验 + 区间对照 + 「不一致对\u003c6 不下结论」。据此**推翻两条已写进文档的结论**：① rsi-log 的「DeepSeek 95.8% \u003e JEV 91.7%」（2 条样本，p=0.50）② test-plan P0-1 的「存在排序敏感性 −4.2pp」（同为噪声）。"
+}
