@@ -5,9 +5,19 @@
   "type": "module",
   "description": "《账本》— AI 短剧的叙事一致性账本。MCP server 形态，可挂到任何本地创作 agent 上。",
   "bin": {
-    "ledger-mcp": "src/mcp/server.ts"
+    "ledger-mcp": "dist/mcp.js"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=20"
   },
   "scripts": {
+    "build": "node scripts/build-mcp.mjs",
+    "prepack": "npm run build",
+    "npx:smoke": "tsx eval/npx-smoke.ts",
     "mcp": "tsx src/mcp/server.ts",
     "mcp:smoke": "tsx eval/mcp-smoke.ts",
     "eval": "tsx eval/run-eval.ts",
@@ -26,6 +36,7 @@
   },
   "devDependencies": {
     "@types/node": "^22.7.5",
+    "esbuild": "^0.28.2",
     "tsx": "^4.19.1",
     "typescript": "^5.6.3"
   },
