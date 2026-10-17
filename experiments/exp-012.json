@@ -1,0 +1,58 @@
+{
+  "id": "exp-012",
+  "parent": "exp-009",
+  "createdAt": "2026-10-17T09:33:18.740Z",
+  "version": {
+    "hash": "4f0bafdc5b10",
+    "commit": "e411a43-dirty",
+    "extractModel": "deepseek-v4-pro",
+    "judgeModel": "jev-latest",
+    "promptHash": "0b8239f6aa03",
+    "flags": {
+      "R1_AGENT": "default",
+      "R1_PRESENCE": "default",
+      "R1_UNITS": "default",
+      "R1_CHAR_HINT": "default",
+      "R1_SHORTKEY": "default",
+      "R1_KEY_LEN": "default",
+      "R1_KEY_FREQ": "default",
+      "E2E_PAD": "default",
+      "EVAL_CONTEXT": "default",
+      "EVAL_ORDER": "default",
+      "JEV_CRITERIA_MODE": "default"
+    }
+  },
+  "change": {
+    "bucket": "no_usage",
+    "hypothesis": "抽取记下的说法是整句，而别人只用短引用提它（「暗格里那份」vs「真正的那份遗嘱，在书房暗格里」），所以使用点扫不到",
+    "file": "src/audit/r1.ts",
+    "switch": "R1_SHORTKEY",
+    "params": {
+      "R1_KEY_LEN": "5,6",
+      "R1_KEY_FREQ": "1"
+    }
+  },
+  "result": {
+    "dev": {
+      "reported": 8,
+      "tp": 3,
+      "fp": 5,
+      "fn": 7,
+      "precision": 0.375,
+      "recall": 0.3,
+      "cost": 26,
+      "fpRate": 0.625,
+      "unusable": false
+    },
+    "devSet": {
+      "version": "v3",
+      "size": 10
+    }
+  },
+  "evalCost": {
+    "usd": 0.057755662000000006,
+    "seconds": 0
+  },
+  "status": "rejected",
+  "note": "控制器自动裁决：reject —— 精确率退 12.5pp（护栏 >10pp）"
+}

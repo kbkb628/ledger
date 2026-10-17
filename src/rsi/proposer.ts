@@ -57,7 +57,7 @@ export const BUCKET_FIXES: Record<FailureBucket, CandidateFix | null> = {
     variants: [{}],
     requiresNewBaseline: true,
     prior:
-      "尚未实现。做法：抽取区分 established_at（事实被揭示/叙述的场）与 mentioned_at（被引用的场），mind 只从 established_at 起算。属于上游改动，会换基线",
+      "已实现并**经 K=3 裁决拒绝**（exp-008，rsi-protocol 第 11 回合）：R1 精确率 50%→100%，但召回率 30%→20%、cost 持平 24，且 e2e 26→23 触发红线。原因：授知推迟到确立场，更多命题变成「无人知情」，精确率升而召回降。**这条路已证明不通，不要重试同一实现**；若要走，必须换机制（例如只对「同一审计单元内」的引用生效，避免全局推迟授知）",
   },
   delta_self: {
     hypothesis: "delta 抽取把「说话人自己说出的内容」记成了他得知，导致他反而成了知情者",

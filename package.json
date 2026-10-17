@@ -18,6 +18,7 @@
     "rsi": "tsx eval/rsi.ts",
     "exec": "tsx eval/executor.ts",
     "regression": "tsx eval/regression.ts",
+    "controller": "tsx eval/controller.ts",
     "eval:r1": "tsx eval/run-r1.ts",
     "eval:validate": "tsx eval/validate-goldenset.ts",
     "typecheck": "tsc --noEmit"

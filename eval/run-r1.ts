@@ -313,7 +313,8 @@ async function main(): Promise<void> {
         flaggedMustNot: [...flaggedMustNot.entries()],
       },
       evalCost: {
-        usd: cache.extracted.costUsd + cache.merged.costUsd,
+        // --reuse 时上游是缓存，**没有新的真实花费**，报 0 以免控制器把历史成本算进本轮预算
+        usd: process.argv.includes("--reuse") ? 0 : cache.extracted.costUsd + cache.merged.costUsd,
         seconds: 0,
       },
     },
