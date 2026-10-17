@@ -1,4 +1,4 @@
-﻿import { verifyUsages } from "../src/audit/usage-verify.js";
+import { verifyUsages } from "../src/audit/usage-verify.js";
 import { contextStamp } from "../src/rsi/context-protocol.js";
 import { scorerStamp } from "../src/rsi/scorer.js";
 import { formatRate } from "../src/rsi/metrics.js";
@@ -61,6 +61,8 @@ interface Annotation {
   why: string;
   exact_scene: boolean;
   split: "dev" | "holdout";
+  /** 集内分组（如幻影集的 phantom / anchored）；只进报表，不影响判定 */
+  variant?: string;
 }
 interface MustNotFlag { character: string; scene: string; surface: string; why: string }
 interface LeaksFile {
@@ -392,9 +394,19 @@ async function main(): Promise<void> {
     if (!got) console.log(`       ${a.why.slice(0, 70)}`);
   }
 
+  // ── 按集内分组报（幻影集：phantom / anchored 各半，必须分开看）──
+  const variants = [...new Set(scoredLeaks.map((a) => a.variant).filter(Boolean))] as string[];
+  if (variants.length > 1) {
+    console.log(`\n按变体分组:`);
+    for (const v of variants) {
+      const group = scoredLeaks.filter((a) => a.variant === v);
+      const hit = group.filter((a) => hitLeak.has(a.id)).length;
+      console.log(`  ${v.padEnd(9)} ${hit}/${group.length}`);
+    }
+  }
+
   if (missed.length) {
-    console.log(`\n漏掉的原因排查（这些命题在账本里存在吗）：`);
-    for (const a of missed) {
+    console.log(`\n漏掉的原因排查（这些命题在账本里存在吗）：`);    for (const a of missed) {
       const needle = strip(a.surface);
       const owners = ledger.filter((p) => p.aliases.some((x) => strip(x.surface).includes(needle) || needle.includes(strip(x.surface))));
       console.log(`  ${a.id}「${a.surface}」→ 账本里含该说法的命题: ${owners.length ? owners.map((p) => p.id).join("/") : "（无）"}`);

@@ -89,6 +89,42 @@
       "createdAt": "2026-10-17T16:32:29.864Z",
       "supersedes": 1,
       "hash": "6f292ed74e5d"
+    },
+    {
+      "id": "leaks-phantom",
+      "files": [
+        "eval/script-phantom.md",
+        "eval/leaks-phantom.json"
+      ],
+      "size": {
+        "units": 16,
+        "must_not_flag": 6
+      },
+      "source": "自造专项集：8 个事实 × 2 条泄漏（phantom 换说法 / anchored 沿用原话），用于隔离「泄漏台词自建命题 ⇒ 在场者得知 ⇒ 自我掩盖」这一条机制。",
+      "changes": "v1 首版：机制探针，不用于选版本；读数按变体分开报。",
+      "holdoutSealed": false,
+      "version": 1,
+      "createdAt": "2026-10-17T20:19:12.778Z",
+      "supersedes": null,
+      "hash": "3bb4f9ff9b6c"
+    },
+    {
+      "id": "leaks-phantom",
+      "files": [
+        "eval/script-phantom.md",
+        "eval/leaks-phantom.json"
+      ],
+      "size": {
+        "units": 16,
+        "must_not_flag": 7
+      },
+      "source": "自造专项集：8 个事实 × 2 条泄漏（phantom 换说法 / anchored 沿用原话），用于隔离「泄漏台词自建命题 ⇒ 在场者得知 ⇒ 自我掩盖」这一条机制。",
+      "changes": "v2：补 2 条 must_not_flag（陈叔是密码的告知方本人；沈知微那条 surface 取短，避免「我的生日/小姐的生日」匹配不上）。计量口径不变。",
+      "holdoutSealed": false,
+      "version": 2,
+      "createdAt": "2026-10-17T20:24:14.312Z",
+      "supersedes": 1,
+      "hash": "e4077fa003ee"
     }
   ]
 }

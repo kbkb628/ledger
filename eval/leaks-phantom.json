@@ -1,0 +1,248 @@
+{
+  "meta": {
+    "name": "《幻影》幻影命题专项集 v1",
+    "script": "eval/script-phantom.md",
+    "purpose": "把「泄漏台词自己建了一条新命题 ⇒ 首见场景在场者得知 ⇒ 自我掩盖」这一条机制隔离出来量。每个事实两条泄漏：phantom（换说法）对 anchored（沿用原话）。读数按变体分开报。",
+    "revision": "v1 首版：8 个事实 × 2 条 = 16 条，全部 no_source；6 条 must_not_flag 保护「合法知道」。",
+    "note": "variant 字段是本集独有的：phantom / anchored。这不是选版本的决策集（不可用于裁决能力），它是**机制探针** —— 它的价值在两种变体的差，不在总 P/R。",
+    "size": 16
+  },
+  "leaks": [
+    {
+      "id": "X-01",
+      "kind": "no_source",
+      "variant": "phantom",
+      "character": "苏婉",
+      "scene": "P-02",
+      "surface": "那把锁的密码",
+      "why": "「那把锁的密码，我试了两次就开了」——保险箱密码只在 P-01 由陈叔单独告诉沈知微（在场仅沈知微、陈叔）；这里是换说法（不说「保险箱的密码」），预期抽不出同一命题。",
+      "established": "P-01",
+      "exact_scene": true,
+      "split": "dev"
+    },
+    {
+      "id": "X-02",
+      "kind": "no_source",
+      "variant": "anchored",
+      "character": "律师",
+      "scene": "P-03",
+      "surface": "保险箱的密码是小姐的生日",
+      "why": "同一个事实，沿用 P-01 的原话（「保险箱的密码是小姐的生日」）。对照组：归并应挂到 P-01 那条命题上。",
+      "established": "P-01",
+      "exact_scene": true,
+      "split": "dev"
+    },
+    {
+      "id": "X-03",
+      "kind": "no_source",
+      "variant": "phantom",
+      "character": "苏婉",
+      "scene": "P-02",
+      "surface": "地底下那箱旧纸",
+      "why": "「地底下那箱旧纸」——地窖那箱旧账只在 P-01 由陈叔告知沈知微；换说法（旧纸/地底下）预期不连到同一条命题。",
+      "established": "P-01",
+      "exact_scene": true,
+      "split": "dev"
+    },
+    {
+      "id": "X-04",
+      "kind": "no_source",
+      "variant": "anchored",
+      "character": "律师",
+      "scene": "P-03",
+      "surface": "地窖里那箱旧账",
+      "why": "沿用 P-01 原话「地窖里那箱旧账」。",
+      "established": "P-01",
+      "exact_scene": true,
+      "split": "dev"
+    },
+    {
+      "id": "X-05",
+      "kind": "no_source",
+      "variant": "phantom",
+      "character": "陆见深",
+      "scene": "P-02",
+      "surface": "站在旁边的人，口袋不干净",
+      "why": "「签字那天站在旁边的人，口袋不干净」——见证人收钱只在 P-01 由陈叔说出；换说法（不出现「见证人/收钱」）。",
+      "established": "P-01",
+      "exact_scene": true,
+      "split": "dev"
+    },
+    {
+      "id": "X-06",
+      "kind": "no_source",
+      "variant": "anchored",
+      "character": "董事",
+      "scene": "P-03",
+      "surface": "见证人收了钱",
+      "why": "沿用 P-01 原话「见证人收了钱」。",
+      "established": "P-01",
+      "exact_scene": true,
+      "split": "dev"
+    },
+    {
+      "id": "X-07",
+      "kind": "no_source",
+      "variant": "phantom",
+      "character": "苏婉",
+      "scene": "P-02",
+      "surface": "陆家那点外债",
+      "why": "「陆家那点外债，早就不是问题了」——陆家债已还清只在 P-01 由陈叔说出（沈知微在场）；换说法。",
+      "established": "P-01",
+      "exact_scene": true,
+      "split": "dev"
+    },
+    {
+      "id": "X-08",
+      "kind": "no_source",
+      "variant": "anchored",
+      "character": "董事",
+      "scene": "P-03",
+      "surface": "陆家那笔债三年前就还清了",
+      "why": "沿用 P-01 原话「陆家当年那笔债，三年前就还清了」。",
+      "established": "P-01",
+      "exact_scene": true,
+      "split": "dev"
+    },
+    {
+      "id": "X-09",
+      "kind": "no_source",
+      "variant": "phantom",
+      "character": "陈叔",
+      "scene": "P-05",
+      "surface": "是心衰，不是水",
+      "why": "「老爷最后那口气，是心衰，不是水」——死因只在 P-04 苏婉的电话里（在场仅苏婉）；换说法。",
+      "established": "P-04",
+      "exact_scene": true,
+      "split": "dev"
+    },
+    {
+      "id": "X-10",
+      "kind": "no_source",
+      "variant": "anchored",
+      "character": "陆见深",
+      "scene": "P-06",
+      "surface": "病历上写的是心衰，不是落水",
+      "why": "沿用 P-04 原话「病历上写的是心衰，不是落水」。",
+      "established": "P-04",
+      "exact_scene": true,
+      "split": "dev"
+    },
+    {
+      "id": "X-11",
+      "kind": "no_source",
+      "variant": "phantom",
+      "character": "董事",
+      "scene": "P-05",
+      "surface": "编号 S 的那份合同",
+      "why": "「编号 S 的那份合同，怎么找不到了」——合同被烧只在 P-04 苏婉独处时说出；换说法（只有编号，没有「烧」）。",
+      "established": "P-04",
+      "exact_scene": true,
+      "split": "dev"
+    },
+    {
+      "id": "X-12",
+      "kind": "no_source",
+      "variant": "anchored",
+      "character": "律师",
+      "scene": "P-06",
+      "surface": "编号 S 的合同已经烧了",
+      "why": "沿用 P-04 原话「编号 S 的合同……已经烧了」。",
+      "established": "P-04",
+      "exact_scene": true,
+      "split": "dev"
+    },
+    {
+      "id": "X-13",
+      "kind": "no_source",
+      "variant": "phantom",
+      "character": "苏婉",
+      "scene": "P-08",
+      "surface": "她那本护照",
+      "why": "「她那本护照，我确实翻过一次」——护照被动手脚是 P-07 助理告诉沈知微；苏婉换说法（不提出境记录）。",
+      "established": "P-07",
+      "exact_scene": true,
+      "split": "dev"
+    },
+    {
+      "id": "X-14",
+      "kind": "no_source",
+      "variant": "anchored",
+      "character": "陆见深",
+      "scene": "P-09",
+      "surface": "护照被人动过，出境记录有两笔",
+      "why": "沿用 P-07 原话「你的护照被人动过，出境记录有两笔」。",
+      "established": "P-07",
+      "exact_scene": true,
+      "split": "dev"
+    },
+    {
+      "id": "X-15",
+      "kind": "no_source",
+      "variant": "phantom",
+      "character": "陈叔",
+      "scene": "P-08",
+      "surface": "在外面还有个孩子",
+      "why": "「苏小姐在外面还有个孩子」——私生女是 P-07 助理告诉沈知微；陈叔换说法。",
+      "established": "P-07",
+      "exact_scene": true,
+      "split": "dev"
+    },
+    {
+      "id": "X-16",
+      "kind": "no_source",
+      "variant": "anchored",
+      "character": "董事",
+      "scene": "P-09",
+      "surface": "在外面还有一个女儿，今年七岁",
+      "why": "沿用 P-07 原话「苏婉在外面还有一个女儿，今年七岁」。",
+      "established": "P-07",
+      "exact_scene": true,
+      "split": "dev"
+    }
+  ],
+  "must_not_flag": [
+    {
+      "character": "陈叔",
+      "scene": "P-01",
+      "surface": "保险箱的密码是小姐的生日",
+      "why": "他就是告知方本人（这条事实是他自己在 P-01 说出来的）"
+    },
+    {
+      "character": "沈知微",
+      "scene": "P-10",
+      "surface": "保险箱的密码",
+      "why": "P-01 陈叔当面告诉她本人；surface 取短一点，避免「我的生日 / 小姐的生日」两种写法匹配不上"
+    },
+    {
+      "character": "陈叔",
+      "scene": "P-10",
+      "surface": "地窖那箱账",
+      "why": "他是告知方本人（P-01 就是他说的）"
+    },
+    {
+      "character": "苏婉",
+      "scene": "P-04",
+      "surface": "心衰",
+      "why": "她本人经手（P-04 是她的电话内容）"
+    },
+    {
+      "character": "助理",
+      "scene": "P-07",
+      "surface": "出境记录有两笔",
+      "why": "她本人查的"
+    },
+    {
+      "character": "沈知微",
+      "scene": "P-07",
+      "surface": "还有一个女儿",
+      "why": "助理当场告知，合法"
+    },
+    {
+      "character": "苏婉",
+      "scene": "P-08",
+      "surface": "我确实翻过一次",
+      "why": "动护照这事的施事是她本人"
+    }
+  ]
+}
