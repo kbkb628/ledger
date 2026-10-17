@@ -72,13 +72,12 @@
   </div>
   <p class="note" id="checkNote"></p>
 
-  <h2>2 · 全剧审计清单（真实调用返回）</h2>
+  <h2>2 · 全剧审计清单（演示剧本《九章》，真实调用返回）</h2>
   <div class="card">
     <div class="muted" id="auditHead" style="margin-bottom:8px"></div>
     <ol class="issues" id="issues"></ol>
   </div>
   <p class="note" id="auditNote"></p>
-
   <h2>3 · 账本词条（wiki 形态，真实调用返回）</h2>
   <div class="card" id="pageCard"><span class="muted">加载中…</span></div>
 
@@ -148,8 +147,11 @@ function render(d) {
       <div class="muted">→ ${esc(x.canonical)}</div>
       <div class="muted">${esc(x.reason || "")}</div>
     </li>`).join("");
-  document.getElementById("auditNote").textContent =
-    "演示剧本里的很多「泄漏」其实是写手知道的常识被账本当成秘密 —— 所以 ledger_waive 是产品的一环，不是补丁。";
+  document.getElementById("auditNote").innerHTML =
+    "同一套规则在专业剧本《茶馆》（72 场，零标注）上只报 <b>4 条 / 241 个使用点</b>，" +
+    "而在这本 23 场的演示剧本上报了 " + d.audit.count + " 条 —— 差别不在规则，在脚本本身：" +
+    "专业剧本把「谁在什么时候得知了什么」写清楚了，薄剧本没有，于是常识被账本当成秘密。" +
+    "所以 <code>ledger_waive</code> 是产品的一环，不是补丁。";
 
   // 3 · 词条
   const p = d.page;
