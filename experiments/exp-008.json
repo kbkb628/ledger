@@ -1,51 +1,59 @@
 {
-  "id": "exp-008",
-  "parent": "exp-006",
-  "createdAt": "2026-10-17T07:59:48.480Z",
-  "version": {
-    "hash": "f7ec2ac1fcb1",
-    "commit": "1319e24-dirty",
-    "extractModel": "deepseek-v4-pro",
-    "judgeModel": "jev-latest",
-    "promptHash": "0b8239f6aa03",
-    "flags": {
-      "R1_AGENT": "default",
-      "R1_PRESENCE": "default",
-      "R1_UNITS": "default",
-      "R1_CHAR_HINT": "default",
-      "R1_SHORTKEY": "default",
-      "R1_KEY_LEN": "default",
-      "R1_KEY_FREQ": "default",
-      "E2E_PAD": "default",
-      "EVAL_CONTEXT": "default",
-      "EVAL_ORDER": "default",
-      "JEV_CRITERIA_MODE": "default"
-    }
-  },
-  "change": {
-    "bucket": "masked_by_presence",
-    "hypothesis": "泄漏台词本身也是一句断言，抽取会把它的场景当成事实首见点，于是「首见场景在场者得知」把泄漏者自己的话变成了他的知识来源",
-    "file": "src/extraction/prompt.ts",
-    "switch": "R1_ESTABLISHED",
-    "params": {}
-  },
-  "result": {
-    "dev": {
-      "reported": 4,
-      "tp": 4,
-      "fp": 0,
-      "fn": 6,
-      "precision": 1,
-      "recall": 0.4,
-      "cost": 18,
-      "fpRate": 0,
-      "unusable": false
-    },
-    "regression": {
-      "judge": 44,
-      "e2e": 19
-    }
-  },
-  "status": "rejected",
-  "note": "上游改动需 K>=3 次重抽才能裁决；当前协议看不出来，先关默认值。R1 侧收益真实，但无法抵掉未证实的上游风险"
+    "id":  "exp-008",
+    "parent":  "exp-006",
+    "createdAt":  "2026-10-17T07:59:48.480Z",
+    "version":  {
+                    "hash":  "f7ec2ac1fcb1",
+                    "commit":  "1319e24-dirty",
+                    "extractModel":  "deepseek-v4-pro",
+                    "judgeModel":  "jev-latest",
+                    "promptHash":  "0b8239f6aa03",
+                    "flags":  {
+                                  "R1_AGENT":  "default",
+                                  "R1_PRESENCE":  "default",
+                                  "R1_UNITS":  "default",
+                                  "R1_CHAR_HINT":  "default",
+                                  "R1_SHORTKEY":  "default",
+                                  "R1_KEY_LEN":  "default",
+                                  "R1_KEY_FREQ":  "default",
+                                  "E2E_PAD":  "default",
+                                  "EVAL_CONTEXT":  "default",
+                                  "EVAL_ORDER":  "default",
+                                  "JEV_CRITERIA_MODE":  "default"
+                              }
+                },
+    "change":  {
+                   "bucket":  "masked_by_presence",
+                   "hypothesis":  "泄漏台词本身也是一句断言，抽取会把它的场景当成事实首见点，于是「首见场景在场者得知」把泄漏者自己的话变成了他的知识来源",
+                   "file":  "src/extraction/prompt.ts",
+                   "switch":  "R1_ESTABLISHED",
+                   "params":  {
+
+                              }
+               },
+    "result":  {
+                   "dev":  {
+                               "reported":  8,
+                               "tp":  8,
+                               "fp":  0,
+                               "fn":  8,
+                               "precision":  1,
+                               "recall":  0.2,
+                               "cost":  24,
+                               "fpRate":  0,
+                               "unusable":  false
+                           },
+                   "regression":  {
+                                      "judge":  44,
+                                      "e2e":  23,
+                                      "parentJudge":  44,
+                                      "parentE2e":  26
+                                  },
+                   "devSet":  {
+                                  "version":  "v3",
+                                  "size":  10
+                              }
+               },
+    "status":  "rejected",
+    "note":  "K=3 中位数裁决（正确协议，配置钉死）：judge 44→44（=）、e2e 26→23（−3，触发 ≥2 红线）、r1 P 50%→100% 但 R 30%→20%、cost 24→24 持平。精确率提升被召回下降抵消，且损害端到端。上一轮的 P100/R40 与 19/48 都是配置未钉死的单次抽样，作废。已回退：prompt 段删除、开关默认 false；再跑 K=3 验证基线已恢复（44/26/24，未触发红线）。"
 }
