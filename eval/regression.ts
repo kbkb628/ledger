@@ -60,6 +60,15 @@ const TASK_ENV: Record<string, Record<string, string>> = {
   r1: {
     R1_SCRIPT: "eval/script-leak.md",
   },
+  /**
+   * 真实剧本零标注精确率（《茶馆》72 场）。
+   * 用**冻结的流水线缓存**，只重跑 R1 层 —— 确定性、零成本、分布真实。
+   * 注意：它捕捉的是 R1 层改动；上游改动要另跑 `--real-fresh` 重新抽取。
+   */
+  audit: {
+    AUDIT_SCRIPT: "eval/script-chaguan.md",
+    AUDIT_CACHE: "eval/baseline/pipeline-chaguan.json",
+  },
 };
 
 interface Trial {
@@ -75,6 +84,8 @@ interface RegressionBaseline {
   judge: { ok: number; total: number };
   e2e: { median: number; total: number; trials: number[] };
   r1: { trial: { tp: number; fp: number; fn: number }; cost: number; trials: number[] };
+  /** 真实剧本误报数（零标注精确率） */
+  real: { issues: number; usages: number };
 }
 
 function loadEnv(path: string): void {
@@ -133,6 +144,17 @@ function main(): void {
   const judgeTotal = Number((judgeArt?.metrics as Record<string, number> | undefined)?.total ?? 0);
   console.log(`  judge ${judgeOk}/${judgeTotal}`);
 
+  // ── 真实剧本：冻结上游，只跑 R1 层（确定性）──
+  console.log(`\n[real] audit on 茶馆（冻结缓存）`);
+  const realDir = join(base, "real");
+  mkdirSync(realDir, { recursive: true });
+  run("eval/run-audit.ts", [], realDir, TASK_ENV.audit!);
+  const realArt = readResult(realDir, "audit");
+  const realMetrics = (realArt?.metrics ?? {}) as Record<string, number>;
+  const realIssues = realMetrics.issues ?? 0;
+  const realUsages = realMetrics.usages ?? 0;
+  console.log(`  real ${realIssues} 条报出 / ${realUsages} 使用点`);
+
   // ── K 次重抽取 → 每次 e2e + r1 ──
   const trials: Trial[] = [];
   for (let i = 1; i <= k; i++) {
@@ -166,6 +188,7 @@ function main(): void {
   console.log(`  judge ${judgeOk}/${judgeTotal}`);
   console.log(`  e2e   ${e2eMedian}/${trials[0]?.e2e.total ?? 48}　（各次 ${e2eOk.join(", ")}）`);
   console.log(`  r1    ${formatMetrics(r1Metrics)}　（各次 cost ${r1Costs.join(", ")}）`);
+  console.log(`  real  ${realIssues} 条报出 / ${realUsages} 使用点`);
 
   const current: RegressionBaseline = {
     at: new Date().toISOString(),
@@ -175,6 +198,7 @@ function main(): void {
     judge: { ok: judgeOk, total: judgeTotal },
     e2e: { median: e2eMedian, total: trials[0]?.e2e.total ?? 48, trials: e2eOk },
     r1: { trial: r1MedianTrial, cost: r1MedianCost, trials: r1Costs },
+    real: { issues: realIssues, usages: realUsages },
   };
 
   // ── 与基线比对 ──
@@ -196,6 +220,14 @@ function main(): void {
     if (dJudge <= -RED_LINE_SAMPLES) regressions.push(`判定层退 ${-dJudge} 条（红线 ≥${RED_LINE_SAMPLES}）`);
     if (dE2e <= -RED_LINE_SAMPLES) regressions.push(`端到端退 ${-dE2e} 条（红线 ≥${RED_LINE_SAMPLES}）`);
     if (dR1 > 0) regressions.push(`R1 cost 上升 ${dR1}`);
+    // 旧基线可能没有 real 字段（本项是回合 15 才加的）→ 首次只记录，不判红线
+    if (before.real) {
+      const dReal = realIssues - before.real.issues;
+      console.log(`  real  ${arrow(dReal)}　（${before.real.issues} → ${realIssues}）`);
+      if (dReal >= RED_LINE_SAMPLES) regressions.push(`真实剧本误报增加 ${dReal} 条（红线 ≥${RED_LINE_SAMPLES}）`);
+    } else {
+      console.log(`  real  （旧基线无此项，本次记为初始值 ${realIssues}）`);
+    }
   }
 
   if (regressions.length) {

@@ -21,6 +21,7 @@ import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { buildKnowledge, buildUsages, defaultKnowledge, detectLeaks } from "../src/audit/r1.js";
+import { writeTaskResult } from "../src/eval/report.js";
 import { extractScenes, type ExtractResult } from "../src/extraction/extractor.js";
 import { mergeScenes, type MergeResult } from "../src/extraction/merge.js";
 import { parseScenes } from "../src/extraction/script.js";
@@ -133,6 +134,20 @@ async function main(): Promise<void> {
   console.log(`\n${"─".repeat(64)}`);
   console.log(`成本: 抽取 $${extracted.costUsd.toFixed(4)} + 归并 $${merged.costUsd.toFixed(4)}`);
   console.log(`\n⚠️ 第一版刻意不加任何豁免 —— 误报是这份清单的一部分，需逐条核对原因。\n`);
+
+  // ── 交给执行器/回归：真实剧本的「零标注精确率」指标 ──
+  writeTaskResult({
+    task: "audit",
+    metrics: {
+      issues: issues.length,
+      usages: usages.length,
+      propositions: ledger.length,
+      knowledge: facts.length,
+      issueRate: usages.length === 0 ? 0 : Number((issues.length / usages.length).toFixed(4)),
+    },
+    extra: { script: SCRIPT, cache: CACHE, nameSkip: process.env.R1_NAME_SKIP !== "0" },
+    evalCost: { usd: 0, seconds: 0 },
+  }, issues.map((i) => JSON.stringify({ kind: "issue", scene: i.useScene, character: i.character, surface: i.surface, propositionId: i.propositionId })));
 }
 
 await main();

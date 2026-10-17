@@ -21,7 +21,7 @@ import { versionFingerprint, type VersionFingerprint } from "../rsi/version.js";
  */
 
 export interface TaskResult {
-  task: "judge" | "e2e" | "r1";
+  task: "judge" | "e2e" | "r1" | "audit";
   /** 核心指标（字段随任务不同，但必须包含足够复算的东西） */
   metrics: Record<string, number | string | boolean>;
   /** 附加信息（配置、口径、警告） */
