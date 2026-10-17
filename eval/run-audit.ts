@@ -85,7 +85,7 @@ async function main(): Promise<void> {
       `${extracted.rejectedDeltas ? `（原文可查校验拦掉 ${extracted.rejectedDeltas} 条）` : ""}`,
   );
 
-  const { usages, droppedShort } = buildUsages(ledger, scenes, { skipNames: process.env.R1_NAME_SKIP !== "0" });
+  const { usages, droppedShort } = buildUsages(ledger, scenes, { skipNames: process.env.R1_NAME_SKIP !== "0", minLen: Number(process.env.R1_MIN_SURFACE_LEN ?? 3) });
   const { facts, unresolved } = buildKnowledge(ledger, extracted.scenes);
   // 隔离实验用：AUDIT_NO_DEFAULT=1 关掉默认知识层，看这一条规则单独贡献多少
   const useDefaults = !process.env.AUDIT_NO_DEFAULT;

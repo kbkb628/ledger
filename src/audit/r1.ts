@@ -146,7 +146,7 @@ function deriveKeys(
 export function buildUsages(
   ledger: DraftProposition[],
   scenes: Scene[],
-  opts: { shortKeys?: boolean; skipNames?: boolean } = {},
+  opts: { shortKeys?: boolean; skipNames?: boolean; minLen?: number; personNames?: string[] } = {},
 ): { usages: Usage[]; droppedShort: number; keyMatches: number } {
   const usages: Usage[] = [];
   let droppedShort = 0;
@@ -155,7 +155,18 @@ export function buildUsages(
   // 说话人名集合：**提到一个人名 ≠ 使用了关于他的命题**。
   // 真实剧本测试暴露（《茶馆》12 条里有 3 条）：命题「小二德子埋伏下了打手」的说法被抽成
   // 「小二德子」，于是任何角色提到这三个字就命中。纯字面缺陷，确定性排除。
-  const personNames = new Set(ledger.flatMap((p) => p.agents));
+  //
+  // 人名集合**优先用抽取出的人物表**（含「主体但不是施事」的人名，如「康大力」）。
+  // 只用 agents 会漏掉这类 —— 真实剧本测试里 3 条误报正是这么来的。
+  const personNames = new Set([
+    ...ledger.flatMap((p) => p.agents),
+    ...(opts.personNames ?? []),
+    // 兜底：场景元数据里的「在场」并集 —— 零成本，不需要额外 LLM 调用，
+    // 且能覆盖「主体但不是施事」的人名（如《茶馆》的「康大力」）。
+    ...scenes.flatMap((s) => presentCharacters(s)),
+  ]);
+  // 匹配片段的最短长度：太短的片段几乎必然误命中（「就是他」「你不懂」都是 3 字）
+  const minLen = opts.minLen ?? 3;
 
   for (const p of ledger) {
     const surfaces = [...new Set(p.aliases.map((a) => a.surface))];

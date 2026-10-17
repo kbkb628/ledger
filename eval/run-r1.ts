@@ -164,7 +164,7 @@ async function main(): Promise<void> {
   for (const d of defaults) {
     facts.push({ ...d, kind: "learns", evidence: "(默认:施事/在场)", source: "default" });
   }
-  const usagesRes = buildUsages(ledger, scenes, { shortKeys: FLAGS.shortKey, skipNames: FLAGS.nameSkip });
+  const usagesRes = buildUsages(ledger, scenes, { shortKeys: FLAGS.shortKey, skipNames: FLAGS.nameSkip, minLen: Number(process.env.R1_MIN_SURFACE_LEN ?? 3) });
   const usages = usagesRes.usages;
 
   // ── 把知识与使用一并提升到审计单元层，再跑 R1 ──
