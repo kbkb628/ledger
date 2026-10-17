@@ -13888,14 +13888,6 @@
     },
     {
       "character": "周秀花",
-      "propositionId": "E-189",
-      "scene": "S04-19",
-      "surface": "可谁知道也许",
-      "line": "周秀花：老太太，这儿永远是您的家！王利发可谁知道也许……康顺子我也不会忘了你们！老掌柜，你硬硬朗朗的吧！（同周秀花下）",
-      "provenance": "verified"
-    },
-    {
-      "character": "周秀花",
       "propositionId": "E-190",
       "scene": "S04-19",
       "surface": "我也不会忘了你们",
@@ -14288,7 +14280,7 @@
     }
   ],
   "usageStamps": {
-    "scorer": "r1@5c4757558d19",
+    "scorer": "r1@11afbc5f10a3",
     "contextProtocol": "ctx@0bdbed65bcc4",
     "ledger": "lg@55deb2443649"
   }

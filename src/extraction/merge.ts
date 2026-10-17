@@ -145,6 +145,32 @@ export async function mergeScenes(
       }
 
       const candidates = scored.map((x) => x.p);
+
+      // ── 同说法优先归并（`R1_MERGE_EXACT=1`）──
+      //
+      // 机制：别名表的本意就是「同一件事被不同措辞提到」，可**逐字相同的说法**
+      // 在同一个账本里指向两件事的概率，比模型误判的概率低得多。
+      // 而一旦被误判成 NEW，新命题的首见场景 = 泄漏现场，于是
+      // 「首见场景在场者得知」当场给泄漏者发许可 —— 这就是 `masked_by_presence`
+      // 在归并层的根因（回合 30：10 条漏报里 8 条命中、7 条同一机制；5 条误报里 4 条同源）。
+      //
+      // 只在**唯一命中**时短路判官：若同一说法已经挂在多条命题上（「那份东西」这类），
+      // 说明它不具区分度，仍交给判官裁决。
+      const exact = exactSurfaceMatches(draft, propositions, norm);
+      if (exact.length === 1) {
+        attach(propositions, exact[0]!, draft, draftAgents, se.scene, false);
+        if (opts.verbose) {
+          process.stdout.write(`    ${se.scene} 「${draft.canonical.slice(0, 26)}」→ ${exact[0]!.id} (exact_surface)\n`);
+        }
+        decisions.push({
+          scene: se.scene, canonical: draft.canonical, choice: exact[0]!.id,
+          candidates: candidates.map((p) => p.id), confidence: 1, reason: "exact_surface",
+        });
+        continue;
+      }
+      if (exact.length > 1 && opts.verbose) {
+        process.stdout.write(`    ${se.scene} 同说法命中 ${exact.length} 条（${exact.map((p) => p.id).join("/")}）→ 交判官\n`);
+      }
       const req: JudgmentRequest = {
         task: "bind_mention",
         mention: {
@@ -185,20 +211,7 @@ export async function mergeScenes(
       const target = propositions.find((p) => p.id === choice);
       if (target) {
         reason = "attached";
-        for (const s of draft.surfaces) {
-          if (!target.aliases.some((a) => a.surface === s.text)) {
-            target.aliases.push({ surface: s.text, firstSeen: se.scene, kind: s.kind });
-          }
-        }
-        for (const a of draftAgents) if (!target.agents.includes(a)) target.agents.push(a);
-        if (!target.scenes.includes(se.scene)) target.scenes.push(se.scene);
-        // 首次「确立」的场次 —— R1 的在场者规则只从这里起算（见 rsi-protocol 第 9 回合）
-        if (draft.established !== false && (target.establishedAt === undefined || target.establishedAt === null)) {
-          target.establishedAt = se.scene;
-        }
-        if (opts.verbose) {
-          process.stdout.write(`    ${se.scene} 「${draft.canonical.slice(0, 26)}」→ ${target.id} (${confidence.toFixed(2)})\n`);
-        }
+        attach(propositions, target, draft, draftAgents, se.scene, opts.verbose, confidence);
       } else {
         propositions.push(newProposition(`E-${String(nextId++).padStart(3, "0")}`, { ...draft, agents: draftAgents }, se.scene));
         if (opts.verbose) {
@@ -217,6 +230,51 @@ export async function mergeScenes(
   for (const p of propositions) if (p.establishedAt === undefined) p.establishedAt = p.scenes[0] ?? null;
 
   return { propositions, decisions, costUsd, latencyMs: Date.now() - started, calls, unsure };
+}
+
+/** 归并结果挂到目标命题上（新增说法 / 施事 / 场次 / 确立场次） */
+function attach(
+  propositions: DraftProposition[],
+  target: DraftProposition,
+  draft: ScenePropositionDraft,
+  draftAgents: string[],
+  scene: string,
+  verbose?: boolean,
+  confidence = 1,
+): void {
+  void propositions;
+  for (const s of draft.surfaces) {
+    if (!target.aliases.some((a) => a.surface === s.text)) {
+      target.aliases.push({ surface: s.text, firstSeen: scene, kind: s.kind });
+    }
+  }
+  for (const a of draftAgents) if (!target.agents.includes(a)) target.agents.push(a);
+  if (!target.scenes.includes(scene)) target.scenes.push(scene);
+  // 首次「确立」的场次 —— R1 的在场者规则只从这里起算（见 rsi-protocol 第 9 回合）
+  if (draft.established !== false && (target.establishedAt === undefined || target.establishedAt === null)) {
+    target.establishedAt = scene;
+  }
+  if (verbose) {
+    process.stdout.write(`    ${scene} 「${draft.canonical.slice(0, 26)}」→ ${target.id} (${confidence.toFixed(2)})\n`);
+  }
+}
+
+/**
+ * 逐字相同的说法命中了几条命题。
+ *
+ * 门槛 `≥4` 个归一化字符：`R1_MIN_SURFACE_LEN` 的下限是 3，
+ * 而 3 字说法（「那份东西」只有 4 字但极泛）在账本里本就歧义，
+ * 交给判官更安全。命中 ≥2 条时调用方也**不会**短路，仍走判官。
+ */
+function exactSurfaceMatches(
+  draft: ScenePropositionDraft,
+  propositions: DraftProposition[],
+  norm: (s: string) => string,
+): DraftProposition[] {
+  if (process.env.R1_MERGE_EXACT !== "1") return [];
+  const wanted = new Set(draft.surfaces.map((s) => norm(s.text)).filter((s) => s.length >= 4));
+  if (wanted.size === 0) return [];
+  return propositions.filter((p) => p.aliases.some((a) => wanted.has(norm(a.surface))));
 }
 
 function newProposition(id: string, draft: ScenePropositionDraft, scene: string): DraftProposition {

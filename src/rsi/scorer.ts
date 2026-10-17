@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 打分器版本 —— 「结果可比性」的另一半。
  *
  * ## 为什么需要（我的真实疏漏）
@@ -71,6 +71,7 @@ const R1_FLAGS = [
   "R1_MIN_SURFACE_LEN",
   "R1_NO_SELF_ESTABLISH",
   "R1_ESTABLISHED",
+  "R1_MERGE_EXACT",
 ] as const;
 
 export type ScorerKind = "r1" | "judge" | "e2e";

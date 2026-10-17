@@ -1,4 +1,4 @@
-import { resolveUsages } from "../src/audit/usage-cache.js";
+﻿import { resolveUsages } from "../src/audit/usage-cache.js";
 import { verifyUsages } from "../src/audit/usage-verify.js";
 import { contextStamp } from "../src/rsi/context-protocol.js";
 import { scorerStamp } from "../src/rsi/scorer.js";
@@ -115,7 +115,13 @@ async function main(): Promise<void> {
   const { facts, unresolved } = buildKnowledge(ledger, extracted.scenes);
   // 隔离实验用：AUDIT_NO_DEFAULT=1 关掉默认知识层，看这一条规则单独贡献多少
   const useDefaults = !process.env.AUDIT_NO_DEFAULT;
-  const defaults = useDefaults ? defaultKnowledge(ledger, scenes) : [];
+  // R1_NO_SELF_ESTABLISH=later：不在「更晚也有来源」的场次里用自己的台词给自己发许可
+    const noSelf = (process.env.R1_NO_SELF_ESTABLISH ?? "").trim().toLowerCase();
+    const defaults = useDefaults
+      ? defaultKnowledge(ledger, scenes, {
+          noSelfEstablish: noSelf === "later" ? "later" : noSelf === "single" ? "single" : noSelf === "1",
+        })
+      : [];
   for (const d of defaults) {
     facts.push({ ...d, kind: "learns", evidence: "(默认:施事/在场)" });
   }

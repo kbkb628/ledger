@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 抽取层的产物类型。
  *
  * ## 范围（由实测砍定，见 docs/test-plan.md P1-2）
@@ -116,7 +116,7 @@ export interface MergeDecision {
   candidates: string[];
   confidence: number;
   /** 被判定层拒绝的候选——用 `vague` 说法命中的候选不算证据 */
-  reason: "attached" | "new" | "unsure" | "no_candidate";
+  reason: "attached" | "new" | "unsure" | "no_candidate" | "exact_surface";
 }
 
 export interface LedgerDraft {

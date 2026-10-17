@@ -1,0 +1,53 @@
+{
+  "id": "exp-031",
+  "kind": "capability",
+  "parent": "exp-030",
+  "createdAt": "2026-10-18T02:40:00.000Z",
+  "version": {
+    "hash": "8f54d3688df1",
+    "commit": "57e609f-dirty",
+    "extractModel": "deepseek-v4-pro",
+    "judgeModel": "openai-compat:deepseek-v4-pro",
+    "promptHash": "0b8239f6aa03",
+    "flags": {
+      "R1_NO_SELF_ESTABLISH": "later",
+      "R1_MERGE_EXACT": "0",
+      "R1_JUDGE_PROVIDER": "openai"
+    }
+  },
+  "change": {
+    "bucket": "masked_by_presence",
+    "hypothesis": "泄漏现场新建的命题之所以自动给现场者发许可，是因为「在场者得知」拿他自己的台词当来源；若该命题在更晚的场次里他也在场（说明他其实是后面才知道的），前面的使用就是时序泄漏，应当收回这条自证",
+    "file": "src/audit/r1.ts",
+    "switch": "R1_NO_SELF_ESTABLISH",
+    "params": { "R1_NO_SELF_ESTABLISH": "later" }
+  },
+  "result": {
+    "dev": {
+      "reported": 8,
+      "tp": 5,
+      "fp": 3,
+      "fn": 5,
+      "precision": 0.625,
+      "recall": 0.5,
+      "cost": 24,
+      "fpRate": 0.375,
+      "unusable": false
+    },
+    "devSet": { "version": "leaks@1#cc59a5ad9de1", "size": 10 },
+    "holdout": {
+      "reported": 11,
+      "tp": 3,
+      "fp": 8,
+      "fn": 7,
+      "precision": 0.2727,
+      "recall": 0.3,
+      "cost": 0,
+      "fpRate": 0.7273,
+      "unusable": false
+    },
+    "real": { "issues": 5, "usages": 240, "stamps": "r1@0196736c5974/ctx@0bdbed65bcc4" }
+  },
+  "status": "rejected",
+  "note": "评测器未通过：holdout 需 tp≥6 且 fp≤5，实测 tp 3（+1）/ fp 8（+3）。dev 一侧是通过的（冻结上游配对：P 3/6→5/8、R 30%→50%、误报仍 3，新抓到的正是 L-02 与 L-05 两条时序泄漏），所以这不是「规则没生效」，而是**规则在跨剧本集上不迁移**：新增的 3 条误报里 1 条是沈知微 S01-03「最要紧的东西」（她的台词本身就自陈来源「爸走之前跟我说」，账本只看见台词，于是把合法的自证收回了），另 2 条是未标注误报。机制结论：① 许可层能修时序类泄漏，但会把「说话人本人的披露式自证」一起打掉 —— 必须先有 should_allow（自陈来源标记 + 前提性知识如「重生者预知」）才能上；这是 exp-021 顺序洞察的第二次确认，这次有了具体误报样本。② 同回合的另一杠杆 R1_MERGE_EXACT（逐字相同说法强制归并，唯一命中才短路判官）在 dev 上只触发 1 次、指标不变，未进 holdout 评估，默认关闭保留。③ 测量纪律新增：dev 的归并不可复现（同配置 `--remerge` 两次得到 tp 3 与 tp 2），所以 **dev 的 A/B 必须用 `--reuse` 冻结上游**，归并层改动只能用 `--remerge`，两者不能混。④ 因为 R1_MERGE_EXACT 进了 R1_FLAGS，打分器戳由 r1@5c4757558d19 变为 r1@0196736c5974 ⇒ 茶馆的使用点缓存作废，本轮 real 是一次重校验的新抽样（240 使用点 / 5 条），与 241/4 的旧基线相差 1 条，属 handoff §2 记录的 ±1~2 噪声带。全部开关默认关闭，产品与真实指标行为不变。"
+}

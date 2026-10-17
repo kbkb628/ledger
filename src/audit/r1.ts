@@ -1,4 +1,4 @@
-import type { SceneExtraction, DraftProposition } from "../extraction/types.js";
+﻿import type { SceneExtraction, DraftProposition } from "../extraction/types.js";
 import type { Scene } from "../extraction/script.js";
 /**
  * R1 知识泄漏检测 —— 产品的核心输出。
@@ -297,7 +297,7 @@ function firstDisclosureScene(
 export function defaultKnowledge(
   ledger: DraftProposition[],
   scenes?: Scene[],
-  opts: { agent?: boolean; presence?: boolean; established?: boolean; noSelfEstablish?: boolean } = {},
+  opts: { agent?: boolean; presence?: boolean; established?: boolean; noSelfEstablish?: boolean | "single" | "later" } = {},
 ): Array<{ character: string; propositionId: string; scene: string }> {
   const useAgent = opts.agent ?? true;
   const usePresence = opts.presence ?? true;
@@ -305,9 +305,20 @@ export function defaultKnowledge(
   // 关掉即退回旧行为（首见场），用于 A/B 与回退。
   const useEstablished = opts.established ?? true;
   // R1_NO_SELF_ESTABLISH：不得用自己台词作为自己知情来源（治 masked_by_presence）
-  const noSelfEstablish = opts.noSelfEstablish ?? false;
+  //   `true`   = 外科版：本场内该说法的出现全部来自他自己台词时，这条在场证据无效
+  //   "single" = 更窄：只对**孤命题**（全剧只在这一场出现过）生效
+  const noSelfMode: "off" | "all" | "single" | "later" =
+    opts.noSelfEstablish === "single"
+      ? "single"
+      : opts.noSelfEstablish === "later"
+        ? "later"
+        : opts.noSelfEstablish
+          ? "all"
+          : "off";
   const out: Array<{ character: string; propositionId: string; scene: string }> = [];
   const byId = new Map((scenes ?? []).map((s) => [s.id, s]));
+  // 场次顺序：later 模式要判「有没有更晚的场次里他也在场」
+  const orderOf = new Map((scenes ?? []).map((s, i) => [s.id, i]));
 
   for (const p of ledger) {
     const scene = p.scenes[0];
@@ -332,8 +343,26 @@ export function defaultKnowledge(
         // 召回 30%→60%，但误报 3→12、cost 持平 24、精确率 −16.7pp → 被闸门拒绝。
         // 所以这里用**外科版**：不动全局授知，只在「本场内该说法的出现全部来自他自己台词」时
         // 才判定这条在场证据无效。这恰好命中 masked_by_presence 的机制，而不波及其他人。
-        if (noSelfEstablish) {
-          const sceneObj = byId.get(grantScene);
+        if (noSelfMode !== "off") {
+          // 三种收紧方式（都是「不拿自己的台词当自己的来源」，区别只在收紧范围）：
+          //   all    = 只要本场该说法的出现全是他自己台词，就收回（exp-021/本轮 arm C：精确率 −16.7pp）
+          //   single = 只对孤命题（全剧只出现一场）收回（本轮 arm D：P 26.7% / R 40%）
+          //   later  = **只在该命题于更晚的场次里也有人在场时**才收回 ——
+          //            那种情况说明「他其实是在后面才知道的」，前面那次就是时序泄漏；
+          //            而只说过一次的命题没有这种「更晚的来源」，收回收只会伤精确率。
+          const laterSource = (): boolean => {
+            if (noSelfMode !== "later") return true;
+            const i0 = orderOf.get(grantScene) ?? -1;
+            return p.scenes.some((s) => {
+              if (s === grantScene || (orderOf.get(s) ?? -1) <= i0) return false;
+              return presentCharacters(byId.get(s)).includes(who);
+            });
+          };
+          const applies =
+            noSelfMode === "all" ||
+            (noSelfMode === "single" && p.scenes.length === 1 && p.scenes[0] === grantScene) ||
+            (noSelfMode === "later" && laterSource());
+          const sceneObj = applies ? byId.get(grantScene) : undefined;
           if (sceneObj) {
             const surfaces = [...new Set(p.aliases.map((a) => a.surface.replace(/\s+/g, "")))].filter(
               (s) => s.length >= 3,

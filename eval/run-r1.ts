@@ -92,8 +92,13 @@ const FLAGS = {
   charHint: flag("R1_CHAR_HINT", false),
   /** 用判定层校验 usage 是否真引用（治「碰巧共享词」假命中） */
   usageVerify: flag("R1_USAGE_VERIFY", true),
-  /** 不得用自己台词作为自己知情来源（治 masked_by_presence） */
-  noSelfEstablish: flag("R1_NO_SELF_ESTABLISH", false),
+  /** 不得用自己台词作为自己知情来源（治 masked_by_presence）：0=关 1=外科版 single=孤命题 later=更晚有来源 */
+  noSelfEstablish: (() => {
+    const v = (process.env.R1_NO_SELF_ESTABLISH ?? "").trim().toLowerCase();
+    if (v === "single") return "single" as const;
+    if (v === "later") return "later" as const;
+    return flag("R1_NO_SELF_ESTABLISH", false);
+  })(),
   /** 过滤「纯人名」说法（提到人名 ≠ 使用命题，真实剧本测试暴露） */
   nameSkip: flag("R1_NAME_SKIP", true),
   /** 在场者规则改从「确立场」起算（治 masked_by_presence） */
@@ -192,8 +197,32 @@ function testsetStampOf(file: string): string | null {
 const pct = (n: number, d: number): string => (d === 0 ? "n/a" : `${((n / d) * 100).toFixed(1)}%`);
 
 async function loadCache(): Promise<CacheShape> {
-  if (process.argv.includes("--reuse") && existsSync(CACHE)) {
-    return JSON.parse(readFileSync(CACHE, "utf8")) as CacheShape;
+  const reuse = process.argv.includes("--reuse");
+  const remerge = process.argv.includes("--remerge");
+  if ((reuse || remerge) && existsSync(CACHE)) {
+    const cached = JSON.parse(readFileSync(CACHE, "utf8")) as CacheShape;
+    if (!remerge) return cached;
+    // `--remerge`：**冻结抽取，只重跑归并**。
+    //
+    // 为什么必须有这个模式：归并层的改动若用 `--fresh` 验证，重抽噪声会盖住改动本身
+    // （回合 29 已量过：同配置重抽，命题数 234 vs 230，`real` 5 条 vs 4 条）。
+    // 冻结抽取后，两次运行只差「归并代码」，差值才是改动。
+    // 注意：它**不写缓存** —— 基线缓存必须保持原样。
+    console.log(`【归并·remerge】沿用缓存的 ${cached.extracted.scenes.length} 场抽取结果，只重跑归并`);
+    const scenesOfCache = parseScenes(readFileSync(SCRIPT, "utf8"));
+    const normalize = buildNormalizer(cached.characters);
+    const merged = await mergeScenes(cached.extracted.scenes, scenesOfCache, {
+      provider: judgeWatch.provider,
+      normalize,
+      characterHint: FLAGS.charHint
+        ? cached.characters
+            .filter((c) => c.aliases.length > 0)
+            .map((c) => `${c.name} = ${c.aliases.join(" = ")}`)
+            .join("\n")
+        : undefined,
+      verbose: true,
+    });
+    return { ...cached, merged };
   }
   if (!process.argv.includes("--fresh") && existsSync(CACHE)) {
     return JSON.parse(readFileSync(CACHE, "utf8")) as CacheShape;
