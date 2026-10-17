@@ -203,3 +203,59 @@ chaguan 测不了召回。**召回必须靠注入**（等价于变异测试）�
 本机 `hosts` 把 23 个 GitHub 域名指向 `127.0.0.1`，因此：
 - `web_fetch` 报「non-public IP」，`Invoke-WebRequest` 报连接关闭
 - **但 `git` 与 `gh` 可用**（实测 `git clone` / `gh api` 均成功）→ 取公开材料走 CLI
+
+---
+
+## 八、叙事一致性 benchmark 的判决（最贴近本项目的一块）
+
+调研找到两个 2026 年的直接同类工作，以及一组「无支撑断言」的成熟标注规范。结论比预期严厉：
+**这个领域已经有基础设施，我的做法是它们的弱化版，而且我缺了它们最关键的一条纪律。**
+
+### 8.1 STAGE（arXiv 2601.08510）—— 最接近我的任务，且有中文子集
+
+- 151 部全长剧本（**109 英 + 42 中**），为每个角色在时间线每个点复原「state + epistemic access」
+- epistemic access 四值：**目击 / 被告知 / 推断 / 不知道**
+- 标注硬约束：**「同场次后续证据不得回流为前置知识」**（防 future leakage 进标注）
+- 双盲一致率 91.7% 后裁定；judge 校准 Cohen κ = 0.82 / 0.86 / 0.76
+- provenance 链路让专家核验从 5.4 min 降到 1.8 min，κ 从 0.62 升到 0.80
+- 指标：影片级 macro + 1000 次 movie-cluster bootstrap CI；
+  future-leakage / unknown-fact / unsupported-claim 作为**审计信号，不进正式排名**
+- 中文部分：104 角色、690 states、Task III 1137 单轮 + 238 多轮
+
+> **我第 6 回合自己总结的规矩「事实须在更早、泄漏者不在场的场景确立」，
+> 就是它那条「不得回流」约束的弱化版。** 而且它有 42 部中文剧本 ——
+> 这可以替代或补强我那个可能被污染的《茶馆》。
+
+**我的差距**：`mind(C)` 只有三条启发式（施事 / 在场的首见场景 / 显式 delta），
+而它是**每个角色在每个时间点的四值状态**，且区分「被告知」与「推断」。
+
+### 8.2 ConStory-Bench（arXiv 2603.05890）与一个必须知道的事实
+
+- 2000 prompts、5 类 19 子类矛盾分类法；机器 P .884 / R .550 / F1 .281
+- **人类专家 recall 只有 4.5%–31.5%** → **漏报是这个任务的天然难点，不是我的实现缺陷**
+- 原则：「earlier narrative content serves as the ground truth」
+
+> 这条对我的意义：我一直在为「R1 召回只有 30%」自责。
+> 但如果连人类专家在同类任务上也只有 4.5%–31.5%，那 30% 需要放在这个背景下解读，
+> 而不是单纯当成「实现不行」。**当然这不构成免责，只构成基线参考。**
+
+### 8.3 三值标签与分母规则（VeriScore / FActScore / RAGTruth）
+
+| 做法 | 出处 | 对我的直接改法 |
+|---|---|---|
+| 三值标签：**support / contradict / inconclusive**，`inconclusive` **移出分母** | VeriScore (2406.19276)，κ=0.766 | 「不可核验」与「误信被正确引用」不该算进误报分母 |
+| **无源（baseless）与冲突（conflict）分开报** | RAGTruth (2401.00396) | 我的 `no_source` 与 `timing` 两类应**分别报子集指标**，不能混成一个 P/R |
+| **omission（该报未报）独立成一类**，不塞进 recall | FABLES (2404.01261) | 我的「漏掉」应单列，且能细分到成因桶 |
+| **balanced accuracy** 治类别不平衡 | SummaC (2111.09525) | 我的 real 集 19 误报 vs 6 命中，必须报 balanced accuracy |
+| 抽 20% 双标 + 第三人裁定，公开一致率/κ；**κ<0.7 先改规范而不是加标注量** | RAGTruth / VeriScore | 我的单标注者局面必须先解决 |
+| F1@K 式截断上限 | SAFE/LongFact (2403.18802) | 防「少报求精确率便宜」的作弊方向 |
+
+### 8.4 中文资源现状（重要：没有现成的）
+
+- **不存在**「中文短剧剧本知识泄漏」的现成评测集或标注规范
+- SkyScript-100M（2408.09333）有 6660 部中文短剧 / 约 8 万集，script↔shooting-script 配对，
+  但**零一致性标注** —— 只能作为抽取层的压力测试材料，不能当评测集
+- HalluQA / Chinese SimpleQA / ChineseFactEval 都是问答式，无叙事与时间线维度
+
+**可行路径**：用 STAGE 的中文剧本 + 它的 epistemic-access 骨架做真实集，
+配 ConStory-Bench 的 5×19 分类法自建标注规范。
