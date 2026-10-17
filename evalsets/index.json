@@ -125,6 +125,22 @@
       "createdAt": "2026-10-17T20:24:14.312Z",
       "supersedes": 1,
       "hash": "e4077fa003ee"
+    },
+    {
+      "id": "chaguan",
+      "files": [
+        "eval/script-chaguan.md"
+      ],
+      "size": {
+        "units": 72
+      },
+      "source": "《茶馆》公有领域文本导入（Wikisource 转录 + 人工人物表）。零标注，用于 real 精确率。",
+      "changes": "v2：删掉第二、三幕被空白切开的人物表残留 10 行（`人物王淑芬报童…` 及其后续名单，曾被导入器当成台词，导致「康大力：王利发松二爷老林难民数人」这类假台词与「同周秀花下」这类残字说法）。real 的输入里本来就不该有转录垃圾。",
+      "holdoutSealed": false,
+      "version": 2,
+      "createdAt": "2026-10-17T22:38:13.247Z",
+      "supersedes": 1,
+      "hash": "a2323ea00ae9"
     }
   ]
 }
