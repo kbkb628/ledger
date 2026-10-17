@@ -43,6 +43,7 @@ const SCORER_FILES: Record<ScorerKind, string[]> = {
   r1: [
     "src/audit/r1.ts",
     "src/audit/check.ts",
+    "src/audit/usage-verify.ts", // usage 语义校验：改变"哪些使用点算数"
     "src/extraction/merge.ts", // 归并决策会改变账本，从而改变可报出的东西
   ],
   /** 判定层：指令 + provider + 候选呈现 */
@@ -66,6 +67,9 @@ const R1_FLAGS = [
   "R1_KEY_LEN",
   "R1_KEY_FREQ",
   "R1_NAME_SKIP",
+  "R1_USAGE_VERIFY",
+  "R1_MIN_SURFACE_LEN",
+  "R1_NO_SELF_ESTABLISH",
   "R1_ESTABLISHED",
 ] as const;
 

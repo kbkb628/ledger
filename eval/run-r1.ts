@@ -1,3 +1,4 @@
+import { verifyUsages } from "../src/audit/usage-verify.js";
 import { contextStamp } from "../src/rsi/context-protocol.js";
 import { scorerStamp } from "../src/rsi/scorer.js";
 import { formatRate } from "../src/rsi/metrics.js";
@@ -81,6 +82,8 @@ const FLAGS = {
   units: flag("R1_UNITS", false),
   /** 归并判定时附人物别称表（实测让 P/R 从 66.7% 掉到 50%/33.3% → 默认关闭） */
   charHint: flag("R1_CHAR_HINT", false),
+  /** 用判定层校验 usage 是否真引用（治「碰巧共享词」假命中） */
+  usageVerify: flag("R1_USAGE_VERIFY", true),
   /** 不得用自己台词作为自己知情来源（治 masked_by_presence） */
   noSelfEstablish: flag("R1_NO_SELF_ESTABLISH", false),
   /** 过滤「纯人名」说法（提到人名 ≠ 使用命题，真实剧本测试暴露） */
@@ -159,13 +162,21 @@ async function main(): Promise<void> {
   const cache = await loadCache();
   const ledger = cache.merged.propositions;
 
+  // 判定层校验 usage（R1_USAGE_VERIFY）：过滤「碰巧共享词」的假使用点
   const { facts } = buildKnowledge(ledger, cache.extracted.scenes);
   const defaults = defaultKnowledge(ledger, scenes, { agent: FLAGS.agent, presence: FLAGS.presence, established: FLAGS.established, noSelfEstablish: FLAGS.noSelfEstablish });
   for (const d of defaults) {
     facts.push({ ...d, kind: "learns", evidence: "(默认:施事/在场)", source: "default" });
   }
   const usagesRes = buildUsages(ledger, scenes, { shortKeys: FLAGS.shortKey, skipNames: FLAGS.nameSkip, minLen: Number(process.env.R1_MIN_SURFACE_LEN ?? 3) });
-  const usages = usagesRes.usages;
+  let usages = usagesRes.usages;
+
+  // 语义校验必须在 buildUsages 之后（需要候选使用点）
+  if (FLAGS.usageVerify) {
+    const vr = await verifyUsages(usages, ledger, { provider: new JevProvider() });
+    console.log(`【usage 校验】保留 ${vr.kept} / 丢弃 ${vr.dropped} / UNSURE ${vr.unsure}　${vr.calls} 次调用 $${vr.costUsd.toFixed(4)}　${(vr.latencyMs / 1000).toFixed(1)}s`);
+    usages = vr.usages;
+  }
 
   // ── 把知识与使用一并提升到审计单元层，再跑 R1 ──
   //

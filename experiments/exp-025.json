@@ -1,0 +1,47 @@
+{
+  "id": "exp-025",
+  "parent": "exp-023",
+  "createdAt": "2026-10-17T13:26:07.662Z",
+  "version": {
+    "hash": "b48d2a5ae74c",
+    "commit": "ff8e682-dirty",
+    "extractModel": "deepseek-v4-pro",
+    "judgeModel": "jev-latest",
+    "promptHash": "0b8239f6aa03",
+    "flags": {
+      "R1_AGENT": "default",
+      "R1_PRESENCE": "default",
+      "R1_UNITS": "default",
+      "R1_CHAR_HINT": "default",
+      "R1_SHORTKEY": "default",
+      "R1_KEY_LEN": "default",
+      "R1_KEY_FREQ": "default",
+      "E2E_PAD": "default",
+      "EVAL_CONTEXT": "default",
+      "EVAL_ORDER": "default",
+      "JEV_CRITERIA_MODE": "default"
+    }
+  },
+  "change": {
+    "bucket": "should_allow",
+    "hypothesis": "字符串匹配无法区分真引用与巧合 token 重叠；应复用已验证的判定层，对每个候选用法做语义校验",
+    "file": "src/audit/usage-verify.ts",
+    "switch": "R1_USAGE_VERIFY",
+    "params": {}
+  },
+  "result": {
+    "dev": {
+      "reported": 6,
+      "tp": 3,
+      "fp": 3,
+      "fn": 7,
+      "precision": 0.5,
+      "recall": 0.3,
+      "cost": 24,
+      "fpRate": 0.5,
+      "unusable": false
+    }
+  },
+  "status": "accepted",
+  "note": "real 7→3、dev 零回归；判定层参与 usage 语义校验"
+}

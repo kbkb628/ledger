@@ -1,3 +1,4 @@
+import { verifyUsages } from "../src/audit/usage-verify.js";
 import { contextStamp } from "../src/rsi/context-protocol.js";
 import { scorerStamp } from "../src/rsi/scorer.js";
 import { stamp } from "../src/rsi/testset.js";
@@ -85,7 +86,13 @@ async function main(): Promise<void> {
       `${extracted.rejectedDeltas ? `（原文可查校验拦掉 ${extracted.rejectedDeltas} 条）` : ""}`,
   );
 
-  const { usages, droppedShort } = buildUsages(ledger, scenes, { skipNames: process.env.R1_NAME_SKIP !== "0", minLen: Number(process.env.R1_MIN_SURFACE_LEN ?? 3) });
+  const { usages: rawUsages, droppedShort } = buildUsages(ledger, scenes, { skipNames: process.env.R1_NAME_SKIP !== "0", minLen: Number(process.env.R1_MIN_SURFACE_LEN ?? 3) });
+  let usages = rawUsages;
+  if (process.env.R1_USAGE_VERIFY !== "0") {
+    const vr = await verifyUsages(usages, ledger, { provider: new JevProvider() });
+    console.log(`【usage 校验】保留 ${vr.kept} / 丢弃 ${vr.dropped} / UNSURE ${vr.unsure}　${vr.calls} 次调用 $${vr.costUsd.toFixed(4)}　${(vr.latencyMs / 1000).toFixed(1)}s`);
+    usages = vr.usages;
+  }
   const { facts, unresolved } = buildKnowledge(ledger, extracted.scenes);
   // 隔离实验用：AUDIT_NO_DEFAULT=1 关掉默认知识层，看这一条规则单独贡献多少
   const useDefaults = !process.env.AUDIT_NO_DEFAULT;
