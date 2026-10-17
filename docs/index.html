@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>账本 · AI 短剧的叙事一致性账本</title>
+<style>
+  :root {
+    --bg: #0f1115; --panel: #171a21; --panel2: #1d212a; --line: #262b36;
+    --fg: #e6e8ee; --dim: #9aa3b2; --accent: #7cc4ff; --ok: #52d19a; --warn: #ffb454; --bad: #ff6b6b;
+  }
+  @media (prefers-color-scheme: light) {
+    :root { --bg:#fbfbfc; --panel:#fff; --panel2:#f4f6f9; --line:#e3e6ec; --fg:#14171d; --dim:#5b6473;
+            --accent:#0b6bcb; --ok:#0f8a5f; --warn:#a86a00; --bad:#c62828; }
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--fg);
+         font: 15px/1.65 ui-sans-serif, -apple-system, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .wrap { max-width: 940px; margin: 0 auto; padding: 48px 24px 96px; }
+  h1 { font-size: 30px; margin: 0 0 6px; letter-spacing: .3px; }
+  h2 { font-size: 19px; margin: 44px 0 14px; padding-bottom: 8px; border-bottom: 1px solid var(--line); }
+  .sub { color: var(--dim); margin: 0 0 26px; }
+  .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; margin: 26px 0 0; }
+  .kpi { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; }
+  .kpi b { display:block; font-size: 22px; font-variant-numeric: tabular-nums; }
+  .kpi span { color: var(--dim); font-size: 12.5px; }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; }
+  .tabs { display:flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+  .tab { background: var(--panel2); border:1px solid var(--line); color: var(--fg); border-radius: 999px;
+         padding: 6px 13px; font-size: 13.5px; cursor: pointer; }
+  .tab[aria-selected="true"] { border-color: var(--accent); color: var(--accent); }
+  .verdict { display:flex; align-items:center; gap: 10px; font-weight: 600; margin: 4px 0 10px; }
+  .dot { width: 9px; height: 9px; border-radius: 50%; flex: none; }
+  .leak .dot, .dot.bad { background: var(--bad); }
+  .pass .dot, .dot.ok { background: var(--ok); }
+  .leak { color: var(--bad); } .pass { color: var(--ok); }
+  code, pre, .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; }
+  pre { background: var(--panel2); border:1px solid var(--line); border-radius: 8px; padding: 12px; overflow:auto; margin: 10px 0 0; }
+  .row { display:grid; grid-template-columns: 88px 1fr; gap: 10px; padding: 9px 0; border-top: 1px dashed var(--line); font-size: 13.5px; }
+  .row:first-of-type { border-top: none; }
+  .row > .k { color: var(--dim); }
+  ol.issues { list-style: none; padding: 0; margin: 0; max-height: 420px; overflow: auto; }
+  ol.issues li { padding: 10px 0; border-top: 1px dashed var(--line); font-size: 13.5px; }
+  ol.issues li:first-child { border-top: none; }
+  .scene { color: var(--dim); font-size: 12.5px; }
+  .muted { color: var(--dim); }
+  .note { background: var(--panel2); border-left: 3px solid var(--accent); border-radius: 6px;
+          padding: 10px 14px; font-size: 13.5px; color: var(--dim); margin: 14px 0 0; }
+  footer { margin-top: 56px; padding-top: 18px; border-top: 1px solid var(--line); color: var(--dim); font-size: 13px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>《账本》</h1>
+  <p class="sub">AI 短剧的叙事一致性账本 —— 在写手敲下这句台词之前，回答一个问题：
+    <b>这个角色，这时候该知道这件事吗？</b></p>
+
+  <div class="kpis" id="kpis">
+    <div class="kpi"><b>—</b><span>判定层准确率</span></div>
+    <div class="kpi"><b>—</b><span>真实剧本误报 / 使用点</span></div>
+    <div class="kpi"><b>—</b><span>建账耗时</span></div>
+  </div>
+
+  <h2>1 · 写台词前先问一句（真实调用返回）</h2>
+  <div class="tabs" id="tabs"></div>
+  <div class="card">
+    <div id="verdict" class="verdict"><span class="dot"></span><span>加载中…</span></div>
+    <div id="checkBody"></div>
+  </div>
+  <p class="note" id="checkNote"></p>
+
+  <h2>2 · 全剧审计清单（真实调用返回）</h2>
+  <div class="card">
+    <div class="muted" id="auditHead" style="margin-bottom:8px"></div>
+    <ol class="issues" id="issues"></ol>
+  </div>
+  <p class="note" id="auditNote"></p>
+
+  <h2>3 · 账本词条（wiki 形态，真实调用返回）</h2>
+  <div class="card" id="pageCard"><span class="muted">加载中…</span></div>
+
+  <footer>
+    <div id="meta"></div>
+    <div style="margin-top:6px">
+      <a href="https://github.com/kbkb628/ledger">GitHub 仓库</a> ·
+      这是静态快照：数据由 <code>eval/build-demo-data.ts</code> 真实调用 MCP server 生成，
+      页面本身不做推理（<code>docs/data.json</code>）。
+    </div>
+  </footer>
+</div>
+
+<script>
+const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" }[c]));
+
+fetch("./data.json", { cache: "no-store" }).then((r) => r.json()).then(render).catch((e) => {
+  document.getElementById("kpis").innerHTML = `<div class="kpi"><b>数据未找到</b><span>${esc(e.message)}</span></div>`;
+});
+
+function render(d) {
+  // KPI
+  const j = d.metrics.judge, e2e = d.metrics.e2e, real = d.metrics.real;
+  document.getElementById("kpis").innerHTML = [
+    `<div class="kpi"><b>${j.ok}/${j.total}</b><span>判定层准确率（人工账本 + JEV）</span></div>`,
+    `<div class="kpi"><b>${real.issues} / ${real.usages}</b><span>真实剧本（茶馆 72 场）零标注误报</span></div>`,
+    `<div class="kpi"><b>${(d.ingest.ms / 1000).toFixed(1)}s</b><span>建账 ${d.script.scenes} 场 · ${d.script.propositions} 条命题</span></div>`,
+  ].join("");
+
+  // 1 · check 场景
+  const tabs = document.getElementById("tabs");
+  const keys = Object.keys(d.checks);
+  tabs.innerHTML = keys.map((k, i) =>
+    `<button class="tab" role="tab" data-k="${esc(k)}" aria-selected="${i === 0}">${esc(d.checks[k].label)}</button>`
+  ).join("");
+  tabs.addEventListener("click", (ev) => {
+    const b = ev.target.closest(".tab"); if (!b) return;
+    [...tabs.children].forEach((x) => x.setAttribute("aria-selected", String(x === b)));
+    showCheck(d, b.dataset.k);
+  });
+  function showCheck(d, k) {
+    const c = d.checks[k], r = c.result;
+    const v = document.getElementById("verdict");
+    v.className = "verdict " + (r.leak ? "leak" : "pass");
+    v.innerHTML = `<span class="dot"></span><span>${r.leak ? "拦住：这句台词会构成知识泄漏" : "放过：说话人此时已知情"}</span>`;
+    const hits = (r.hits || []).map((h) => `
+      <div class="row"><div class="k">用到</div><div class="mono">${esc(h.surface)}</div></div>
+      <div class="row"><div class="k">命题</div><div>${esc(h.canonical)}</div></div>
+      <div class="row"><div class="k">原因</div><div>${esc(h.reason || r.summary || "")}</div></div>`).join("");
+    document.getElementById("checkBody").innerHTML = `
+      <div class="row"><div class="k">调用</div><div class="mono">ledger_check({ character: "${esc(c.args.character)}", line: "${esc(c.args.line)}" })</div></div>
+      ${hits || `<div class="row"><div class="k">结果</div><div>${esc(r.summary || "没有命中任何命题")}</div></div>`}
+      <details style="margin-top:10px"><summary class="muted" style="cursor:pointer">原始返回</summary>
+        <pre>${esc(JSON.stringify(r, null, 2))}</pre></details>`;
+    document.getElementById("checkNote").textContent =
+      "这条判断来自账本里已记录的知识状态（谁在哪一场、通过什么方式得知），不是模型现编。";
+  }
+  showCheck(d, keys[0]);
+
+  // 2 · 审计清单
+  document.getElementById("auditHead").textContent =
+    `脚本：${d.script.name} · 共 ${d.audit.count} 条${d.auditAfter ? `（人工豁免 1 条后 ${d.auditAfter.count} 条）` : ""}`;
+  document.getElementById("issues").innerHTML = (d.audit.issues || []).map((x) => `
+    <li>
+      <div><span class="scene">${esc(x.scene?.label || x.scene || "")}</span> <b>${esc(x.character)}</b>
+        用到了「<span class="mono">${esc(x.surface)}</span>」</div>
+      <div class="muted">→ ${esc(x.canonical)}</div>
+      <div class="muted">${esc(x.reason || "")}</div>
+    </li>`).join("");
+  document.getElementById("auditNote").textContent =
+    "演示剧本里的很多「泄漏」其实是写手知道的常识被账本当成秘密 —— 所以 ledger_waive 是产品的一环，不是补丁。";
+
+  // 3 · 词条
+  const p = d.page;
+  if (p) {
+    const aliases = (p.aliases || []).map((a) =>
+      `<div class="row"><div class="k">${esc(a.firstSeen)}</div><div class="mono">${esc(a.surface)} <span class="muted">(${esc(a.kind)})</span></div></div>`).join("");
+    const kn = (p.knowledge || []).map((k) =>
+      `<div class="row"><div class="k">${esc(k.scene)}</div><div><b>${esc(k.character)}</b> 得知 · <span class="muted">${esc(k.evidence || "")}</span></div></div>`).join("");
+    document.getElementById("pageCard").innerHTML = `
+      <div class="mono" style="margin-bottom:8px">${esc(p.id)}</div>
+      <div style="font-size:16px;margin-bottom:10px">${esc(p.canonical)}</div>
+      <div class="row"><div class="k">施事</div><div>${esc((p.agents || []).join("、") || "（未抽出）")}</div></div>
+      <div class="row"><div class="k">说法</div><div>${(p.aliases || []).length} 条</div></div>
+      ${aliases}${kn}`;
+  } else {
+    document.getElementById("pageCard").textContent = "本次没有可展示的词条。";
+  }
+
+  document.getElementById("meta").textContent =
+    `数据生成于 ${new Date(d.generatedAt).toLocaleString("zh-CN")} · ${d.script.name} · 判定层 ${j.ok}/${j.total} · 端到端 ${e2e.median}/${e2e.total}`;
+}
+</script>
+</body>
+</html>
