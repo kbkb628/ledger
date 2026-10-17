@@ -1,5 +1,5 @@
 {
-  "at": "2026-10-17T13:33:12.223Z",
+  "at": "2026-10-17T15:10:59.063Z",
   "k": 1,
   "config": {
     "judge": {
@@ -21,8 +21,8 @@
     }
   },
   "version": {
-    "hash": "1b4fe34249b0",
-    "commit": "a6b3450-dirty",
+    "hash": "8e6ff54ce89a",
+    "commit": "46c2b89-dirty",
     "promptHash": "0b8239f6aa03"
   },
   "judge": {
@@ -48,13 +48,13 @@
     ]
   },
   "real": {
-    "issues": 3,
-    "usages": 239
+    "issues": 4,
+    "usages": 241
   },
   "scorers": {
     "judge": "judge@4fa9eeed25f3",
     "e2e": "e2e@f9a6e1610bef",
     "r1": "r1@fd3c3c58f253",
-    "real": "r1@fd3c3c58f253"
+    "real": "r1@5c4757558d19"
   }
 }

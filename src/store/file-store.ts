@@ -4,6 +4,7 @@ import { dirname, join, resolve } from "node:path";
 import type { DraftProposition } from "../extraction/types.js";
 import type { Scene } from "../extraction/script.js";
 import type { KnowledgeFact } from "../audit/r1.js";
+import type { StoredUsage } from "../audit/usage-cache.js";
 
 /**
  * 账本的落盘形态 —— 「wiki」的存储层。
@@ -53,6 +54,15 @@ export interface LedgerFile {
   scenes: Scene[];
   propositions: StoredProposition[];
   knowledge: KnowledgeFact[];
+  /**
+   * **持久化的使用点** —— wiki 的第三条累积通道。
+   *
+   * 之前账本里没有这一项，于是每次审计都重算（含 253 次语义校验），
+   * 上一次的结论被直接丢掉：**wiki 只从剧本学，不从自己判过什么学**。
+   */
+  usages?: StoredUsage[];
+  /** usages 的版本戳；任一不匹配 → 缓存作废 */
+  usageStamps?: { scorer: string; contextProtocol: string };
   waivers: Waiver[];
   createdAt: string;
   updatedAt: string;
@@ -88,6 +98,7 @@ export function loadLedger(home = ledgerHome(), series = "default"): LedgerFile 
   const raw = JSON.parse(readFileSync(p, "utf8")) as LedgerFile;
   // 旧账本缺字段时补齐，避免读挂
   raw.waivers ??= [];
+  // usages 缺省表示旧账本（没有第三通道）——保持 undefined，让调用方重算
   for (const prop of raw.propositions) {
     prop.auditUnit ??= null;
     if (!prop.aliasSource) {

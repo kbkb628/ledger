@@ -40,6 +40,13 @@ const RSI_FLAG_NAMES = [
   "R1_SHORTKEY",
   "R1_KEY_LEN",
   "R1_KEY_FREQ",
+  // ↓ 与 scorer.ts 的 R1_FLAGS 对齐：这几个开关会改变「哪些使用点算数」，
+  //   但实验指纹里原先没有它们，导致 R1_USAGE_VERIFY=0 的实验记录与基线**无法区分**。
+  "R1_NAME_SKIP",
+  "R1_USAGE_VERIFY",
+  "R1_MIN_SURFACE_LEN",
+  "R1_NO_SELF_ESTABLISH",
+  "R1_ESTABLISHED",
   "E2E_PAD",
   "EVAL_CONTEXT",
   "EVAL_ORDER",

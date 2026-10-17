@@ -62,6 +62,14 @@ export interface ExperimentResult {
   devSet?: { version: string; size: number };
   /** 留出集：只在决定翻默认值时跑一次 */
   holdout?: Metrics | null;
+  /**
+   * 真实剧本（零标注）上的报出数 —— **唯一有分辨力的指标**。
+   *
+   * dev/holdout 的区间宽度是 16–60pp，而 `real` 只有 ~5pp；
+   * 它承担「专业剧本自洽 ⇒ 报出即误报」这条红线（+2 条即回退）。
+   * 以前这个数字只写在文档里，实验记录里无处落脚 —— 于是「红线」在库里查不到。
+   */
+  real?: { issues: number; usages: number; stamps?: string } | null;
   /** 联合回归（条数，不是百分比），防优化一处弄坏另一处 */
   regression?: {
     judge: number;

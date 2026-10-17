@@ -1,4 +1,7 @@
 #!/usr/bin/env node
+import { scorerStamp } from "../rsi/scorer.js";
+import { contextStamp } from "../rsi/context-protocol.js";
+import { resolveUsages } from "../audit/usage-cache.js";
 /**
  * 《账本》MCP server —— 产品的可插拔形态。
  *
@@ -295,7 +298,12 @@ server.setRequestHandler(CallToolRequestSchema, async (req) => {
 
       case "ledger_audit": {
         const ledger = needLedger(series);
-        const { usages } = buildUsages(ledger.propositions, ledger.scenes);
+        // 使用点：命中账本缓存则复用（wiki 第三条通道），否则重算并写回
+        const stamps = { scorer: scorerStamp("r1"), contextProtocol: contextStamp() };
+        const rawUsages = buildUsages(ledger.propositions, ledger.scenes, { skipNames: true }).usages;
+        const resolvedU = await resolveUsages(ledger.propositions, { usages: ledger.usages, stamps: ledger.usageStamps }, () => rawUsages, { provider, verify: process.env.R1_USAGE_VERIFY !== "0", stamps });
+        if (!resolvedU.fromCache) { ledger.usages = resolvedU.usages; ledger.usageStamps = resolvedU.stamps; saveLedger(ledger); }
+        const usages = resolvedU.usages;
         const idx = new Map(ledger.sceneOrder.map((s, i) => [s, i]));
         const waived = new Set(ledger.waivers.map((w) => w.key));
         const issues = detectLeaks(ledger.propositions, usages, ledger.knowledge, idx).filter(

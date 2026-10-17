@@ -1,3 +1,4 @@
+import { resolveUsages } from "../src/audit/usage-cache.js";
 import { verifyUsages } from "../src/audit/usage-verify.js";
 import { contextStamp } from "../src/rsi/context-protocol.js";
 import { scorerStamp } from "../src/rsi/scorer.js";
@@ -36,7 +37,13 @@ const CACHE = process.env.AUDIT_CACHE ?? join(here, "out", "pipeline-r1.json");
 /** 剧本路径可覆盖：真实剧本（如《茶馆》）用来做零标注精确率测试 */
 const SCRIPT = process.env.AUDIT_SCRIPT ? resolve(process.env.AUDIT_SCRIPT) : join(here, "script-jiuzhang.md");
 
-interface CacheShape { extracted: ExtractResult; merged: MergeResult }
+interface CacheShape {
+  extracted: ExtractResult;
+  merged: MergeResult;
+  /** wiki 第三条通道：持久化的使用点及其版本戳 */
+  usages?: import("../src/audit/usage-cache.js").StoredUsage[];
+  usageStamps?: { scorer: string; contextProtocol: string };
+}
 
 function loadEnv(path: string): void {
   let text: string;
@@ -86,13 +93,25 @@ async function main(): Promise<void> {
       `${extracted.rejectedDeltas ? `（原文可查校验拦掉 ${extracted.rejectedDeltas} 条）` : ""}`,
   );
 
-  const { usages: rawUsages, droppedShort } = buildUsages(ledger, scenes, { skipNames: process.env.R1_NAME_SKIP !== "0", minLen: Number(process.env.R1_MIN_SURFACE_LEN ?? 3) });
-  let usages = rawUsages;
-  if (process.env.R1_USAGE_VERIFY !== "0") {
-    const vr = await verifyUsages(usages, ledger, { provider: new JevProvider() });
-    console.log(`【usage 校验】保留 ${vr.kept} / 丢弃 ${vr.dropped} / UNSURE ${vr.unsure}　${vr.calls} 次调用 $${vr.costUsd.toFixed(4)}　${(vr.latencyMs / 1000).toFixed(1)}s`);
-    usages = vr.usages;
-  }
+    // ── 使用点：命中账本缓存则复用，否则重算（并按需语义校验）后写回 ──
+    const stamps = { scorer: scorerStamp("r1"), contextProtocol: contextStamp() };
+    const { usages: rawUsages, droppedShort } = buildUsages(ledger, scenes, { skipNames: process.env.R1_NAME_SKIP !== "0", minLen: Number(process.env.R1_MIN_SURFACE_LEN ?? 3) });
+    const resolved = await resolveUsages(
+      ledger,
+      { usages: cache.usages, stamps: cache.usageStamps },
+      () => rawUsages,
+      { provider: new JevProvider(), verify: process.env.R1_USAGE_VERIFY !== "0", stamps, verbose: true },
+    );
+    if (!resolved.fromCache) {
+      const v = resolved.verifyStats;
+      if (v) console.log(`【usage 校验】保留 ${v.kept} / 丢弃 ${v.dropped} / UNSURE ${v.unsure}　${v.calls} 次调用 $${v.costUsd.toFixed(4)}　${(v.latencyMs / 1000).toFixed(1)}s`);
+      // 回写：这就是 wiki 的第三条累积通道
+      cache.usages = resolved.usages;
+      cache.usageStamps = resolved.stamps;
+      try { writeFileSync(CACHE, JSON.stringify(cache, null, 2), "utf8"); console.log(`  ↺ 使用点已写回 ${CACHE}（${resolved.usages.length} 条）`); }
+      catch (e) { console.log(`  ⚠️ 写回失败：${e instanceof Error ? e.message : e}`); }
+    }
+    const usages = resolved.usages;
   const { facts, unresolved } = buildKnowledge(ledger, extracted.scenes);
   // 隔离实验用：AUDIT_NO_DEFAULT=1 关掉默认知识层，看这一条规则单独贡献多少
   const useDefaults = !process.env.AUDIT_NO_DEFAULT;
