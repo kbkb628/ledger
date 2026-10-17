@@ -1,0 +1,50 @@
+{
+  "at": "2026-10-17T08:17:20.066Z",
+  "k": 3,
+  "config": {
+    "judge": {
+      "GOLDENSET": "eval/goldenset-v3.json",
+      "JEV_CRITERIA_MODE": "keywords",
+      "EVAL_CONTEXT": "neighbors",
+      "EVAL_ORDER": "recall"
+    },
+    "e2e": {
+      "GOLDENSET": "eval/goldenset-v3.json",
+      "E2E_PAD": "id"
+    },
+    "r1": {
+      "R1_SCRIPT": "eval/script-leak.md"
+    }
+  },
+  "version": {
+    "hash": "c42c7b84c2fb",
+    "commit": "e0a2506-dirty",
+    "promptHash": "0b8239f6aa03"
+  },
+  "judge": {
+    "ok": 44,
+    "total": 48
+  },
+  "e2e": {
+    "median": 26,
+    "total": 48,
+    "trials": [
+      26,
+      26,
+      28
+    ]
+  },
+  "r1": {
+    "trial": {
+      "tp": 3,
+      "fp": 3,
+      "fn": 7
+    },
+    "cost": 24,
+    "trials": [
+      23,
+      24,
+      24
+    ]
+  }
+}
