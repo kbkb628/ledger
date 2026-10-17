@@ -1,4 +1,4 @@
-﻿import { resolveUsages } from "../src/audit/usage-cache.js";
+import { resolveUsages } from "../src/audit/usage-cache.js";
 import { verifyUsages } from "../src/audit/usage-verify.js";
 import { contextStamp } from "../src/rsi/context-protocol.js";
 import { scorerStamp } from "../src/rsi/scorer.js";
@@ -31,6 +31,8 @@ import { extractScenes, type ExtractResult } from "../src/extraction/extractor.j
 import { mergeScenes, type MergeResult } from "../src/extraction/merge.js";
 import { parseScenes } from "../src/extraction/script.js";
 import { JevProvider } from "../src/judgment/jev-provider.js";
+import { OpenAiCompatProvider } from "../src/judgment/openai-provider.js";
+import type { JudgmentProvider } from "../src/judgment/types.js";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const CACHE = process.env.AUDIT_CACHE ?? join(here, "out", "pipeline-r1.json");
@@ -59,8 +61,23 @@ function loadEnv(path: string): void {
 }
 
 async function loadCache(): Promise<CacheShape> {
+  const remerge = process.argv.includes("--remerge");
   if (!process.argv.includes("--fresh") && existsSync(CACHE)) {
-    return JSON.parse(readFileSync(CACHE, "utf8")) as CacheShape;
+    const cached = JSON.parse(readFileSync(CACHE, "utf8")) as CacheShape;
+    if (!remerge) return cached;
+    // `--remerge`：**冻结抽取，只重跑归并**。归并层的改动只能这样验（handoff §9）：
+    // 抽取重跑一次就是新抽样，而 real 只允许在同一份冻结账本上比较。
+    // ⚠️ 绝不写回 CACHE —— 那是冻结基线，动了 `real` 就再也不是同一个数。
+    console.log(`【归并·remerge】沿用冻结抽取 ${cached.extracted.scenes.length} 场，只重跑归并（不写回缓存）`);
+    const merged = await mergeScenes(cached.extracted.scenes, scenesOf(), {
+      provider: auditProvider(),
+      verbose: !process.argv.includes("--quiet"),
+    });
+    console.log(
+      `【归并·remerge】${merged.calls} 次判定 · $${merged.costUsd.toFixed(4)} · ` +
+        `${merged.propositions.length} 条命题（原 ${cached.merged.propositions.length} 条）`,
+    );
+    return { ...cached, merged };
   }
   const scenes = parseScenes(readFileSync(SCRIPT, "utf8"));
   console.log(`【第 0 层】抽取 ${scenes.length} 场（含知识变化）`);
@@ -68,7 +85,7 @@ async function loadCache(): Promise<CacheShape> {
 
   console.log(`\n【第 1 层】归并`);
   const merged = await mergeScenes(extracted.scenes, scenes, {
-    provider: new JevProvider(),
+    provider: auditProvider(),
     verbose: false,
   });
 
@@ -76,6 +93,25 @@ async function loadCache(): Promise<CacheShape> {
   mkdirSync(dirname(CACHE), { recursive: true });
   writeFileSync(CACHE, JSON.stringify(cache, null, 2), "utf8");
   return cache;
+}
+
+/** 剧本（parse 一次，别在循环里反复读盘） */
+let scenesCache: ReturnType<typeof parseScenes> | null = null;
+function scenesOf(): ReturnType<typeof parseScenes> {
+  scenesCache ??= parseScenes(readFileSync(SCRIPT, "utf8"));
+  return scenesCache;
+}
+
+/**
+ * 审计侧判定 provider：`R1_JUDGE_PROVIDER=jev|openai`（默认 jev）。
+ *
+ * 为什么加：TypeSafe 直连会按地区 451 拒答（handoff §8.9），而 real 的 A/B 必须在
+ * **同一个 provider 下**两侧一致。换 provider 会改变账本，所以它同时进版本指纹。
+ */
+function auditProvider(): JudgmentProvider {
+  const kind = (process.env.R1_JUDGE_PROVIDER ?? "jev").toLowerCase();
+  if (kind === "openai") return new OpenAiCompatProvider();
+  return new JevProvider();
 }
 
 async function main(): Promise<void> {

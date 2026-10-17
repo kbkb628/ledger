@@ -1,4 +1,4 @@
-import { MERGE_PROPOSITIONS_INSTRUCTIONS } from "../judgment/prompt.js";
+﻿import { MERGE_PROPOSITIONS_INSTRUCTIONS } from "../judgment/prompt.js";
 import type { JudgmentProvider, JudgmentRequest } from "../judgment/types.js";
 import { renderScene, type Scene } from "./script.js";
 import type { DraftProposition, MergeDecision, SceneExtraction, ScenePropositionDraft } from "./types.js";
@@ -172,7 +172,7 @@ export async function mergeScenes(
         process.stdout.write(`    ${se.scene} 同说法命中 ${exact.length} 条（${exact.map((p) => p.id).join("/")}）→ 交判官\n`);
       }
 
-      // ── 长重合优先归并（`R1_MERGE_OVERLAP=1`）──
+      // ── 长重合优先归并（`R1_MERGE_OVERLAP`，默认开启，`=0` 回退）──
       //
       // 为什么还要一层：回合 36 的幻影集显示，**即使逐字一致，归并也只有一半挂上**
       // （anchored 4/8）。原因是别名存的是**整句台词**，"保险箱的密码是小姐的生日，
@@ -332,7 +332,11 @@ function longestCommonSpan(a: string, b: string): number {
 }
 
 /**
- * 长重合命中了哪几条命题（`R1_MERGE_OVERLAP=1`）。
+ * 长重合命中了哪几条命题（`R1_MERGE_OVERLAP`）。
+ *
+ * **已基线化（回合 38）**：默认开启，`=0` 是回退开关。
+ * 依据是茶馆那份冻结抽取上的 A/B（同 provider、只重跑归并）——
+ * 问题清单 4 条 → 3 条，命题 264 → 256，没有越过「+2 条即回退」的红线。
  *
  * 门槛默认 6 个归一化字符：3–4 字（「那份东西」「密码」）在账本里本就泛指，
  * 共享它不构成「同一件事」的证据；6 字约等于两个实词。
@@ -343,7 +347,7 @@ function overlapSurfaceMatches(
   propositions: DraftProposition[],
   norm: (s: string) => string,
 ): DraftProposition[] {
-  if (process.env.R1_MERGE_OVERLAP !== "1") return [];
+  if (process.env.R1_MERGE_OVERLAP === "0") return [];
   const minSpan = Number(process.env.R1_MERGE_OVERLAP_MIN ?? 6);
   const wanted = draft.surfaces.map((s) => norm(s.text)).filter((s) => s.length >= minSpan);
   if (wanted.length === 0) return [];
