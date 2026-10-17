@@ -1,0 +1,204 @@
+{
+  "meta": {
+    "name": "《旧账·九章》跨剧本留出集 v2",
+    "script": "eval/script-jiuzhang-leak.md",
+    "purpose": "跨剧本留出：dev 集（eval/leaks.json）与 dev 剧本同源、同注入方式，而我在那份剧本上改了 20 多个回合，密封性只是名义上的。这一份来自另一份零泄漏正本（eval/script-jiuzhang.md，23 场），10 条全部标 holdout。",
+    "revision": "v2（v1 的教训）：v1 的注入台词用了换词，抽取层于是把该事实**在泄漏现场新建了一条命题**，`首见场景在场者得知` 当场把那 10 条里的 9 条自我掩盖（诊断见 docs/rsi-protocol.md 回合 30）。v2 每条注入都复用「确立场景」的原话（即账本里那条命题的别名），归并会挂到更早的命题上；另外 surface 一律 ≥3 字，避免被 R1_MIN_SURFACE_LEN 过滤掉。",
+    "note": "established = 该事实在账本里的首见场景（该角色必须不在场）；learns_at = 时序类里该角色真正知情的场景。两者都由 eval/validate-goldenset.ts 机械校验。",
+    "size": 10
+  },
+  "leaks": [
+    {
+      "id": "J-01",
+      "kind": "timing",
+      "character": "苏婉",
+      "scene": "S08-04",
+      "surface": "最要紧的东西",
+      "why": "「那块表里最要紧的东西」——表里有沈父最要紧的东西只在 S01-03 由沈知微独处时确立（在场仅沈知微）；苏婉到 S11-01 沈知微当众说出「他临终前告诉我，最要紧的东西在表里」才知道。",
+      "established": "S01-03",
+      "learns_at": "S11-01",
+      "exact_scene": true,
+      "split": "holdout"
+    },
+    {
+      "id": "J-02",
+      "kind": "timing",
+      "character": "陆见深",
+      "scene": "S08-04",
+      "surface": "联姻备忘录",
+      "why": "「陆氏与苏氏那份联姻备忘录」——备忘录只在 S07-02 摆在沈知微茶几上（在场仅沈知微）；陆见深到 S09-01 被当面质问才知道有这回事。",
+      "established": "S07-02",
+      "learns_at": "S09-01",
+      "exact_scene": true,
+      "split": "holdout"
+    },
+    {
+      "id": "J-03",
+      "kind": "no_source",
+      "character": "律师",
+      "scene": "S06-03",
+      "surface": "没有伸手",
+      "why": "「码头那晚他没有伸手」——码头那一夜的实情只在 S03-05 闪回（在场仅陆见深、沈父），律师全程无渠道知道，律师场景里沈知微也只谈遗嘱来历。",
+      "established": "S03-05",
+      "exact_scene": false,
+      "split": "holdout"
+    },
+    {
+      "id": "J-04",
+      "kind": "no_source",
+      "character": "董事",
+      "scene": "S11-01",
+      "surface": "处理掉",
+      "why": "「不是早该处理掉了吗」——苏婉下令把那份东西处理掉只在 S04-02 她与陈默单独对话里（在场仅苏婉、陈默），董事从未在场，也没人被转告。",
+      "established": "S04-02",
+      "exact_scene": false,
+      "split": "holdout"
+    },
+    {
+      "id": "J-05",
+      "kind": "no_source",
+      "character": "陆见深",
+      "scene": "S15-03",
+      "surface": "经手",
+      "why": "「那份东西是陈叔经手的」——陈默经手那份东西只在 S05-01 苏婉对陈默的私下施压里（在场仅苏婉、陈默），陆见深无渠道知道。",
+      "established": "S05-01",
+      "exact_scene": false,
+      "split": "holdout"
+    },
+    {
+      "id": "J-06",
+      "kind": "no_source",
+      "character": "董事",
+      "scene": "S16-02",
+      "surface": "唯一在册的遗嘱",
+      "why": "「苏婉手上那份是唯一在册的遗嘱」——这句只在 S06-03 律师对沈知微说过（在场仅沈知微、律师），董事不在场。",
+      "established": "S06-03",
+      "exact_scene": false,
+      "split": "holdout"
+    },
+    {
+      "id": "J-07",
+      "kind": "no_source",
+      "character": "陆见深",
+      "scene": "S17-01",
+      "surface": "离岸账户",
+      "why": "「两千三百万走的是同一个离岸账户」——资金细节只在 S13-02 由财务总监告诉沈知微（在场仅沈知微、财务总监），陆见深不在场，之后也没人告诉他。",
+      "established": "S13-02",
+      "exact_scene": false,
+      "split": "holdout"
+    },
+    {
+      "id": "J-08",
+      "kind": "no_source",
+      "character": "苏婉",
+      "scene": "S15-03",
+      "surface": "那份原件",
+      "why": "「陈叔留着的那份原件」——原件还在陈默手上只在 S14-01 病床前由陈默对沈知微说出（在场仅沈知微、陈默）；苏婉在 S04-02 还认定那份东西会被烧掉。",
+      "established": "S14-01",
+      "exact_scene": false,
+      "split": "holdout"
+    },
+    {
+      "id": "J-09",
+      "kind": "no_source",
+      "character": "陆见深",
+      "scene": "S09-01",
+      "surface": "他留下的那一份",
+      "why": "「那份遗嘱不是他留下的那一份」——这个判断只在 S06-03 沈知微对律师说过（在场仅沈知微、律师），陆见深不在场，S09-01 之前也没有任何渠道。",
+      "established": "S06-03",
+      "exact_scene": false,
+      "split": "holdout"
+    },
+    {
+      "id": "J-10",
+      "kind": "no_source",
+      "character": "财务总监",
+      "scene": "S13-02",
+      "surface": "那份东西",
+      "why": "「老爷留下的那份东西，还在陈叔手上吧」——那份东西在陈默手上只在 S04-02 苏婉与陈默的单独对话里（在场仅苏婉、陈默），财务总监无渠道知道，他本场只该谈账。",
+      "established": "S04-02",
+      "exact_scene": false,
+      "split": "holdout"
+    }
+  ],
+  "must_not_flag": [
+    {
+      "character": "沈知微",
+      "scene": "S01-05",
+      "surface": "苏小姐的酒",
+      "why": "重生者的记忆：她前世被这杯酒害过，拒酒不是无源知情"
+    },
+    {
+      "character": "沈知微",
+      "scene": "S02-02",
+      "surface": "码头",
+      "why": "重生者的预知：三年前码头的事是她前世的记忆，S03-05 闪回只是给观众看的，不能按「她当时不在场」处理"
+    },
+    {
+      "character": "沈知微",
+      "scene": "S07-02",
+      "surface": "备忘录",
+      "why": "她本人当场看到茶几上的备忘录与签名"
+    },
+    {
+      "character": "沈知微",
+      "scene": "S11-01",
+      "surface": "最要紧的东西",
+      "why": "S01-03 她本人从父亲那里得知，S11-01 是合法使用"
+    },
+    {
+      "character": "沈知微",
+      "scene": "S16-02",
+      "surface": "两千三百万",
+      "why": "S13-02 财务总监当面告知，合法"
+    },
+    {
+      "character": "沈知微",
+      "scene": "S20-05",
+      "surface": "做过一遍的梦",
+      "why": "重生者自述知道，属于设计上的合法知道"
+    },
+    {
+      "character": "苏婉",
+      "scene": "S04-02",
+      "surface": "那份东西",
+      "why": "她是施事本人（下令处理、下令烧）"
+    },
+    {
+      "character": "苏婉",
+      "scene": "S05-01",
+      "surface": "经手",
+      "why": "她是施事本人，正是她让陈默经手"
+    },
+    {
+      "character": "苏婉",
+      "scene": "S12-05",
+      "surface": "码头",
+      "why": "她知道的是「码头出过事」这一层，且那晚的处置另有她的渠道；不该按缺源处理"
+    },
+    {
+      "character": "陈默",
+      "scene": "S10-02",
+      "surface": "换掉了",
+      "why": "当事人本人（他换的）"
+    },
+    {
+      "character": "陈默",
+      "scene": "S18-04",
+      "surface": "副本",
+      "why": "当事人本人（他换掉的是副本，原件一直收着）"
+    },
+    {
+      "character": "陆见深",
+      "scene": "S09-01",
+      "surface": "婚约",
+      "why": "本场正是他第一次被告知婚约，此处「什么婚约？」是疑问本身，不是使用"
+    },
+    {
+      "character": "董事",
+      "scene": "S16-02",
+      "surface": "签字的人是苏婉",
+      "why": "沈知微当场把流水单摊在桌上并点名，属当场听到"
+    }
+  ]
+}

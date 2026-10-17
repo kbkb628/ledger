@@ -47,6 +47,11 @@ const RSI_FLAG_NAMES = [
   "R1_MIN_SURFACE_LEN",
   "R1_NO_SELF_ESTABLISH",
   "R1_ESTABLISHED",
+  // ↓ 判定层选型。它会改变**归并出的账本**（不是打分器），所以与 EXTRACT_MODEL 同级放在这里，
+  //   而不是塞进 scorer.ts 的 R1_FLAGS。加它的原因：TypeSafe 直连会按地区 451 拒答，
+  //   而 run-r1 的合并在失败时会「尽力而为」退回全 NEW —— 不记这一位，
+  //   「换 provider 后的数字」和「JEV 正常时的数字」在库里长得一模一样。
+  "R1_JUDGE_PROVIDER",
   "EXTRACT_THINKING",
   "EXTRACT_MODEL",
   "EXTRACT_CONCURRENCY",

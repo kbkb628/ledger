@@ -2,7 +2,7 @@ import { verifyUsages } from "../src/audit/usage-verify.js";
 import { contextStamp } from "../src/rsi/context-protocol.js";
 import { scorerStamp } from "../src/rsi/scorer.js";
 import { formatRate } from "../src/rsi/metrics.js";
-import { stamp } from "../src/rsi/testset.js";
+import { stamp, loadRegistry } from "../src/rsi/testset.js";
 /**
  * R1 真阳性验证 —— 在**故意写坏的**剧本上测精确率与召回率。
  *
@@ -27,7 +27,7 @@ import { stamp } from "../src/rsi/testset.js";
  *   npm run eval:r1 -- --fresh    # 重跑抽取 + 归并（约 $0.01 / 12s）
  */
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { dirname, join, resolve } from "node:path";
+import { dirname, join, resolve, basename } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { auditOnUnits, buildKnowledge, buildUsages, defaultKnowledge, detectLeaks } from "../src/audit/r1.js";
@@ -38,10 +38,18 @@ import { extractScenes, type ExtractResult } from "../src/extraction/extractor.j
 import { mergeScenes, type MergeResult } from "../src/extraction/merge.js";
 import { parseScenes } from "../src/extraction/script.js";
 import { JevProvider } from "../src/judgment/jev-provider.js";
+import { OpenAiCompatProvider } from "../src/judgment/openai-provider.js";
+import type { JudgmentProvider } from "../src/judgment/types.js";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const SCRIPT = process.env.R1_SCRIPT ?? join(here, "script-leak.md");
-const CACHE = process.env.R1_CACHE ?? join(here, "out", "pipeline-leak.json");
+const LEAKS = process.env.R1_LEAKS ?? join(here, "leaks.json");
+// ⚠️ 缓存默认值必须跟着标注集走：跨剧本留出集若共用 pipeline-leak.json，一次 --fresh
+// 就会把 dev 的抽取缓存覆盖成另一份剧本的，此后 `npx tsx eval/run-r1.ts` 拿到的是错的账本
+// 而看不出任何异常。用 R1_CACHE 显式覆盖仍优先。
+const CACHE =
+  process.env.R1_CACHE ??
+  join(here, "out", LEAKS === join(here, "leaks.json") ? "pipeline-leak.json" : `pipeline-${basename(LEAKS, ".json")}.json`);
 
 interface Annotation {
   id: string;
@@ -115,6 +123,72 @@ function loadEnv(path: string): void {
 }
 
 const strip = (s: string): string => s.replace(/[\s。，、！？：；「」（）·—…]/g, "");
+
+/**
+ * 判定层选型：`R1_JUDGE_PROVIDER=jev|openai`（默认 jev）。
+ *
+ * 为什么必须可换：TypeSafe 直连会按地区拒答（实测 451 `Typesafe is not available
+ * in your region`），而项目里本来就有一条等价协议的另一实现（`OpenAiCompatProvider`）。
+ * 换 provider 会改变**账本**（归并结果），所以它进的是版本指纹 `RSI_FLAG_NAMES`，
+ * 与 `EXTRACT_MODEL` 同级 —— 不在打分器戳里。
+ */
+function makeJudgeProvider(): JudgmentProvider {
+  const kind = (process.env.R1_JUDGE_PROVIDER ?? "jev").toLowerCase();
+  return kind === "openai" ? new OpenAiCompatProvider() : new JevProvider();
+}
+
+/**
+ * 判定失败必须炸，不能静默降级。
+ *
+ * 实测教训：JEV 区域封锁时，`mergeScenes` 对每一次失败都退回 "NEW"、
+ * `verifyUsages` 对每一次失败都保留使用点 —— 两边都"尽力而为"，
+ * 于是 run-r1 打印出一个像样的 P/R，而账本其实**一条都没归并**、使用点**一条都没校验**。
+ * 这不是能力问题，是绿灯失效，必须在写结果之前中止。
+ */
+// .env 必须在构造 provider **之前**加载：provider 是在构造时读 JUDGE_* / JEV_* 的
+loadEnv(join(here, "..", ".env"));
+
+const judgeWatch = (() => {
+  const inner = makeJudgeProvider();
+  const stats = { name: inner.name, calls: 0, failed: 0, message: "" as string };
+  const provider: JudgmentProvider = {
+    name: inner.name,
+    async judge(req) {
+      stats.calls += 1;
+      try {
+        return await inner.judge(req);
+      } catch (e) {
+        stats.failed += 1;
+        if (!stats.message) stats.message = (e instanceof Error ? e.message : String(e)).slice(0, 200);
+        throw e;
+      }
+    },
+  };
+  return { provider, stats };
+})();
+
+function failIfDegraded(stage: string): boolean {
+  if (judgeWatch.stats.failed === 0) return false;
+  console.log(
+    `\n❌ ${stage}：判定调用失败 ${judgeWatch.stats.failed}/${judgeWatch.stats.calls} 次 —— ` +
+      `管线已静默降级（合并退化为全 NEW / 使用点校验全保留），本次数字不可用。\n   第一次失败：${judgeWatch.stats.message}\n`,
+  );
+  process.exitCode = 1;
+  return true;
+}
+
+/**
+ * 标注集文件 → 注册表里的 `id@ver#hash`。
+ *
+ * 以前这里硬写 `stamp("leaks")`：一旦用 R1_LEAKS 换了另一份标注，结果里记的仍是
+ * dev 集的戳 —— 正是「这个数字是哪个版本跑出来的」要避免的那种错答案。
+ */
+function testsetStampOf(file: string): string | null {
+  const rel = file.replace(/\\/g, "/");
+  const hits = loadRegistry().sets.filter((s) => s.files.some((f) => rel.endsWith(f.replace(/\\/g, "/"))));
+  if (!hits.length) return null;
+  return stamp(hits[hits.length - 1]!.id);
+}
 const pct = (n: number, d: number): string => (d === 0 ? "n/a" : `${((n / d) * 100).toFixed(1)}%`);
 
 async function loadCache(): Promise<CacheShape> {
@@ -134,7 +208,7 @@ async function loadCache(): Promise<CacheShape> {
   const extracted = await extractScenes(scenes, { verbose: true });
   console.log(`【归并】（输入已做人物别称归一）`);
   const merged = await mergeScenes(extracted.scenes, scenes, {
-    provider: new JevProvider(),
+    provider: judgeWatch.provider,
     normalize,
     characterHint: FLAGS.charHint
       ? chars.characters
@@ -145,17 +219,23 @@ async function loadCache(): Promise<CacheShape> {
     verbose: true,
   });
   const cache: CacheShape = { extracted, merged, characters: chars.characters };
-  mkdirSync(dirname(CACHE), { recursive: true });
-  writeFileSync(CACHE, JSON.stringify(cache, null, 2), "utf8");
+  if (judgeWatch.stats.failed > 0) {
+    // 落盘就会把「全 NEW」的账本变成下一次的默认输入 —— 宁可重抽
+    console.log(`⚠️ 归并阶段有 ${judgeWatch.stats.failed} 次判定失败，本次不写缓存`);
+  } else {
+    mkdirSync(dirname(CACHE), { recursive: true });
+    writeFileSync(CACHE, JSON.stringify(cache, null, 2), "utf8");
+  }
   return cache;
 }
 
 async function main(): Promise<void> {
   loadEnv(join(here, "..", ".env"));
-  // 标注集可选：默认 script-leak 的标注；跨剧本留出集用 R1_LEAKS 指向另一份
+  // 标注集在文件头解析：默认 script-leak 的标注；跨剧本留出集用 R1_LEAKS 指向另一份
   // （如 R1_SCRIPT=eval/script-jiuzhang-leak.md R1_LEAKS=eval/leaks-jiuzhang.json）
-  const LEAKS = process.env.R1_LEAKS ?? join(here, "leaks.json");
   const ann = JSON.parse(readFileSync(LEAKS, "utf8")) as LeaksFile;
+  const setStamp = testsetStampOf(LEAKS);
+  if (!setStamp) console.log(`⚠️ 标注集未在 evalsets/index.json 登记：${LEAKS}（结果里的 testset 记为 null）`);
   // ── 留出集封存：默认只用 dev 裁决；--holdout 才解封 ──
   const useHoldout = process.argv.includes("--holdout");
   const scoredLeaks = ann.leaks.filter((a) => useHoldout || a.split === "dev");
@@ -163,6 +243,8 @@ async function main(): Promise<void> {
   const scenes = parseScenes(readFileSync(SCRIPT, "utf8"));
   const sceneOrder = new Map(scenes.map((s, i) => [s.id, i]));
   const cache = await loadCache();
+  // 降级时**不落缓存**：否则下一次不带 --fresh 的运行会静默复用「全 NEW」的账本
+  if (judgeWatch.stats.calls > 0 && failIfDegraded("归并")) return;
   const ledger = cache.merged.propositions;
 
   // 判定层校验 usage（R1_USAGE_VERIFY）：过滤「碰巧共享词」的假使用点
@@ -176,8 +258,10 @@ async function main(): Promise<void> {
 
   // 语义校验必须在 buildUsages 之后（需要候选使用点）
   if (FLAGS.usageVerify) {
-    const vr = await verifyUsages(usages, ledger, { provider: new JevProvider() });
+    const vr = await verifyUsages(usages, ledger, { provider: judgeWatch.provider });
     console.log(`【usage 校验】保留 ${vr.kept} / 丢弃 ${vr.dropped} / UNSURE ${vr.unsure}　${vr.calls} 次调用 $${vr.costUsd.toFixed(4)}　${(vr.latencyMs / 1000).toFixed(1)}s`);
+    // 每次失败都被静默「保留」——那等于关掉了 R1_USAGE_VERIFY，不能当真结果
+    if (failIfDegraded("usage 校验")) return;
     usages = vr.usages;
   }
 
@@ -210,6 +294,7 @@ async function main(): Promise<void> {
   console.log(`\n${"─".repeat(62)}`);
   console.log(`账本 : ${ledger.length} 条命题 / ${usages.length} 个使用点 / ${facts.length} 条知识状态`);
   console.log(`报出 : ${issues.length} 条问题${FLAGS.shortKey ? `（识别键新增使用点 ${usagesRes.keyMatches}）` : ""}`);
+  console.log(`判定 : ${judgeWatch.stats.name}（${judgeWatch.stats.calls} 次调用，失败 ${judgeWatch.stats.failed}）`);
 
   // ── 匹配标注 ──
   const hitLeak = new Set<string>();
@@ -335,11 +420,12 @@ async function main(): Promise<void> {
       extra: {
         devSet: { version: ann.meta.name, size: scoredLeaks.length },
         split: useHoldout ? "all" : "dev",
-        testset: stamp("leaks"),
+        testset: setStamp,
         scorer: scorerStamp("r1"),
         contextProtocol: contextStamp(),
         ledger: { propositions: ledger.length, usages: usages.length, knowledge: facts.length },
         flags: FLAGS,
+        judgeProvider: judgeWatch.stats.name,
         ledgerCache: CACHE,
         flaggedMustNot: [...flaggedMustNot.entries()],
       },

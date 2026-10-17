@@ -53,6 +53,42 @@
       "createdAt": "2026-10-17T10:55:54.634Z",
       "supersedes": null,
       "hash": "b7c851b4766c"
+    },
+    {
+      "id": "leaks-jiuzhang",
+      "files": [
+        "eval/script-jiuzhang-leak.md",
+        "eval/leaks-jiuzhang.json"
+      ],
+      "size": {
+        "units": 10,
+        "must_not_flag": 13
+      },
+      "source": "从零泄漏正本 eval/script-jiuzhang.md（23 场）派生：注入 10 条泄漏（事实都在该角色不在场的更早场景里确立，注入台词不自陈来源）。",
+      "changes": "v1 首版：跨剧本留出集，10 条全部 split=holdout；13 条 must_not_flag 含施事/当事人/重生者预知。",
+      "holdoutSealed": true,
+      "version": 1,
+      "createdAt": "2026-10-17T16:09:40.134Z",
+      "supersedes": null,
+      "hash": "184fda121018"
+    },
+    {
+      "id": "leaks-jiuzhang",
+      "files": [
+        "eval/script-jiuzhang-leak.md",
+        "eval/leaks-jiuzhang.json"
+      ],
+      "size": {
+        "units": 10,
+        "must_not_flag": 13
+      },
+      "source": "从零泄漏正本 eval/script-jiuzhang.md（23 场）派生：注入 10 条泄漏（事实都在该角色不在场的更早场景里确立，注入台词不自陈来源）。",
+      "changes": "v1 首版：跨剧本留出集，10 条全部 split=holdout；13 条 must_not_flag 含施事/当事人/重生者预知。",
+      "holdoutSealed": true,
+      "version": 2,
+      "createdAt": "2026-10-17T16:32:29.864Z",
+      "supersedes": 1,
+      "hash": "6f292ed74e5d"
     }
   ]
 }

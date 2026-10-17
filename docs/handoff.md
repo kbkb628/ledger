@@ -1,7 +1,7 @@
-# 交接说明（handoff）
+﻿# 交接说明（handoff）
 
 > 写给「下一个会话的自己」和任何接手的人。目标是：**不读对话历史也能继续做**。
-> 最后更新：回合 29 之后。
+> 最后更新：回合 30 之后。
 
 ## 1. 这是什么，现在到哪一步
 
@@ -33,8 +33,13 @@
 | 端到端（命题级） | 25/48，K=3 各次 24–29 | 波动 ≈±10pp，**不能用来选版本** |
 | R1 dev | P 50.0% [18.8–81.2] / R 30.0% [10.8–60.3] / cost 24 | 区间宽 50–60pp，**只能看大改** |
 | **真实剧本误报** | **4 条 / 241 使用点**（茶馆 72 场，零标注） | 唯一有分辨力的指标；红线 **+2 条即回退** |
+| 跨剧本留出集（回合 30 新增） | **P 2/7 = 28.6% [8.2–64.1] / R 2/10 = 20.0% [5.7–51.0]**，测试集 `leaks-jiuzhang@2#6f292ed74e5d` | 新基线，**只与它自己比**；测量时判定层是 openai-compat（见 §8.9） |
 | 建账 | 23 场 14s（抽取 10.3s + 归并 4.5s） | — |
 | 审计复跑 | 0.9s（首次 67.6s） | 使用点随账本落盘 |
+
+**⚠️ 回合 30 的作废声明**：`eval/leaks-jiuzhang.json` v1 那轮的 P 50% / R 10% 作废（instrument 变了）。
+dev 三行数字**不受影响**（dev 缓存 `eval/out/pipeline-leak.json` 未动）。
+新集的判定层是 `openai-compat:deepseek-v4-pro`（JEV 区域封锁），归并粒度与历史 dev 不同源 ⇒ **跨集比 P/R 无效**。
 
 **⚠️ `real` 只在「同一份冻结账本」上比较**：同一配置重抽两次，分别是 5 条和 4 条，报出清单几乎不重合。
 重抽噪声 ≈±1~2 条，正好是红线的量级。跨抽取比较 `real` 一律算未定论。
@@ -61,19 +66,21 @@ npx tsx eval/build-demo-data.ts
 npx tsx eval/regression.ts --k 3 --force-save
 ```
 
-跨剧本留出集（下一个回合要用，`R1_LEAKS` 已加好）：
+跨剧本留出集（回合 30 已完成，`eval/leaks-jiuzhang.json` 10 条全 holdout）：
 
 ```bash
 R1_SCRIPT=eval/script-jiuzhang-leak.md \
 R1_LEAKS=eval/leaks-jiuzhang.json \
-  npx tsx eval/run-r1.ts --fresh --holdout
+R1_JUDGE_PROVIDER=openai \
+  npx tsx eval/run-r1.ts --fresh --holdout     # ≈7 分钟 / $0.42（23 场抽取 + 81 次判定）
+npx tsx eval/validate-goldenset.ts eval/leaks-jiuzhang.json   # 标注的机械校验（含 established/learns_at）
 ```
 
 ## 4. 纪律（这是本项目真正的产出，别绕过）
 
 - **两类回合**：`capability`（改抽取/规则，用 P/R/cost 裁决）vs `measurement`（改打分器/指标/匹配，
   不裁决优劣，但必须 ① 重建基线 ② 声明哪些历史结论作废 ③ 进实验库）。
-- 每个回合都要进 `experiments/exp-XXX.json`（现有 30 条），文档记在 `docs/rsi-protocol.md`。
+- 每个回合都要进 `experiments/exp-XXX.json`（现有 31 条），文档记在 `docs/rsi-protocol.md`。
 - 比例型指标一律带 **95% Wilson 区间**；配对比较用 **McNemar 精确检验**，不一致对 <6 不下结论。
 - 改行为的新源文件必须同时登记进 `src/rsi/scorer.ts` 的 `SCORER_FILES` 与 `R1_FLAGS`，
   以及 `src/rsi/version.ts` 的 `RSI_FLAG_NAMES` —— 否则「这个数字是哪个版本跑出来的」会给出错误答案。
@@ -92,25 +99,25 @@ R1_LEAKS=eval/leaks-jiuzhang.json \
 
 ## 6. 下一步（已定方向，动手前先读这一节）
 
-### 6.1 跨剧本留出集（用户已选 B）
+### 6.1 跨剧本留出集（用户已选 B）— ✅ 回合 30 做完
+
+`eval/script-jiuzhang-leak.md`（23 场，注入 10 条）+ `eval/leaks-jiuzhang.json`（10 条全 holdout、13 条 must_not_flag）
++ `eval/validate-goldenset.ts` 的泄漏集校验（surface 逐字在该场、泄漏者在该场在场、`established` 更早且泄漏者不在场、
+`learns_at` 更晚且在场）+ `evalsets/index.json` 登记。
+
+**这一集现在测出来的是什么**：漏报 8 条里 **7 条** 是同一机制 —— 注入台词被抽取成**一条新命题**，
+于是「首见场景在场者得知」当场给泄漏者发了许可（`masked_by_presence`，与 §5.3 同一处）。
+5 条误报里 4 条同源（同一事实被拆成两条命题）。**跨剧本集上的瓶颈是归并粒度，不是规则数量。**
+下一步若继续攻它，先固定 provider（§8.9）再动 §5.3 那类修法，否则又在噪声上做实验。
 
 **为什么必须跨剧本**：`eval/leaks.json` 的 meta 写明《旧账》正本（`eval/script-jiuzhang.md`）是
-**内部自洽、零泄漏**的，`eval/script-leak.md` 是从它派生并注入 14 条泄漏的版本。现有 holdout 的 4 条
-与 dev 同剧本、同注入方式，而我在这份剧本上调了 20 多个回合 —— 再加 6 条进去，密封性只是名义上的。
+**内部自洽、零泄漏**的，`eval/script-leak.md` 是从它派生并注入 14 条泄漏的版本。原 holdout 的 4 条
+与 dev 同剧本、同注入方式，而我在这份剧本上调了 20 多个回合 —— 密封性只是名义上的。
 
-**做法**：
-
-1. 从零泄漏正本 `eval/script-jiuzhang.md`（23 场，已读过全文）派生 `eval/script-jiuzhang-leak.md`，
-   注入 **10 条**泄漏。注入时守两条规矩（v1 踩过的坑）：
-   - 被泄漏的**事实必须在该角色不在场的更早场景里确立**，否则「首见场景在场者得知」会把它自己掩盖掉；
-   - 注入的台词里**不要自陈来源**（不要写「XX 告诉过我」），否则等于自己给自己发了许可。
-2. 写 `eval/leaks-jiuzhang.json`，schema 与 `eval/leaks.json` 一致：
-   `{ meta, leaks: [{id, kind: no_source|timing, character, scene, surface, why, exact_scene, split}], must_not_flag: [...] }`，
-   全部 `split: "holdout"`。`surface` 必须是剧本原文里逐字出现的片段，且能对上账本里的说法。
-3. 同时标 **8 条以上 `must_not_flag`**（应当放过）：`九章` 是自洽正本，它的价值在精确率 ——
-   尤其要标「重生者沈知微的预知」这类**合法知道**（她作为重生者知道前世的事，不该被报）。
-4. 跑 `npx tsx eval/validate-goldenset.ts` 做机械校验（别名是否逐字出自剧本），再跑上面的 `--holdout` 命令。
-5. 记为 `exp-030`，`kind: measurement`（新增测试集 ⇒ 旧数字作废、必须重建基线）。
+**做法（已成事实，供复核）**：10 条泄漏从零泄漏正本派生，全部 `split: "holdout"`；注入守三条：
+① 事实在该角色不在场的更早场景里确立；② 台词不自陈来源；③ **surface ≥3 字**且复用确立场景的原话
+（v1 用了换词 + 2 字 surface：抽取层在泄漏现场新建命题 ⇒ 10 条里 9 条被自我掩盖，另有多条被
+`R1_MIN_SURFACE_LEN=3` 直接过滤掉）。
 
 ### 6.2 其余待办（按价值排序）
 
@@ -134,7 +141,7 @@ R1_LEAKS=eval/leaks-jiuzhang.json \
 | `src/extraction/merge.ts` | 归并（bigram blocking + JEV 判定） |
 | `src/rsi/metrics.ts` | `wilson` / `computeMetrics` / `judgeCandidate`（含精确率护栏与 devSet 闸） |
 | `src/rsi/version.ts` · `scorer.ts` | 版本指纹与打分器清单 |
-| `eval/` | 所有评测脚本；`eval/leaks.json` 是标注，`eval/baseline/` 是冻结基线 |
+| `eval/` | 所有评测脚本；`eval/leaks.json` 是标注，`eval/leaks-jiuzhang.json` 是跨剧本留出集标注，`eval/baseline/` 是冻结基线 |
 
 ## 8. 环境坑（踩过的，别再踩）
 
@@ -149,3 +156,11 @@ R1_LEAKS=eval/leaks-jiuzhang.json \
 6. 抽取关思考后单场 2s；**开着是 47s / $0.0162**（54 字）。不要在不知情的情况下打开它。
 7. `npx tsc --noEmit` 的 `noUnusedLocals` 会因残留变量报错 —— 删代码时连变量一起删。
 8. `.env` 里有真 key，已 gitignore；`.env.bak` 曾在历史里出现过，已从历史移除。**不要再提交任何 .env**。
+9. **TypeSafe 直连（JEV）会按地区 451 拒答**（`Typesafe is not available in your region`）。它在管线里是
+   **静默降级**：`mergeScenes` 每次失败都退回 `NEW`、`verifyUsages` 每次失败都保留使用点，于是 run-r1 照旧
+   打印一个像样的 P/R，而账本一条没归并。回合 30 已加失败计数（`judgeWatch`）：降级即中止、且不写缓存。
+   替代：`R1_JUDGE_PROVIDER=openai` 走 `OpenAiCompatProvider`（DeepSeek），它同时是**归并粒度不同的另一套账本**，
+   数字与历史 dev 不可比。先 `npx tsx` 探一下 JEV 今天通不通再决定，别在降级结果上做实验。
+10. `R1_LEAKS` 换了标注集却共用 `pipeline-leak.json` 时，一次 `--fresh` 会把 dev 的抽取缓存覆盖掉（此后 dev 数字
+    静默变成另一份剧本的）。缓存名现在跟着标注集走（`pipeline-<leaks名>.json`），`R1_CACHE` 仍可显式覆盖。
+
