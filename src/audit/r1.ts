@@ -224,13 +224,21 @@ export function presentCharacters(scene: Scene | undefined): string[] {
  *   - 公开在册事实：需要事实类型（`type`），而抽取层按最小范围没抽它。
  *   - 特殊设定（重生/穿越/卧底）：**永远无法从剧本推断**，必须由作者显式声明。
  */
+/** 事实被「确立」的场次 —— 有 establishedAt 用它，旧账本退回首见场 */
+function establishedSceneOf(p: DraftProposition): string | undefined {
+  return p.establishedAt === undefined ? p.scenes[0] : (p.establishedAt ?? p.scenes[0]);
+}
+
 export function defaultKnowledge(
   ledger: DraftProposition[],
   scenes?: Scene[],
-  opts: { agent?: boolean; presence?: boolean } = {},
+  opts: { agent?: boolean; presence?: boolean; established?: boolean } = {},
 ): Array<{ character: string; propositionId: string; scene: string }> {
   const useAgent = opts.agent ?? true;
   const usePresence = opts.presence ?? true;
+  // R1_ESTABLISHED：在场者规则从「确立场」而不是「首见场」起算。
+  // 关掉即退回旧行为（首见场），用于 A/B 与回退。
+  const useEstablished = opts.established ?? true;
   const out: Array<{ character: string; propositionId: string; scene: string }> = [];
   const byId = new Map((scenes ?? []).map((s) => [s.id, s]));
 
@@ -245,9 +253,10 @@ export function defaultKnowledge(
       }
     }
 
-    // 规则 2：首见场景的在场者
+    // 规则 2：**确立**场景的在场者（不是首见场 —— 泄漏台词本身也会成为首见场）
     if (usePresence) {
-      for (const who of presentCharacters(byId.get(scene))) {
+      const grantScene = useEstablished ? (establishedSceneOf(p) ?? scene) : scene;
+      for (const who of presentCharacters(byId.get(grantScene))) {
         if (p.agents.includes(who)) continue; // 已由规则 1 覆盖
         out.push({ character: who, propositionId: p.id, scene });
       }

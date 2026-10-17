@@ -1,0 +1,1167 @@
+{
+  "extracted": {
+    "scenes": [
+      {
+        "scene": "S01-01",
+        "propositions": [],
+        "knowledgeDeltas": []
+      },
+      {
+        "scene": "S01-03",
+        "propositions": [
+          {
+            "canonical": "沈父在去世前告诉沈知微怀表里有他最要紧的东西",
+            "surfaces": [
+              {
+                "text": "爸走之前跟我说，这块表里有他最要紧的东西",
+                "kind": "descriptive"
+              }
+            ],
+            "agents": [],
+            "established": true
+          }
+        ],
+        "knowledgeDeltas": []
+      },
+      {
+        "scene": "S01-05",
+        "propositions": [],
+        "knowledgeDeltas": []
+      },
+      {
+        "scene": "S02-02",
+        "propositions": [
+          {
+            "canonical": "陆见深三年前在码头做了某件事",
+            "surfaces": [
+              {
+                "text": "你三年前在码头做了什么",
+                "kind": "descriptive"
+              }
+            ],
+            "agents": [
+              "陆见深"
+            ],
+            "established": true
+          }
+        ],
+        "knowledgeDeltas": []
+      },
+      {
+        "scene": "S03-05",
+        "propositions": [
+          {
+            "canonical": "陆见深三年前在码头与沈父争执，沈父后退踩空落水，陆见深未施救",
+            "surfaces": [
+              {
+                "text": "那份协议，你签不签？",
+                "kind": "descriptive"
+              },
+              {
+                "text": "两人争执，沈父后退踩空，落入水中",
+                "kind": "descriptive"
+              },
+              {
+                "text": "陆见深站在岸边，没有伸手",
+                "kind": "descriptive"
+              }
+            ],
+            "agents": [],
+            "established": true
+          }
+        ],
+        "knowledgeDeltas": []
+      },
+      {
+        "scene": "S04-02",
+        "propositions": [
+          {
+            "canonical": "沈父留下了一份东西，在陈默手上",
+            "surfaces": [
+              {
+                "text": "老爷留下的那份东西",
+                "kind": "descriptive"
+              },
+              {
+                "text": "那是老爷的……",
+                "kind": "vague"
+              }
+            ],
+            "agents": [],
+            "established": true
+          }
+        ],
+        "knowledgeDeltas": []
+      },
+      {
+        "scene": "S05-01",
+        "propositions": [],
+        "knowledgeDeltas": []
+      },
+      {
+        "scene": "S06-03",
+        "propositions": [
+          {
+            "canonical": "苏婉手上那份遗嘱是唯一在册的遗嘱",
+            "surfaces": [
+              {
+                "text": "苏女士手上那份是唯一在册的遗嘱",
+                "kind": "explicit"
+              }
+            ],
+            "agents": [],
+            "established": true
+          },
+          {
+            "canonical": "沈父三年前立过一份遗嘱",
+            "surfaces": [
+              {
+                "text": "我父亲三年前立过一份遗嘱",
+                "kind": "explicit"
+              }
+            ],
+            "agents": [],
+            "established": true
+          },
+          {
+            "canonical": "苏婉手上那份遗嘱不是沈父留下的那一份",
+            "surfaces": [
+              {
+                "text": "那不是他留下的那一份",
+                "kind": "vague"
+              }
+            ],
+            "agents": [],
+            "established": true
+          }
+        ],
+        "knowledgeDeltas": []
+      },
+      {
+        "scene": "S07-02",
+        "propositions": [
+          {
+            "canonical": "陆见深签署了《陆氏与苏氏联姻备忘录》",
+            "surfaces": [
+              {
+                "text": "《陆氏与苏氏联姻备忘录》",
+                "kind": "explicit"
+              },
+              {
+                "text": "陆见深的签名",
+                "kind": "explicit"
+              }
+            ],
+            "agents": [
+              "陆见深"
+            ],
+            "established": true
+          }
+        ],
+        "knowledgeDeltas": []
+      },
+      {
+        "scene": "S08-04",
+        "propositions": [
+          {
+            "canonical": "苏婉伪造了沈父的遗嘱",
+            "surfaces": [
+              {
+                "text": "那份遗嘱是伪造的",
+                "kind": "descriptive"
+              }
+            ],
+            "agents": [
+              "苏婉"
+            ],
+            "established": true
+          }
+        ],
+        "knowledgeDeltas": []
+      },
+      {
+        "scene": "S09-01",
+        "propositions": [
+          {
+            "canonical": "陆见深与苏婉有婚约",
+            "surfaces": [
+              {
+                "text": "你和苏婉的婚约",
+                "kind": "explicit"
+              }
+            ],
+            "agents": [],
+            "established": true
+          }
+        ],
+        "knowledgeDeltas": []
+      },
+      {
+        "scene": "S10-02",
+        "propositions": [
+          {
+            "canonical": "苏婉指使陈默修改了沈父的遗嘱",
+            "surfaces": [
+              {
+                "text": "当年是苏小姐让我改的遗嘱",
+                "kind": "descriptive"
+              }
+            ],
+            "agents": [
+              "陈默"
+            ],
+            "established": true
+          },
+          {
+            "canonical": "苏婉调换了沈父真正的遗嘱",
+            "surfaces": [
+              {
+                "text": "老爷真正留下的那份，被她换掉了",
+                "kind": "descriptive"
+              }
+            ],
+            "agents": [],
+            "established": true
+          }
+        ],
+        "knowledgeDeltas": [
+          {
+            "character": "沈知微",
+            "about": "当年是苏小姐让我改的遗嘱",
+            "kind": "learns"
+          },
+          {
+            "character": "沈知微",
+            "about": "老爷真正留下的那份，被她换掉了",
+            "kind": "learns"
+          }
+        ]
+      },
+      {
+        "scene": "S11-01",
+        "propositions": [
+          {
+            "canonical": "沈父真正的遗嘱藏在怀表里",
+            "surfaces": [
+              {
+                "text": "我父亲真正的遗嘱，在这里",
+                "kind": "descriptive"
+              },
+              {
+                "text": "最要紧的东西在表里",
+                "kind": "descriptive"
+              }
+            ],
+            "agents": [],
+            "established": true
+          }
+        ],
+        "knowledgeDeltas": [
+          {
+            "character": "苏婉",
+            "about": "我父亲真正的遗嘱，在这里",
+            "kind": "learns"
+          },
+          {
+            "character": "董事",
+            "about": "我父亲真正的遗嘱，在这里",
+            "kind": "learns"
+          }
+        ]
+      },
+      {
+        "scene": "S12-05",
+        "propositions": [],
+        "knowledgeDeltas": []
+      },
+      {
+        "scene": "S13-02",
+        "propositions": [
+          {
+            "canonical": "苏婉三年间通过同一个离岸账户转走两千三百万",
+            "surfaces": [
+              {
+                "text": "两千三百万",
+                "kind": "explicit"
+              },
+              {
+                "text": "走的都是同一个离岸账户",
+                "kind": "descriptive"
+              }
+            ],
+            "agents": [],
+            "established": true
+          }
+        ],
+        "knowledgeDeltas": [
+          {
+            "character": "沈知微",
+            "about": "两千三百万",
+            "kind": "learns"
+          }
+        ]
+      },
+      {
+        "scene": "S14-01",
+        "propositions": [
+          {
+            "canonical": "陈默保留了某份文件的原件",
+            "surfaces": [
+              {
+                "text": "那份原件，我一直留着",
+                "kind": "descriptive"
+              }
+            ],
+            "agents": [
+              "陈默"
+            ],
+            "established": true
+          }
+        ],
+        "knowledgeDeltas": [
+          {
+            "character": "沈知微",
+            "about": "那份原件，我一直留着",
+            "kind": "learns"
+          }
+        ]
+      },
+      {
+        "scene": "S15-03",
+        "propositions": [
+          {
+            "canonical": "苏婉伪造了备忘录",
+            "surfaces": [
+              {
+                "text": "那是你伪造的",
+                "kind": "descriptive"
+              }
+            ],
+            "agents": [
+              "苏婉"
+            ],
+            "established": true
+          }
+        ],
+        "knowledgeDeltas": []
+      },
+      {
+        "scene": "S16-02",
+        "propositions": [
+          {
+            "canonical": "苏婉在三年间从该账户转走两千三百万",
+            "surfaces": [
+              {
+                "text": "三年间，两千三百万从这个账户转走",
+                "kind": "explicit"
+              },
+              {
+                "text": "签字的人是苏婉",
+                "kind": "explicit"
+              }
+            ],
+            "agents": [
+              "苏婉"
+            ],
+            "established": true
+          }
+        ],
+        "knowledgeDeltas": []
+      },
+      {
+        "scene": "S17-01",
+        "propositions": [
+          {
+            "canonical": "苏婉以陆见深的名义签署了婚约",
+            "surfaces": [
+              {
+                "text": "你用了我的名义，签了那份婚约",
+                "kind": "descriptive"
+              },
+              {
+                "text": "签名是真的",
+                "kind": "explicit"
+              },
+              {
+                "text": "笔迹也是真的",
+                "kind": "explicit"
+              }
+            ],
+            "agents": [
+              "苏婉"
+            ],
+            "established": true
+          }
+        ],
+        "knowledgeDeltas": []
+      },
+      {
+        "scene": "S18-04",
+        "propositions": [
+          {
+            "canonical": "陈默当年调换了沈父的遗嘱，将原件保留，换掉的是副本",
+            "surfaces": [
+              {
+                "text": "当年我换掉的是副本，原件我一直收着",
+                "kind": "descriptive"
+              }
+            ],
+            "agents": [
+              "陈默"
+            ],
+            "established": true
+          }
+        ],
+        "knowledgeDeltas": [
+          {
+            "character": "沈知微",
+            "about": "当年我换掉的是副本，原件我一直收着",
+            "kind": "learns"
+          }
+        ]
+      },
+      {
+        "scene": "S19-02",
+        "propositions": [
+          {
+            "canonical": "苏婉伪造了遗嘱",
+            "surfaces": [
+              {
+                "text": "那份假遗嘱",
+                "kind": "explicit"
+              }
+            ],
+            "agents": [
+              "苏婉"
+            ],
+            "established": true
+          },
+          {
+            "canonical": "苏婉伪造了婚约",
+            "surfaces": [
+              {
+                "text": "那份婚约",
+                "kind": "explicit"
+              }
+            ],
+            "agents": [
+              "苏婉"
+            ],
+            "established": true
+          },
+          {
+            "canonical": "苏婉侵吞了那笔钱",
+            "surfaces": [
+              {
+                "text": "那笔钱",
+                "kind": "explicit"
+              }
+            ],
+            "agents": [
+              "苏婉"
+            ],
+            "established": true
+          },
+          {
+            "canonical": "陈叔保留了原件",
+            "surfaces": [
+              {
+                "text": "陈叔留着的原件",
+                "kind": "explicit"
+              }
+            ],
+            "agents": [
+              "陈叔"
+            ],
+            "established": true
+          }
+        ],
+        "knowledgeDeltas": []
+      },
+      {
+        "scene": "S20-01",
+        "propositions": [
+          {
+            "canonical": "陆见深在码头那天没有伸手救沈父",
+            "surfaces": [
+              {
+                "text": "码头那天，你明明可以伸手",
+                "kind": "descriptive"
+              },
+              {
+                "text": "我伸了手，就保不住你",
+                "kind": "descriptive"
+              },
+              {
+                "text": "所以你选择让他死",
+                "kind": "descriptive"
+              }
+            ],
+            "agents": [
+              "陆见深"
+            ],
+            "established": true
+          }
+        ],
+        "knowledgeDeltas": []
+      },
+      {
+        "scene": "S20-05",
+        "propositions": [],
+        "knowledgeDeltas": []
+      }
+    ],
+    "costUsd": 0.0506106,
+    "latencyMs": 41457,
+    "calls": 23,
+    "failures": [],
+    "rejectedSurfaces": 0,
+    "kindCounts": {
+      "explicit": 14,
+      "descriptive": 19,
+      "vague": 2
+    },
+    "knowledgeDeltas": 7,
+    "rejectedDeltas": 0
+  },
+  "merged": {
+    "propositions": [
+      {
+        "id": "E-001",
+        "canonical": "沈父在去世前告诉沈知微怀表里有他最要紧的东西",
+        "aliases": [
+          {
+            "surface": "爸走之前跟我说，这块表里有他最要紧的东西",
+            "firstSeen": "S01-03",
+            "kind": "descriptive"
+          },
+          {
+            "surface": "我父亲真正的遗嘱，在这里",
+            "firstSeen": "S11-01",
+            "kind": "descriptive"
+          },
+          {
+            "surface": "最要紧的东西在表里",
+            "firstSeen": "S11-01",
+            "kind": "descriptive"
+          }
+        ],
+        "scenes": [
+          "S01-03",
+          "S11-01"
+        ],
+        "agents": [],
+        "establishedAt": "S01-03"
+      },
+      {
+        "id": "E-002",
+        "canonical": "陆见深三年前在码头做了某件事",
+        "aliases": [
+          {
+            "surface": "你三年前在码头做了什么",
+            "firstSeen": "S02-02",
+            "kind": "descriptive"
+          }
+        ],
+        "scenes": [
+          "S02-02"
+        ],
+        "agents": [
+          "陆见深"
+        ],
+        "establishedAt": "S02-02"
+      },
+      {
+        "id": "E-003",
+        "canonical": "陆见深三年前在码头与沈父争执，沈父后退踩空落水，陆见深未施救",
+        "aliases": [
+          {
+            "surface": "那份协议，你签不签？",
+            "firstSeen": "S03-05",
+            "kind": "descriptive"
+          },
+          {
+            "surface": "两人争执，沈父后退踩空，落入水中",
+            "firstSeen": "S03-05",
+            "kind": "descriptive"
+          },
+          {
+            "surface": "陆见深站在岸边，没有伸手",
+            "firstSeen": "S03-05",
+            "kind": "descriptive"
+          },
+          {
+            "surface": "码头那天，你明明可以伸手",
+            "firstSeen": "S20-01",
+            "kind": "descriptive"
+          },
+          {
+            "surface": "我伸了手，就保不住你",
+            "firstSeen": "S20-01",
+            "kind": "descriptive"
+          },
+          {
+            "surface": "所以你选择让他死",
+            "firstSeen": "S20-01",
+            "kind": "descriptive"
+          }
+        ],
+        "scenes": [
+          "S03-05",
+          "S20-01"
+        ],
+        "agents": [
+          "陆见深"
+        ],
+        "establishedAt": "S03-05"
+      },
+      {
+        "id": "E-004",
+        "canonical": "沈父留下了一份东西，在陈默手上",
+        "aliases": [
+          {
+            "surface": "老爷留下的那份东西",
+            "firstSeen": "S04-02",
+            "kind": "descriptive"
+          },
+          {
+            "surface": "那是老爷的……",
+            "firstSeen": "S04-02",
+            "kind": "vague"
+          }
+        ],
+        "scenes": [
+          "S04-02"
+        ],
+        "agents": [],
+        "establishedAt": "S04-02"
+      },
+      {
+        "id": "E-005",
+        "canonical": "苏婉手上那份遗嘱是唯一在册的遗嘱",
+        "aliases": [
+          {
+            "surface": "苏女士手上那份是唯一在册的遗嘱",
+            "firstSeen": "S06-03",
+            "kind": "explicit"
+          }
+        ],
+        "scenes": [
+          "S06-03"
+        ],
+        "agents": [],
+        "establishedAt": "S06-03"
+      },
+      {
+        "id": "E-006",
+        "canonical": "沈父三年前立过一份遗嘱",
+        "aliases": [
+          {
+            "surface": "我父亲三年前立过一份遗嘱",
+            "firstSeen": "S06-03",
+            "kind": "explicit"
+          }
+        ],
+        "scenes": [
+          "S06-03"
+        ],
+        "agents": [],
+        "establishedAt": "S06-03"
+      },
+      {
+        "id": "E-007",
+        "canonical": "苏婉手上那份遗嘱不是沈父留下的那一份",
+        "aliases": [
+          {
+            "surface": "那不是他留下的那一份",
+            "firstSeen": "S06-03",
+            "kind": "vague"
+          }
+        ],
+        "scenes": [
+          "S06-03"
+        ],
+        "agents": [],
+        "establishedAt": "S06-03"
+      },
+      {
+        "id": "E-008",
+        "canonical": "陆见深签署了《陆氏与苏氏联姻备忘录》",
+        "aliases": [
+          {
+            "surface": "《陆氏与苏氏联姻备忘录》",
+            "firstSeen": "S07-02",
+            "kind": "explicit"
+          },
+          {
+            "surface": "陆见深的签名",
+            "firstSeen": "S07-02",
+            "kind": "explicit"
+          }
+        ],
+        "scenes": [
+          "S07-02"
+        ],
+        "agents": [
+          "陆见深"
+        ],
+        "establishedAt": "S07-02"
+      },
+      {
+        "id": "E-009",
+        "canonical": "苏婉伪造了沈父的遗嘱",
+        "aliases": [
+          {
+            "surface": "那份遗嘱是伪造的",
+            "firstSeen": "S08-04",
+            "kind": "descriptive"
+          },
+          {
+            "surface": "那份假遗嘱",
+            "firstSeen": "S19-02",
+            "kind": "explicit"
+          }
+        ],
+        "scenes": [
+          "S08-04",
+          "S19-02"
+        ],
+        "agents": [
+          "苏婉"
+        ],
+        "establishedAt": "S08-04"
+      },
+      {
+        "id": "E-010",
+        "canonical": "陆见深与苏婉有婚约",
+        "aliases": [
+          {
+            "surface": "你和苏婉的婚约",
+            "firstSeen": "S09-01",
+            "kind": "explicit"
+          }
+        ],
+        "scenes": [
+          "S09-01"
+        ],
+        "agents": [],
+        "establishedAt": "S09-01"
+      },
+      {
+        "id": "E-011",
+        "canonical": "苏婉指使陈默修改了沈父的遗嘱",
+        "aliases": [
+          {
+            "surface": "当年是苏小姐让我改的遗嘱",
+            "firstSeen": "S10-02",
+            "kind": "descriptive"
+          },
+          {
+            "surface": "老爷真正留下的那份，被她换掉了",
+            "firstSeen": "S10-02",
+            "kind": "descriptive"
+          }
+        ],
+        "scenes": [
+          "S10-02"
+        ],
+        "agents": [
+          "陈默"
+        ],
+        "establishedAt": "S10-02"
+      },
+      {
+        "id": "E-012",
+        "canonical": "苏婉三年间通过同一个离岸账户转走两千三百万",
+        "aliases": [
+          {
+            "surface": "两千三百万",
+            "firstSeen": "S13-02",
+            "kind": "explicit"
+          },
+          {
+            "surface": "走的都是同一个离岸账户",
+            "firstSeen": "S13-02",
+            "kind": "descriptive"
+          },
+          {
+            "surface": "三年间，两千三百万从这个账户转走",
+            "firstSeen": "S16-02",
+            "kind": "explicit"
+          },
+          {
+            "surface": "签字的人是苏婉",
+            "firstSeen": "S16-02",
+            "kind": "explicit"
+          }
+        ],
+        "scenes": [
+          "S13-02",
+          "S16-02"
+        ],
+        "agents": [
+          "苏婉"
+        ],
+        "establishedAt": "S13-02"
+      },
+      {
+        "id": "E-013",
+        "canonical": "陈默保留了某份文件的原件",
+        "aliases": [
+          {
+            "surface": "那份原件，我一直留着",
+            "firstSeen": "S14-01",
+            "kind": "descriptive"
+          },
+          {
+            "surface": "当年我换掉的是副本，原件我一直收着",
+            "firstSeen": "S18-04",
+            "kind": "descriptive"
+          }
+        ],
+        "scenes": [
+          "S14-01",
+          "S18-04"
+        ],
+        "agents": [
+          "陈默"
+        ],
+        "establishedAt": "S14-01"
+      },
+      {
+        "id": "E-014",
+        "canonical": "苏婉伪造了备忘录",
+        "aliases": [
+          {
+            "surface": "那是你伪造的",
+            "firstSeen": "S15-03",
+            "kind": "descriptive"
+          }
+        ],
+        "scenes": [
+          "S15-03"
+        ],
+        "agents": [
+          "苏婉"
+        ],
+        "establishedAt": "S15-03"
+      },
+      {
+        "id": "E-015",
+        "canonical": "苏婉以陆见深的名义签署了婚约",
+        "aliases": [
+          {
+            "surface": "你用了我的名义，签了那份婚约",
+            "firstSeen": "S17-01",
+            "kind": "descriptive"
+          },
+          {
+            "surface": "签名是真的",
+            "firstSeen": "S17-01",
+            "kind": "explicit"
+          },
+          {
+            "surface": "笔迹也是真的",
+            "firstSeen": "S17-01",
+            "kind": "explicit"
+          },
+          {
+            "surface": "那份婚约",
+            "firstSeen": "S19-02",
+            "kind": "explicit"
+          }
+        ],
+        "scenes": [
+          "S17-01",
+          "S19-02"
+        ],
+        "agents": [
+          "苏婉"
+        ],
+        "establishedAt": "S17-01"
+      },
+      {
+        "id": "E-016",
+        "canonical": "苏婉侵吞了那笔钱",
+        "aliases": [
+          {
+            "surface": "那笔钱",
+            "firstSeen": "S19-02",
+            "kind": "explicit"
+          }
+        ],
+        "scenes": [
+          "S19-02"
+        ],
+        "agents": [
+          "苏婉"
+        ],
+        "establishedAt": "S19-02"
+      },
+      {
+        "id": "E-017",
+        "canonical": "陈叔保留了原件",
+        "aliases": [
+          {
+            "surface": "陈叔留着的原件",
+            "firstSeen": "S19-02",
+            "kind": "explicit"
+          }
+        ],
+        "scenes": [
+          "S19-02"
+        ],
+        "agents": [
+          "陈叔"
+        ],
+        "establishedAt": "S19-02"
+      }
+    ],
+    "decisions": [
+      {
+        "scene": "S01-03",
+        "canonical": "沈父在去世前告诉沈知微怀表里有他最要紧的东西",
+        "choice": "NEW",
+        "candidates": [],
+        "confidence": 1,
+        "reason": "no_candidate"
+      },
+      {
+        "scene": "S02-02",
+        "canonical": "陆见深三年前在码头做了某件事",
+        "choice": "NEW",
+        "candidates": [],
+        "confidence": 1,
+        "reason": "no_candidate"
+      },
+      {
+        "scene": "S03-05",
+        "canonical": "陆见深三年前在码头与沈父争执，沈父后退踩空落水，陆见深未施救",
+        "choice": "NEW",
+        "candidates": [
+          "E-002"
+        ],
+        "confidence": 0.31,
+        "reason": "new"
+      },
+      {
+        "scene": "S04-02",
+        "canonical": "沈父留下了一份东西，在陈默手上",
+        "choice": "NEW",
+        "candidates": [],
+        "confidence": 1,
+        "reason": "no_candidate"
+      },
+      {
+        "scene": "S06-03",
+        "canonical": "苏婉手上那份遗嘱是唯一在册的遗嘱",
+        "choice": "NEW",
+        "candidates": [],
+        "confidence": 1,
+        "reason": "no_candidate"
+      },
+      {
+        "scene": "S06-03",
+        "canonical": "沈父三年前立过一份遗嘱",
+        "choice": "NEW",
+        "candidates": [],
+        "confidence": 1,
+        "reason": "no_candidate"
+      },
+      {
+        "scene": "S06-03",
+        "canonical": "苏婉手上那份遗嘱不是沈父留下的那一份",
+        "choice": "NEW",
+        "candidates": [
+          "E-004",
+          "E-005",
+          "E-006"
+        ],
+        "confidence": 0.76,
+        "reason": "new"
+      },
+      {
+        "scene": "S07-02",
+        "canonical": "陆见深签署了《陆氏与苏氏联姻备忘录》",
+        "choice": "NEW",
+        "candidates": [],
+        "confidence": 1,
+        "reason": "no_candidate"
+      },
+      {
+        "scene": "S08-04",
+        "canonical": "苏婉伪造了沈父的遗嘱",
+        "choice": "NEW",
+        "candidates": [
+          "E-005",
+          "E-007",
+          "E-006"
+        ],
+        "confidence": 0.8,
+        "reason": "new"
+      },
+      {
+        "scene": "S09-01",
+        "canonical": "陆见深与苏婉有婚约",
+        "choice": "NEW",
+        "candidates": [
+          "E-008"
+        ],
+        "confidence": 0.61,
+        "reason": "new"
+      },
+      {
+        "scene": "S10-02",
+        "canonical": "苏婉指使陈默修改了沈父的遗嘱",
+        "choice": "NEW",
+        "candidates": [
+          "E-009"
+        ],
+        "confidence": 0.83,
+        "reason": "new"
+      },
+      {
+        "scene": "S10-02",
+        "canonical": "苏婉调换了沈父真正的遗嘱",
+        "choice": "E-011",
+        "candidates": [
+          "E-007",
+          "E-009",
+          "E-004",
+          "E-011",
+          "E-005"
+        ],
+        "confidence": 0.43,
+        "reason": "attached"
+      },
+      {
+        "scene": "S11-01",
+        "canonical": "沈父真正的遗嘱藏在怀表里",
+        "choice": "E-001",
+        "candidates": [
+          "E-001",
+          "E-006"
+        ],
+        "confidence": 0.45,
+        "reason": "attached"
+      },
+      {
+        "scene": "S13-02",
+        "canonical": "苏婉三年间通过同一个离岸账户转走两千三百万",
+        "choice": "NEW",
+        "candidates": [],
+        "confidence": 1,
+        "reason": "no_candidate"
+      },
+      {
+        "scene": "S14-01",
+        "canonical": "陈默保留了某份文件的原件",
+        "choice": "NEW",
+        "candidates": [],
+        "confidence": 1,
+        "reason": "no_candidate"
+      },
+      {
+        "scene": "S15-03",
+        "canonical": "苏婉伪造了备忘录",
+        "choice": "NEW",
+        "candidates": [
+          "E-009"
+        ],
+        "confidence": 0.91,
+        "reason": "new"
+      },
+      {
+        "scene": "S16-02",
+        "canonical": "苏婉在三年间从该账户转走两千三百万",
+        "choice": "E-012",
+        "candidates": [
+          "E-012"
+        ],
+        "confidence": 0.51,
+        "reason": "attached"
+      },
+      {
+        "scene": "S17-01",
+        "canonical": "苏婉以陆见深的名义签署了婚约",
+        "choice": "NEW",
+        "candidates": [
+          "E-010",
+          "E-008"
+        ],
+        "confidence": 0.72,
+        "reason": "new"
+      },
+      {
+        "scene": "S18-04",
+        "canonical": "陈默当年调换了沈父的遗嘱，将原件保留，换掉的是副本",
+        "choice": "E-013",
+        "candidates": [
+          "E-013",
+          "E-011",
+          "E-009"
+        ],
+        "confidence": 0.66,
+        "reason": "attached"
+      },
+      {
+        "scene": "S19-02",
+        "canonical": "苏婉伪造了遗嘱",
+        "choice": "E-009",
+        "candidates": [
+          "E-009",
+          "E-014",
+          "E-005",
+          "E-007"
+        ],
+        "confidence": 0.72,
+        "reason": "attached"
+      },
+      {
+        "scene": "S19-02",
+        "canonical": "苏婉伪造了婚约",
+        "choice": "E-015",
+        "candidates": [
+          "E-014",
+          "E-009",
+          "E-015",
+          "E-010"
+        ],
+        "confidence": 0.42,
+        "reason": "attached"
+      },
+      {
+        "scene": "S19-02",
+        "canonical": "苏婉侵吞了那笔钱",
+        "choice": "NEW",
+        "candidates": [],
+        "confidence": 1,
+        "reason": "no_candidate"
+      },
+      {
+        "scene": "S19-02",
+        "canonical": "陈叔保留了原件",
+        "choice": "NEW",
+        "candidates": [
+          "E-013"
+        ],
+        "confidence": 0.31,
+        "reason": "new"
+      },
+      {
+        "scene": "S20-01",
+        "canonical": "陆见深在码头那天没有伸手救沈父",
+        "choice": "E-003",
+        "candidates": [
+          "E-003"
+        ],
+        "confidence": 0.4,
+        "reason": "attached"
+      }
+    ],
+    "costUsd": 0.00062118,
+    "latencyMs": 3821,
+    "calls": 15,
+    "unsure": 0
+  }
+}

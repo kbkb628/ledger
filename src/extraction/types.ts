@@ -47,11 +47,21 @@ export interface ScenePropositionDraft {
   canonical: string;
   surfaces: ExtractedSurface[];
   /**
+   * 本场是否**确立**了这件事（作为信息揭示），而不是把它当已知前提**引用**。
+   *
+   * 这是 R1 的一个根因修复（`masked_by_presence`，见 rsi-protocol 第 8 回合）：
+   * 泄漏台词本身也是一句断言，抽取会把它的场景当成事实的首见点，
+   * 于是「首见场景在场者得知」把泄漏者自己的话变成了他的知识来源 —— 泄漏被自己掩盖。
+   *
+   * 区分方法：本场有没有给出这件事的**来源**（谁说的、何时发生、在哪看到）？
+   * 给了 → 确立；只是当筹码/前提/质问用 → 引用。
+   */
+  established?: boolean;
+  /**
    * **施事**：做这件事的人（没有施事时为空数组，如意外落水）。
    *
    * ⚠️ 这是**审计必需**字段，不是判定字段（P1-2 消融证明它对判定零贡献）。
    * R1 的默认知识层第一条规则就靠它：**施事天然知道自己的行为**。
-   * 没有它，R1 会把「苏婉用『那份东西』」——她自己下令烧的东西——判成泄漏。
    */
   agents: string[];
 }
@@ -90,6 +100,11 @@ export interface DraftProposition {
   scenes: string[];
   /** 施事（跨场合并去重） */
   agents: string[];
+  /**
+   * 事实被**确立**的场景（首个 `established: true` 的场）；从未确立则为 null。
+   * 缺省（undefined）表示这条命题来自没有 established 字段的旧账本，退回 `scenes[0]`。
+   */
+  establishedAt?: string | null;
 }
 
 /** 归并层的一次决策，落库后可用于复查与 waiver */

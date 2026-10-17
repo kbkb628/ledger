@@ -110,6 +110,7 @@ export async function extractScenes(scenes: Scene[], opts: ExtractOptions = {}):
         canonical: d.canonical.trim() || surfaces[0]!.text,
         surfaces,
         agents: d.agents.filter((a) => sceneText.includes(a)), // 人名也要原文可查
+      established: d.established,
       });
     }
 
@@ -218,10 +219,12 @@ export function parseExtraction(text: string): {
   const propositions: ScenePropositionDraft[] = [];
 
   for (const item of list) {
-    const r = item as { canonical?: unknown; surfaces?: unknown; agents?: unknown };
+    const r = item as { canonical?: unknown; surfaces?: unknown; agents?: unknown; established?: unknown };
     propositions.push({
       canonical: typeof r.canonical === "string" ? r.canonical : "",
       surfaces: parseSurfaces(r.surfaces),
+      // 缺省 true：旧行为（把首见当确立）
+      established: r.established === undefined ? true : Boolean(r.established),
       agents: Array.isArray(r.agents)
         ? r.agents.map((a) => String(a).trim()).filter(Boolean)
         : typeof r.agents === "string" && r.agents.trim()

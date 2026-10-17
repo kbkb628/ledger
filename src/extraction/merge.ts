@@ -192,6 +192,10 @@ export async function mergeScenes(
         }
         for (const a of draftAgents) if (!target.agents.includes(a)) target.agents.push(a);
         if (!target.scenes.includes(se.scene)) target.scenes.push(se.scene);
+        // 首次「确立」的场次 —— R1 的在场者规则只从这里起算（见 rsi-protocol 第 9 回合）
+        if (draft.established !== false && (target.establishedAt === undefined || target.establishedAt === null)) {
+          target.establishedAt = se.scene;
+        }
         if (opts.verbose) {
           process.stdout.write(`    ${se.scene} 「${draft.canonical.slice(0, 26)}」→ ${target.id} (${confidence.toFixed(2)})\n`);
         }
@@ -209,6 +213,9 @@ export async function mergeScenes(
     }
   }
 
+  // 兜底：从未被标记为「确立」的命题退回首见场 —— 不额外制造知识，也不静默丢知识
+  for (const p of propositions) if (p.establishedAt === undefined) p.establishedAt = p.scenes[0] ?? null;
+
   return { propositions, decisions, costUsd, latencyMs: Date.now() - started, calls, unsure };
 }
 
@@ -219,5 +226,6 @@ function newProposition(id: string, draft: ScenePropositionDraft, scene: string)
     aliases: draft.surfaces.map((s) => ({ surface: s.text, firstSeen: scene, kind: s.kind })),
     scenes: [scene],
     agents: [...draft.agents],
+    establishedAt: draft.established === false ? null : scene,
   };
 }
