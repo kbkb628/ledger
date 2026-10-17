@@ -76,7 +76,15 @@ P2 工具债  ⑥⑦⑧⑨⑩ 见 §2.3                          ← 低风险�
 | # | 事项 | 怎么做（方向，不是定论） | 验收 |
 |---|---|---|---|
 | ④ | 跨剧本集的归并粒度 | 让「泄漏现场新建的命题」与既有命题做一次场景内合并（`seed` 已有；`buildUsages`/`merge` 的 blocking 也要看），或在 `detectLeaks` 里对「仅泄漏者在场时新建的命题」降权。**先固定 provider** | 同 provider 前后比 holdout P/R（带 Wilson）；dev 不退；real 不 +2 |
-| ⑤ | `should_allow` 类规则 | `real` 剩的 4 条里 2 条是「公开事实」。方向：判定层问「这句是不是公开事实」，**不是**往抽取 prompt 加字段（三次都变差） | real 下降且 dev 不退；holdout 的 13 条 `must_not_flag` 不能被新规则打破 |
+| ⑤ | `should_allow` 类规则 | `real` 剩的 4 条里 2 条是「公开事实」。**回合 31 之后它变成了 ④ 的前置**：许可层收紧在 dev 上 +2 TP，在 holdout 上却 +3 FP，新增误报全是「说话人本人的披露式自证」与「前提性知识」（重生者预知）。方向：自陈来源标记（台词里有「跟我说/告诉我/我亲眼」）+ 前提性知识（按角色声明），都做成 `should_allow` 而不是放宽规则 | real 下降且 dev 不退；holdout 的 13 条 `must_not_flag` 不能被新规则打破 |
+
+### 2.3.1 轮次 31 的结论（已回退，别重做）
+
+`R1_NO_SELF_ESTABLISH=later`（只在「该命题在更晚场次里他也在场」时收回自证）在 dev 冻结上游下
+P 3/6→5/8、R 30%→50%、误报仍 3，新抓到的正是 L-02/L-05 两条**时序**泄漏 —— 机制成立。
+但 holdout（`leaks-jiuzhang@2`）只 +1 TP 却 **+3 FP**，判据 fp≤5 未过，已回退默认关闭。
+`R1_MERGE_EXACT`（逐字相同说法强制归并）在 dev 上只触发 1 次、指标不变，同样默认关闭。
+详见 `experiments/exp-031.json` 与 `docs/rsi-round.md` 轮次 31。
 
 ### 2.4 P2 工具债（低风险，可穿插做）
 
