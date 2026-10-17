@@ -11,3 +11,6 @@ dist/
 eval/out/
 runs/
 .ledger/
+.kumiho/
+tmp_kumiho/
+kumiho_mcp.*
