@@ -17,7 +17,7 @@
  * 比凭直觉预先加豁免规则可靠得多。
  */
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { dirname, join } from "node:path";
+import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { buildKnowledge, buildUsages, defaultKnowledge, detectLeaks } from "../src/audit/r1.js";
@@ -28,6 +28,8 @@ import { JevProvider } from "../src/judgment/jev-provider.js";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const CACHE = process.env.AUDIT_CACHE ?? join(here, "out", "pipeline-r1.json");
+/** 剧本路径可覆盖：真实剧本（如《茶馆》）用来做零标注精确率测试 */
+const SCRIPT = process.env.AUDIT_SCRIPT ? resolve(process.env.AUDIT_SCRIPT) : join(here, "script-jiuzhang.md");
 
 interface CacheShape { extracted: ExtractResult; merged: MergeResult }
 
@@ -48,7 +50,7 @@ async function loadCache(): Promise<CacheShape> {
   if (!process.argv.includes("--fresh") && existsSync(CACHE)) {
     return JSON.parse(readFileSync(CACHE, "utf8")) as CacheShape;
   }
-  const scenes = parseScenes(readFileSync(join(here, "script-jiuzhang.md"), "utf8"));
+  const scenes = parseScenes(readFileSync(SCRIPT, "utf8"));
   console.log(`【第 0 层】抽取 ${scenes.length} 场（含知识变化）`);
   const extracted = await extractScenes(scenes, { verbose: true });
 
@@ -66,7 +68,7 @@ async function loadCache(): Promise<CacheShape> {
 
 async function main(): Promise<void> {
   loadEnv(join(here, "..", ".env"));
-  const scenes = parseScenes(readFileSync(join(here, "script-jiuzhang.md"), "utf8"));
+  const scenes = parseScenes(readFileSync(SCRIPT, "utf8"));
   const sceneOrder = new Map(scenes.map((s, i) => [s.id, i]));
   const cache = await loadCache();
   const { extracted, merged } = cache;
@@ -79,7 +81,7 @@ async function main(): Promise<void> {
       `${extracted.rejectedDeltas ? `（原文可查校验拦掉 ${extracted.rejectedDeltas} 条）` : ""}`,
   );
 
-  const { usages, droppedShort } = buildUsages(ledger, scenes);
+  const { usages, droppedShort } = buildUsages(ledger, scenes, { skipNames: process.env.R1_NAME_SKIP !== "0" });
   const { facts, unresolved } = buildKnowledge(ledger, extracted.scenes);
   // 隔离实验用：AUDIT_NO_DEFAULT=1 关掉默认知识层，看这一条规则单独贡献多少
   const useDefaults = !process.env.AUDIT_NO_DEFAULT;

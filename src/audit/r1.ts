@@ -61,8 +61,18 @@ export interface LeakIssue {
 
 /** 从台词行取说话人。叙述行（无 `角色：` 前缀）返回 null。 */
 export function speakerOf(line: string): string | null {
-  const m = /^([^\s：:，。！？「」（）]{1,6})[：:]/.exec(line.trim());
-  return m ? m[1]! : null;
+  const t = line.trim();
+  // 叙述/舞台指示的常见起手：〔〕（）【】「」《》——一律不是说话人。
+  // 这一条是被真实剧本打出来的：《茶馆》里 `〔幕启：北京城内的大茶馆…` 形如
+  // 「短前缀 + 冒号」，被当成说话人，于是报了 8 条「〔幕启 用到了…」。
+  // 我自造的剧本从没写过带冒号的叙述行，所以合成测试永远测不到这个 bug。
+  if (/^[〔（(\[【〈《<]/.test(t)) return null;
+  const m = /^([^\s：:，。！？「」（）〔〕、；]{1,6})[：:]/.exec(t);
+  if (!m) return null;
+  const name = m[1]!;
+  if (!/^[\u4e00-\u9fffA-Za-z0-9·]+$/.test(name)) return null;
+  if (/^(幕启|幕落|时间|地点|人物|旁白|注|附注)/.test(name)) return null;
+  return name;
 }
 
 /**
@@ -136,12 +146,16 @@ function deriveKeys(
 export function buildUsages(
   ledger: DraftProposition[],
   scenes: Scene[],
-  opts: { shortKeys?: boolean } = {},
+  opts: { shortKeys?: boolean; skipNames?: boolean } = {},
 ): { usages: Usage[]; droppedShort: number; keyMatches: number } {
   const usages: Usage[] = [];
   let droppedShort = 0;
   let keyMatches = 0;
   const keys = opts.shortKeys ? deriveKeys(ledger) : undefined;
+  // 说话人名集合：**提到一个人名 ≠ 使用了关于他的命题**。
+  // 真实剧本测试暴露（《茶馆》12 条里有 3 条）：命题「小二德子埋伏下了打手」的说法被抽成
+  // 「小二德子」，于是任何角色提到这三个字就命中。纯字面缺陷，确定性排除。
+  const personNames = new Set(ledger.flatMap((p) => p.agents));
 
   for (const p of ledger) {
     const surfaces = [...new Set(p.aliases.map((a) => a.surface))];
@@ -153,6 +167,7 @@ export function buildUsages(
         // ① 整句说法包含
         const direct = surfaces.filter((s) => {
           const n = s.replace(/\s+/g, "");
+          if (opts.skipNames !== false && personNames.has(n)) return false; // 人名本身不算引用
           return n.length >= 3 && flat.includes(n);
         });
         // ② 派生识别键（短引用）

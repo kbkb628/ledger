@@ -1,0 +1,76 @@
+{
+  "acts": [
+    {
+      "act": "序幕",
+      "characters": 8,
+      "paragraphs": 34,
+      "dialogue": 3,
+      "narration": 31,
+      "scenes": 1,
+      "sampleNames": [
+        "王利发",
+        "康顺子",
+        "刘麻子",
+        "庞太监",
+        "康六",
+        "乡妇",
+        "小妞",
+        "茶客"
+      ]
+    },
+    {
+      "act": "第一幕",
+      "characters": 22,
+      "paragraphs": 135,
+      "dialogue": 106,
+      "narration": 29,
+      "scenes": 15,
+      "sampleNames": [
+        "茶房一二人",
+        "王利发",
+        "刘麻子",
+        "庞太监",
+        "唐铁嘴",
+        "小牛儿",
+        "松二爷",
+        "黄胖子"
+      ]
+    },
+    {
+      "act": "第二幕",
+      "characters": 16,
+      "paragraphs": 213,
+      "dialogue": 158,
+      "narration": 55,
+      "scenes": 22,
+      "sampleNames": [
+        "王淑芬",
+        "康顺子",
+        "常四爷",
+        "康大力",
+        "王利发",
+        "松二爷",
+        "宋恩子",
+        "吴祥子"
+      ]
+    },
+    {
+      "act": "第三幕",
+      "characters": 24,
+      "paragraphs": 301,
+      "dialogue": 220,
+      "narration": 81,
+      "scenes": 30,
+      "sampleNames": [
+        "小吴祥子",
+        "庞四奶奶",
+        "小刘麻子",
+        "王大拴",
+        "明师傅",
+        "于厚斋",
+        "周秀花",
+        "邹福远"
+      ]
+    }
+  ]
+}
