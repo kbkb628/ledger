@@ -1,0 +1,55 @@
+{
+  "id": "exp-034",
+  "kind": "capability",
+  "parent": "exp-033",
+  "createdAt": "2026-10-18T06:40:00.000Z",
+  "version": {
+    "hash": "34e7825f9f25",
+    "commit": "2811d3b-dirty",
+    "extractModel": "deepseek-v4-pro",
+    "judgeModel": "openai-compat:deepseek-v4-pro",
+    "promptHash": "0b8239f6aa03",
+    "flags": {
+      "R1_NO_SELF_ESTABLISH": "all",
+      "R1_SHOULD_ALLOW": "1",
+      "R1_LEAK_JUDGE": "1",
+      "R1_MERGE_EXACT": "0",
+      "R1_JUDGE_PROVIDER": "openai"
+    }
+  },
+  "change": {
+    "bucket": "masked_by_presence",
+    "hypothesis": "把「许可收紧到 all」与「判定层豁免」同时打开：收紧负责召回幻影命题，豁免负责吸收因此产生的合法自证误报 —— dev 上这一组合是 P 45.5%/fp 6（差 1 条），应当看它在留出集上的真实表现",
+    "file": "src/audit/leak-allow.ts",
+    "switch": "R1_LEAK_JUDGE",
+    "params": { "R1_NO_SELF_ESTABLISH": "all", "R1_SHOULD_ALLOW": "1", "R1_LEAK_JUDGE": "1" }
+  },
+  "result": {
+    "devSet": { "version": "leaks-jiuzhang@2#6f292ed74e5d", "size": 10 },
+    "dev": {
+      "reported": 11,
+      "tp": 5,
+      "fp": 6,
+      "fn": 5,
+      "precision": 0.4545,
+      "recall": 0.5,
+      "cost": 24,
+      "fpRate": 0.5455,
+      "unusable": false
+    },
+    "holdout": {
+      "reported": 16,
+      "tp": 4,
+      "fp": 12,
+      "fn": 6,
+      "precision": 0.25,
+      "recall": 0.4,
+      "cost": 0,
+      "fpRate": 0.75,
+      "unusable": false
+    }
+  },
+  "evalCost": { "usd": 0.1797, "seconds": 470.5 },
+  "status": "rejected",
+  "note": "留出集最后一次解封：tp 4 / fp 12（P 25.0% / R 40.0%），比 `later+shouldAllow` 的 tp 3 / fp 6 更差 —— 收紧到 all 换来的 1 条召回，代价是 6 条新误报，而判定层只放行了 6 条、还有 6 条存疑按保守策略保留。**四次留出集读数汇总（全部冻结上游、同 provider）**：对照 tp2/fp5、later tp3/fp8、later+SA tp3/fp6、all+SA+judge tp4/fp12。**没有一个通过 tp≥6 且 fp≤5**；离判据最近的是对照本身（fp 5 达标，tp 差 4）。成本也是硬约束：22 次判定 470.5s / $0.18，意味着每次审计多 8 分钟。结论：在「只动 merge/usage/许可发放、不动抽取 prompt、不动标注集」这个范围内，该修复达不到预注册判据；根因是两件事同时成立——①召回要涨只能撤销自证，而自证与「说话人知道自己说的事」在词法上不可分；②dev 只有 10 条标注（一条=10pp）、`--remerge` 重复本身在 tp 3/2 间跳，1 条级差异不可分辨。需要人决定：放宽范围做测量回合（扩标注集/造独立评测集），或调整判据。"
+}
