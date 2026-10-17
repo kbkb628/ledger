@@ -48,6 +48,10 @@ R1_CACHE=eval/baseline/pipeline-leak.json npx tsx eval/run-r1.ts --reuse
 
 ## 二、回合表
 
+> ⚠️ **这张表已经是历史叙述，权威版本在 `experiments/*.json`。**
+> 生成当前表格：`npm run rsi -- table`；查裁决：`npm run rsi -- judge exp-007`。
+> 下面保留手写版，因为它记录了当时的口径与判断理由（哪些是 3 条标注、哪些是 10 条），结构化记录里只有结论。
+
 | # | 改动 | 基线 | 改前 | 改后 | 判定 |
 |---|---|---|---|---|---|
 | 0 | 起点：整句 surface，无任何默认知识层 | `--fresh` | — | P 20.0% / R 33.3% | — |

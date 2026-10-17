@@ -1,0 +1,51 @@
+{
+  "id": "exp-005",
+  "parent": "exp-003",
+  "createdAt": "2026-10-17T07:33:22.606Z",
+  "version": {
+    "hash": "7ea569fc5c60",
+    "commit": "265db66-dirty",
+    "extractModel": "unknown",
+    "judgeModel": "jev-latest",
+    "promptHash": "0b8239f6aa03",
+    "flags": {
+      "R1_AGENT": "default",
+      "R1_PRESENCE": "default",
+      "R1_UNITS": "default",
+      "R1_CHAR_HINT": "default",
+      "R1_SHORTKEY": "default",
+      "R1_KEY_LEN": "default",
+      "R1_KEY_FREQ": "default",
+      "E2E_PAD": "default",
+      "EVAL_CONTEXT": "default",
+      "EVAL_ORDER": "default",
+      "JEV_CRITERIA_MODE": "default"
+    }
+  },
+  "change": {
+    "bucket": "wrong_proposition",
+    "hypothesis": "同一人物的不同称呼（沈父/林昭的父亲/老爷）被当成不同施事，应把别称表传给归并判定器",
+    "file": "src/extraction/merge.ts",
+    "switch": "R1_CHAR_HINT",
+    "params": {}
+  },
+  "result": {
+    "dev": {
+      "reported": 2,
+      "tp": 1,
+      "fp": 1,
+      "fn": 2,
+      "precision": 0.5,
+      "recall": 0.3333333333333333,
+      "cost": 7,
+      "fpRate": 0.5,
+      "unusable": false
+    },
+    "devSet": {
+      "version": "v1",
+      "size": 3
+    }
+  },
+  "status": "rejected",
+  "note": "基线 v0→v1 过渡（3 条）。P/R 66.7%/66.7% → 50.0%/33.3%，变差；但比较跨了新抽取、混着 33pp 抖动，严格说只是「无证据有效」。开关保留"
+}

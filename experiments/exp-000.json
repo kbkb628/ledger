@@ -1,0 +1,51 @@
+{
+  "id": "exp-000",
+  "parent": null,
+  "createdAt": "2026-10-17T07:33:22.603Z",
+  "version": {
+    "hash": "7ea569fc5c60",
+    "commit": "265db66-dirty",
+    "extractModel": "unknown",
+    "judgeModel": "jev-latest",
+    "promptHash": "0b8239f6aa03",
+    "flags": {
+      "R1_AGENT": "default",
+      "R1_PRESENCE": "default",
+      "R1_UNITS": "default",
+      "R1_CHAR_HINT": "default",
+      "R1_SHORTKEY": "default",
+      "R1_KEY_LEN": "default",
+      "R1_KEY_FREQ": "default",
+      "E2E_PAD": "default",
+      "EVAL_CONTEXT": "default",
+      "EVAL_ORDER": "default",
+      "JEV_CRITERIA_MODE": "default"
+    }
+  },
+  "change": {
+    "bucket": "other",
+    "hypothesis": "起点：抽取记整句说法，无任何默认知识层",
+    "file": "NONE",
+    "switch": "NONE",
+    "params": {}
+  },
+  "result": {
+    "dev": {
+      "reported": 5,
+      "tp": 1,
+      "fp": 4,
+      "fn": 2,
+      "precision": 0.2,
+      "recall": 0.3333333333333333,
+      "cost": 10,
+      "fpRate": 0.8,
+      "unusable": true
+    },
+    "devSet": {
+      "version": "v1",
+      "size": 3
+    }
+  },
+  "status": "released",
+  "note": "基线 v0（3 条标注）。R1 起点：P 20.0% / R 33.3%"
+}

@@ -1,0 +1,35 @@
+{
+  "id": "exp-002",
+  "parent": "exp-001",
+  "createdAt": "2026-10-17T07:33:22.605Z",
+  "version": {
+    "hash": "7ea569fc5c60",
+    "commit": "265db66-dirty",
+    "extractModel": "unknown",
+    "judgeModel": "jev-latest",
+    "promptHash": "0b8239f6aa03",
+    "flags": {
+      "R1_AGENT": "default",
+      "R1_PRESENCE": "default",
+      "R1_UNITS": "default",
+      "R1_CHAR_HINT": "default",
+      "R1_SHORTKEY": "default",
+      "R1_KEY_LEN": "default",
+      "R1_KEY_FREQ": "default",
+      "E2E_PAD": "default",
+      "EVAL_CONTEXT": "default",
+      "EVAL_ORDER": "default",
+      "JEV_CRITERIA_MODE": "default"
+    }
+  },
+  "change": {
+    "bucket": "should_allow",
+    "hypothesis": "施事知道自己做的事，可用 agents 字段建默认知识层第一条规则",
+    "file": "src/audit/r1.ts",
+    "switch": "R1_AGENT",
+    "params": {}
+  },
+  "result": {},
+  "status": "accepted",
+  "note": "在正本《旧账》上测：误报 23 → 18（−21.7%）。与泄漏集指标不可比（任务不同）"
+}

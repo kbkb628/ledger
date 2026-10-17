@@ -15,6 +15,7 @@
     "eval:extract": "tsx eval/run-extract.ts",
     "eval:e2e": "tsx eval/run-e2e.ts",
     "audit": "tsx eval/run-audit.ts",
+    "rsi": "tsx eval/rsi.ts",
     "eval:r1": "tsx eval/run-r1.ts",
     "eval:validate": "tsx eval/validate-goldenset.ts",
     "typecheck": "tsc --noEmit"

@@ -1,0 +1,35 @@
+{
+  "id": "exp-001",
+  "parent": "exp-000",
+  "createdAt": "2026-10-17T07:33:22.605Z",
+  "version": {
+    "hash": "7ea569fc5c60",
+    "commit": "265db66-dirty",
+    "extractModel": "unknown",
+    "judgeModel": "jev-latest",
+    "promptHash": "0b8239f6aa03",
+    "flags": {
+      "R1_AGENT": "default",
+      "R1_PRESENCE": "default",
+      "R1_UNITS": "default",
+      "R1_CHAR_HINT": "default",
+      "R1_SHORTKEY": "default",
+      "R1_KEY_LEN": "default",
+      "R1_KEY_FREQ": "default",
+      "E2E_PAD": "default",
+      "EVAL_CONTEXT": "default",
+      "EVAL_ORDER": "default",
+      "JEV_CRITERIA_MODE": "default"
+    }
+  },
+  "change": {
+    "bucket": "no_usage",
+    "hypothesis": "抽取记整句导致短引用匹配不上，改为记最短指代片段",
+    "file": "src/extraction/prompt.ts",
+    "switch": "NONE",
+    "params": {}
+  },
+  "result": {},
+  "status": "accepted",
+  "note": "基线 v0（3 条）。召回 33.3% → 100%（3/3）。当时未单独记录误报数"
+}

@@ -1,0 +1,51 @@
+{
+  "id": "exp-003",
+  "parent": "exp-002",
+  "createdAt": "2026-10-17T07:33:22.606Z",
+  "version": {
+    "hash": "7ea569fc5c60",
+    "commit": "265db66-dirty",
+    "extractModel": "unknown",
+    "judgeModel": "jev-latest",
+    "promptHash": "0b8239f6aa03",
+    "flags": {
+      "R1_AGENT": "default",
+      "R1_PRESENCE": "default",
+      "R1_UNITS": "default",
+      "R1_CHAR_HINT": "default",
+      "R1_SHORTKEY": "default",
+      "R1_KEY_LEN": "default",
+      "R1_KEY_FREQ": "default",
+      "E2E_PAD": "default",
+      "EVAL_CONTEXT": "default",
+      "EVAL_ORDER": "default",
+      "JEV_CRITERIA_MODE": "default"
+    }
+  },
+  "change": {
+    "bucket": "should_allow",
+    "hypothesis": "命题首见场景的在场者应当得知它（窄化到首见场，避免泄给旁观者）",
+    "file": "src/audit/r1.ts",
+    "switch": "R1_PRESENCE",
+    "params": {}
+  },
+  "result": {
+    "dev": {
+      "reported": 2,
+      "tp": 1,
+      "fp": 1,
+      "fn": 2,
+      "precision": 0.5,
+      "recall": 0.3333333333333333,
+      "cost": 7,
+      "fpRate": 0.5,
+      "unusable": false
+    },
+    "devSet": {
+      "version": "v1",
+      "size": 3
+    }
+  },
+  "status": "accepted",
+  "note": "基线 v1（3 条）。冻结输入下精确率 16.7% → 50.0%（+33.3pp），确定差异"
+}
