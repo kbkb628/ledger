@@ -152,7 +152,10 @@ async function loadCache(): Promise<CacheShape> {
 
 async function main(): Promise<void> {
   loadEnv(join(here, "..", ".env"));
-  const ann = JSON.parse(readFileSync(join(here, "leaks.json"), "utf8")) as LeaksFile;
+  // 标注集可选：默认 script-leak 的标注；跨剧本留出集用 R1_LEAKS 指向另一份
+  // （如 R1_SCRIPT=eval/script-jiuzhang-leak.md R1_LEAKS=eval/leaks-jiuzhang.json）
+  const LEAKS = process.env.R1_LEAKS ?? join(here, "leaks.json");
+  const ann = JSON.parse(readFileSync(LEAKS, "utf8")) as LeaksFile;
   // ── 留出集封存：默认只用 dev 裁决；--holdout 才解封 ──
   const useHoldout = process.argv.includes("--holdout");
   const scoredLeaks = ann.leaks.filter((a) => useHoldout || a.split === "dev");

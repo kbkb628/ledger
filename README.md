@@ -149,8 +149,11 @@ npm run eval             # 判定层单点评测
 |---|---|
 | `docs/design.md` | 总体设计：认知层、事件同一性、三层路由、promotion 层、审计规则 |
 | `docs/extraction-schema.md` | 抽取层字段定义（含「证据 / 索引 / 审计必需」三级分类） |
+| `docs/rsi-protocol.md` | **主文档**：RSI 纪律（两类回合、红线、三个版本戳）与 29 个回合的完整记录，含被自己推翻的结论 |
+| `docs/testset.md` | 测试集规范、演进日志、样本量计算、外部实践借鉴 |
 | `docs/rsi-log.md` | 判定层的 RSI 迭代记录（v0→v3，含效度教训） |
 | `docs/test-plan.md` | 测试计划、已完成实验与结论、失败分类、headroom 排序 |
+| `docs/handoff.md` | 交接说明：当前基线、可复现命令、下一步与已知坑 |
 
 ## 技术栈
 
