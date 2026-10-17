@@ -1,4 +1,4 @@
-﻿/**
+/**
  * 打分器版本 —— 「结果可比性」的另一半。
  *
  * ## 为什么需要（我的真实疏漏）
@@ -73,6 +73,8 @@ const R1_FLAGS = [
   "R1_NO_SELF_ESTABLISH",
   "R1_ESTABLISHED",
   "R1_MERGE_EXACT",
+  "R1_MERGE_OVERLAP",
+  "R1_MERGE_OVERLAP_MIN",
   "R1_SHOULD_ALLOW",
   "R1_LEAK_JUDGE",
 ] as const;

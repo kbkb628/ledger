@@ -171,6 +171,33 @@ export async function mergeScenes(
       if (exact.length > 1 && opts.verbose) {
         process.stdout.write(`    ${se.scene} 同说法命中 ${exact.length} 条（${exact.map((p) => p.id).join("/")}）→ 交判官\n`);
       }
+
+      // ── 长重合优先归并（`R1_MERGE_OVERLAP=1`）──
+      //
+      // 为什么还要一层：回合 36 的幻影集显示，**即使逐字一致，归并也只有一半挂上**
+      // （anchored 4/8）。原因是别名存的是**整句台词**，"保险箱的密码是小姐的生日，
+      // 老爷只告诉我一个人。" 与 "保险箱的密码是小姐的生日，改不改都没意义。" 逐字比对
+      // 不相等，判官又可能判 NEW —— 于是同一事实变成两条命题，泄漏现场那条又靠
+      // 在场者得知给自己发了许可。
+      //
+      // 判据仍是**确定性**的：两条说法共享一段 ≥N 字的连续片段（默认 6，即两个词量级），
+      // 且这样的命题**唯一**时才短路判官。唯一性要求是关键 ——
+      // 「那份东西」这类泛指的共享片段会命中多条，仍然交判官。
+      const overlap = overlapSurfaceMatches(draft, propositions, norm);
+      if (overlap.length === 1) {
+        attach(propositions, overlap[0]!, draft, draftAgents, se.scene, false);
+        if (opts.verbose) {
+          process.stdout.write(`    ${se.scene} 「${draft.canonical.slice(0, 26)}」→ ${overlap[0]!.id} (overlap_surface)\n`);
+        }
+        decisions.push({
+          scene: se.scene, canonical: draft.canonical, choice: overlap[0]!.id,
+          candidates: candidates.map((p) => p.id), confidence: 1, reason: "overlap_surface",
+        });
+        continue;
+      }
+      if (overlap.length > 1 && opts.verbose) {
+        process.stdout.write(`    ${se.scene} 长重合命中 ${overlap.length} 条（${overlap.map((p) => p.id).join("/")}）→ 交判官\n`);
+      }
       const req: JudgmentRequest = {
         task: "bind_mention",
         mention: {
@@ -277,8 +304,59 @@ function exactSurfaceMatches(
   return propositions.filter((p) => p.aliases.some((a) => wanted.has(norm(a.surface))));
 }
 
-function newProposition(id: string, draft: ScenePropositionDraft, scene: string): DraftProposition {
-  return {
+/**
+ * 说法之间的**最长公共连续片段**长度 —— 归并层的确定性线索。
+ *
+ * 为什么不用编辑距离：别名是整句台词，长短不一，编辑距离会被长度差主导；
+ * 而「同一事实的两种说法」几乎必然共享一段实词片段（「保险箱的密码」「出境记录有两笔」）。
+ */
+function longestCommonSpan(a: string, b: string): number {
+  if (!a || !b) return 0;
+  const n = a.length;
+  const m = b.length;
+  let prev = new Uint16Array(m + 1);
+  let cur = new Uint16Array(m + 1);
+  let best = 0;
+  for (let i = 1; i <= n; i += 1) {
+    const ca = a.charCodeAt(i - 1);
+    for (let j = 1; j <= m; j += 1) {
+      cur[j] = ca === b.charCodeAt(j - 1) ? prev[j - 1]! + 1 : 0;
+      if (cur[j]! > best) best = cur[j]!;
+    }
+    const t = prev;
+    prev = cur;
+    cur = t;
+    cur.fill(0);
+  }
+  return best;
+}
+
+/**
+ * 长重合命中了哪几条命题（`R1_MERGE_OVERLAP=1`）。
+ *
+ * 门槛默认 6 个归一化字符：3–4 字（「那份东西」「密码」）在账本里本就泛指，
+ * 共享它不构成「同一件事」的证据；6 字约等于两个实词。
+ * `R1_MERGE_OVERLAP_MIN` 可调，用于敏感性检查（不要事后按结果挑一个）。
+ */
+function overlapSurfaceMatches(
+  draft: ScenePropositionDraft,
+  propositions: DraftProposition[],
+  norm: (s: string) => string,
+): DraftProposition[] {
+  if (process.env.R1_MERGE_OVERLAP !== "1") return [];
+  const minSpan = Number(process.env.R1_MERGE_OVERLAP_MIN ?? 6);
+  const wanted = draft.surfaces.map((s) => norm(s.text)).filter((s) => s.length >= minSpan);
+  if (wanted.length === 0) return [];
+  return propositions.filter((p) =>
+    p.aliases.some((a) => {
+      const target = norm(a.surface);
+      if (target.length < minSpan) return false;
+      return wanted.some((w) => longestCommonSpan(w, target) >= minSpan);
+    }),
+  );
+}
+
+function newProposition(id: string, draft: ScenePropositionDraft, scene: string): DraftProposition {  return {
     id,
     canonical: draft.canonical,
     aliases: draft.surfaces.map((s) => ({ surface: s.text, firstSeen: scene, kind: s.kind })),

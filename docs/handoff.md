@@ -191,6 +191,7 @@ npx tsx eval/validate-goldenset.ts eval/leaks-jiuzhang.json   # 标注的机械�
 | `R1_NO_SELF_ESTABLISH`（`1` / `single` / `later`） | 不拿自己的台词当自己的知情来源；`later` 只在「更晚场次他也在场」时收回 | `later` 在 dev 上 +2TP 不增误报，但在 holdout 上 +1TP/+3FP；默认关 |
 | `R1_SHOULD_ALLOW`（`=1`） | 词表豁免：自陈来源标记（跟我说/告诉我/我亲眼…）+ 前提性知识（剧本头部声明的重生者知道闪回里的事） | 吸收 2 条误报，dev 上不可见；默认关 |
 | `R1_LEAK_JUDGE`（`=1`） | 判定层豁免：只对已报出的候选问一次「当事人/目击/被专门告知/公开信息」 | 误报砍半但放过真泄漏，单次审计多 470s；默认关 |
+| `R1_MERGE_OVERLAP`（`=1`，回合 37） | 归并层确定性一层：两条说法共享 ≥6 字连续片段（`R1_MERGE_OVERLAP_MIN`）且唯一命中时直接挂上去、不交判官 | 幻影集 anchored 4/8→7/8、误报 2→0；dev 只翻转 1 对（<6 不下结论）；**real 未重测** ⇒ 默认关 |
 
 **评测模式新增 `--remerge`**：冻结抽取、只重跑归并。归并层改动只能这样验；
 R1 层（knowledge/usage）改动用 `--reuse`。**两者不可混比** —— dev 的归并不可复现

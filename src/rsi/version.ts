@@ -1,4 +1,4 @@
-﻿import { execFileSync } from "node:child_process";
+import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 
 import { EXTRACTION_INSTRUCTIONS } from "../extraction/prompt.js";
@@ -48,6 +48,8 @@ const RSI_FLAG_NAMES = [
   "R1_NO_SELF_ESTABLISH",
   "R1_ESTABLISHED",
   "R1_MERGE_EXACT",
+  "R1_MERGE_OVERLAP",
+  "R1_MERGE_OVERLAP_MIN",
   "R1_SHOULD_ALLOW",
   "R1_LEAK_JUDGE",
   // ↓ 判定层选型。它会改变**归并出的账本**（不是打分器），所以与 EXTRACT_MODEL 同级放在这里，
