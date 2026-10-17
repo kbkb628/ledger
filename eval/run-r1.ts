@@ -1,4 +1,4 @@
-import { verifyUsages } from "../src/audit/usage-verify.js";
+﻿import { verifyUsages } from "../src/audit/usage-verify.js";
 import { contextStamp } from "../src/rsi/context-protocol.js";
 import { scorerStamp } from "../src/rsi/scorer.js";
 import { formatRate } from "../src/rsi/metrics.js";
@@ -30,7 +30,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve, basename } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { auditOnUnits, buildKnowledge, buildUsages, defaultKnowledge, detectLeaks } from "../src/audit/r1.js";
+import { auditOnUnits, buildKnowledge, buildUsages, defaultKnowledge, detectLeaks, premiseKnowersOf } from "../src/audit/r1.js";
 import { writeTaskResult } from "../src/eval/report.js";
 import { buildNormalizer, extractCharacters, type CharacterEntry } from "../src/extraction/characters.js";
 import { promoteUnits } from "../src/extraction/promote.js";
@@ -278,7 +278,15 @@ async function main(): Promise<void> {
 
   // 判定层校验 usage（R1_USAGE_VERIFY）：过滤「碰巧共享词」的假使用点
   const { facts } = buildKnowledge(ledger, cache.extracted.scenes);
-  const defaults = defaultKnowledge(ledger, scenes, { agent: FLAGS.agent, presence: FLAGS.presence, established: FLAGS.established, noSelfEstablish: FLAGS.noSelfEstablish });
+  const defaults = defaultKnowledge(ledger, scenes, {
+    agent: FLAGS.agent,
+    presence: FLAGS.presence,
+    established: FLAGS.established,
+    noSelfEstablish: FLAGS.noSelfEstablish,
+    shouldAllow: process.env.R1_SHOULD_ALLOW === "1",
+    // 前提性知识只从**剧本自身**读（不是从标註集抄）：重生/穿越的角色知道过去时间锚里的事
+    premiseKnowers: premiseKnowersOf(readFileSync(SCRIPT, "utf8")),
+  });
   for (const d of defaults) {
     facts.push({ ...d, kind: "learns", evidence: "(默认:施事/在场)", source: "default" });
   }

@@ -1,0 +1,53 @@
+{
+  "id": "exp-032",
+  "kind": "capability",
+  "parent": "exp-031",
+  "createdAt": "2026-10-18T04:10:00.000Z",
+  "version": {
+    "hash": "1da5ad6c50f8",
+    "commit": "840c7df-dirty",
+    "extractModel": "deepseek-v4-pro",
+    "judgeModel": "openai-compat:deepseek-v4-pro",
+    "promptHash": "0b8239f6aa03",
+    "flags": {
+      "R1_NO_SELF_ESTABLISH": "later",
+      "R1_SHOULD_ALLOW": "1",
+      "R1_MERGE_EXACT": "0",
+      "R1_JUDGE_PROVIDER": "openai"
+    }
+  },
+  "change": {
+    "bucket": "should_allow",
+    "hypothesis": "回合 31 的误报全是两类合法知情：①台词自陈来源（「爸走之前跟我说」）②前提性知识（剧本声明重生者）。把这两类做成 should_allow 授权，就能让许可层收紧的同时不制造误报",
+    "file": "src/audit/r1.ts",
+    "switch": "R1_SHOULD_ALLOW",
+    "params": { "R1_SHOULD_ALLOW": "1", "R1_NO_SELF_ESTABLISH": "later" }
+  },
+  "result": {
+    "dev": {
+      "reported": 8,
+      "tp": 5,
+      "fp": 3,
+      "fn": 5,
+      "precision": 0.625,
+      "recall": 0.5,
+      "cost": 24,
+      "fpRate": 0.375,
+      "unusable": false
+    },
+    "devSet": { "version": "leaks@1#cc59a5ad9de1", "size": 10 },
+    "holdout": {
+      "reported": 9,
+      "tp": 3,
+      "fp": 6,
+      "fn": 7,
+      "precision": 0.3333,
+      "recall": 0.3,
+      "cost": 0,
+      "fpRate": 0.6667,
+      "unusable": false
+    }
+  },
+  "status": "rejected",
+  "note": "评测器仍未通过：holdout 需 tp≥6 且 fp≤5，实测 tp 3 / fp 6（shouldAllow 把误报从 8 收到 6，吸收了回合 31 的两条新误报，但 tp 一点没涨）。dev 侧两臂：later+shouldAllow = P 5/8 62.5% / R 50.0% / 误报 3（必要条件通过，与不带 shouldAllow 相同 —— dev 既没有前提角色、泄漏台词也不自陈来源，说明这两条规则在 dev 上不可见，只能在 holdout 显形）；all+shouldAllow = P 6/18 33.3% / R 60.0% / 误报 12（仍崩）。**机制结论**：许可层只能抓「更晚场次他也在场」的时序泄漏（+1），抓不到「孤命题」型无源泄漏 —— 那类要撤销自证，就会同时撤销「说话人总归知道自己在说什么」这条合法默认（周管说老爷去世、何静说自己的钱、陈立报账），现有的两类 should_allow 挡不住。**下一步唯一有希望的在范围内杠杆**：把 should_allow 从词表升级成判定层语义问询（「此人是否可能通过当事人/目击/被专门告知而合法知道」），只对「许可被撤销」的候选调用，让 all 能开店而不炸精确率。**测量瓶颈（必须记下）**：dev 只有 10 条标注，一条 = 10pp，而 `--remerge` 的同配置重复本身就会在 tp 3/2 之间跳，所以归并层与 +1~+2 级的许可层改动在 dev 上**不可分辨**；holdout 已用掉两次解封，只能用最后一次。"
+}

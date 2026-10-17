@@ -72,6 +72,7 @@ const R1_FLAGS = [
   "R1_NO_SELF_ESTABLISH",
   "R1_ESTABLISHED",
   "R1_MERGE_EXACT",
+  "R1_SHOULD_ALLOW",
 ] as const;
 
 export type ScorerKind = "r1" | "judge" | "e2e";

@@ -59,9 +59,49 @@ export interface LeakIssue {
   knownAt: string | null;
 }
 
+/**
+ * `should_allow` ①：**自陈来源**。
+ *
+ * 只要台词里自己说了来源，这条台词就不是「凭空用了一个秘密」，
+ * 而是「他在转述别人告诉他的话」—— 账本不该因此收回他的知情。
+ *
+ * 这是回合 31 的误报样本逼出来的：沈知微 S01-03「爸走之前跟我说，这块表里…」
+ * 被判成泄漏，就因为同一场里这句话是该说法的唯一出处。
+ * 标记刻意写窄（只要明确的第一人称转述/目击），不收「我知道」这种泛化的。
+ */
+const SELF_DISCLOSURE = /跟我说|告诉我|我亲眼|我见过|亲口|临终|临死|走之前|生前告诉|我问过|我查过/;
+
+/** 该场次是不是「过去时间锚」（闪回/往事）—— 重生者据此拥有前提性知识 */
+const PAST_ANCHOR = /闪回|三年前|多年前|当年|往事|前世|回忆/;
+
+export function isPastScene(scene: Scene | undefined): boolean {
+  return !!scene && scene.meta.some((m) => PAST_ANCHOR.test(m));
+}
+
+/**
+ * `should_allow` ②：**前提性知识**。
+ *
+ * 剧本开头的人物设定里若把某人声明为「重生者/穿越者」，那他对**过去时间锚**里发生的事
+ * 本来就知道 —— 那不是泄漏，是设定。只扫文件头部（第一个 `## ` 之前），
+ * 避免把正文里的「重生点」这类措辞也算进来。
+ *
+ * 注意：这是**从剧本自身读出来的**，不是从标注集里抄的（标注不是产品输入）。
+ */
+export function premiseKnowersOf(script: string): string[] {
+  const head = script.split(/\r?\n##\s/)[0] ?? "";
+  const names = new Set<string>();
+  for (const line of head.split(/\r?\n/)) {
+    if (!/重生|穿越/.test(line)) continue;
+    const cleaned = line.replace(/\*\*/g, "");
+    for (const m of cleaned.matchAll(/([\u4e00-\u9fa5]{2,4})\s*[（(][^）)]*(?:重生|穿越)[^）)]*[）)]/g)) {
+      if (m[1]) names.add(m[1]);
+    }
+  }
+  return [...names];
+}
+
 /** 从台词行取说话人。叙述行（无 `角色：` 前缀）返回 null。 */
-export function speakerOf(line: string): string | null {
-  const t = line.trim();
+export function speakerOf(line: string): string | null {  const t = line.trim();
   // 叙述/舞台指示的常见起手：〔〕（）【】「」《》——一律不是说话人。
   // 这一条是被真实剧本打出来的：《茶馆》里 `〔幕启：北京城内的大茶馆…` 形如
   // 「短前缀 + 冒号」，被当成说话人，于是报了 8 条「〔幕启 用到了…」。
@@ -297,10 +337,21 @@ function firstDisclosureScene(
 export function defaultKnowledge(
   ledger: DraftProposition[],
   scenes?: Scene[],
-  opts: { agent?: boolean; presence?: boolean; established?: boolean; noSelfEstablish?: boolean | "single" | "later" } = {},
+  opts: {
+    agent?: boolean;
+    presence?: boolean;
+    established?: boolean;
+    noSelfEstablish?: boolean | "single" | "later";
+    /** `should_allow`：自陈来源保留 + 前提性知识授权（回合 31 二期） */
+    shouldAllow?: boolean;
+    /** 被声明为重生/穿越的角色（`premiseKnowersOf(script)` 取） */
+    premiseKnowers?: string[];
+  } = {},
 ): Array<{ character: string; propositionId: string; scene: string }> {
   const useAgent = opts.agent ?? true;
   const usePresence = opts.presence ?? true;
+  const shouldAllow = opts.shouldAllow ?? process.env.R1_SHOULD_ALLOW === "1";
+  const premiseKnowers = new Set(opts.premiseKnowers ?? []);
   // R1_ESTABLISHED：在场者规则从「确立场」而不是「首见场」起算。
   // 关掉即退回旧行为（首见场），用于 A/B 与回退。
   const useEstablished = opts.established ?? true;
@@ -328,6 +379,16 @@ export function defaultKnowledge(
     if (useAgent) {
       for (const agent of p.agents) {
         out.push({ character: agent, propositionId: p.id, scene });
+      }
+    }
+
+    // `should_allow` ②：前提性知识 —— 被声明为重生的角色知道「过去时间锚」里发生的事，
+    // **即使当时不在场**（重生是从上一世带来的记忆，不是在现场听到的）。
+    // 这一条独立于在场者规则，所以放在它前面。
+    const estScene = useEstablished ? (establishedSceneOf(p) ?? scene) : scene;
+    if (shouldAllow && premiseKnowers.size > 0 && isPastScene(byId.get(estScene))) {
+      for (const who of premiseKnowers) {
+        out.push({ character: who, propositionId: p.id, scene: estScene });
       }
     }
 
@@ -372,14 +433,24 @@ export function defaultKnowledge(
               return surfaces.some((s) => flat.includes(s));
             });
             const allOwn = hits.length > 0 && hits.every((l) => speakerOf(l) === who);
-            if (allOwn) continue; // 本场只有他自己说过 → 这条在场证据无效
+            // `should_allow` ①：自陈来源 —— 台词自己说了「爸走之前跟我说」这类，
+            // 就不是凭空使用，保留这条在场证据（回合 31 的误报样本逼出来的规则）
+            const selfDisclosed = shouldAllow && hits.some((l) => speakerOf(l) === who && SELF_DISCLOSURE.test(l));
+            if (allOwn && !selfDisclosed) continue; // 本场只有他自己说过 → 这条在场证据无效
           }
         }
         out.push({ character: who, propositionId: p.id, scene });
       }
     }
   }
-  return out;
+  // 去重：should_allow 的前提性知识与在场者规则可能命中同一 (角色, 命题, 场次)
+  const seen = new Set<string>();
+  return out.filter((k) => {
+    const key = `${k.character}|${k.propositionId}|${k.scene}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
 }
 
 /**
