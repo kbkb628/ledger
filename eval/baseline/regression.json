@@ -1,6 +1,6 @@
 {
-  "at": "2026-10-17T13:25:53.841Z",
-  "k": 3,
+  "at": "2026-10-17T13:33:12.223Z",
+  "k": 1,
   "config": {
     "judge": {
       "GOLDENSET": "eval/goldenset-v3.json",
@@ -21,8 +21,8 @@
     }
   },
   "version": {
-    "hash": "b48d2a5ae74c",
-    "commit": "ff8e682-dirty",
+    "hash": "1b4fe34249b0",
+    "commit": "a6b3450-dirty",
     "promptHash": "0b8239f6aa03"
   },
   "judge": {
@@ -30,12 +30,10 @@
     "total": 48
   },
   "e2e": {
-    "median": 26,
+    "median": 25,
     "total": 48,
     "trials": [
-      26,
-      26,
-      27
+      25
     ]
   },
   "r1": {
@@ -46,19 +44,17 @@
     },
     "cost": 24,
     "trials": [
-      24,
-      24,
-      23
+      24
     ]
   },
   "real": {
     "issues": 3,
-    "usages": 238
+    "usages": 239
   },
   "scorers": {
     "judge": "judge@4fa9eeed25f3",
     "e2e": "e2e@f9a6e1610bef",
-    "r1": "r1@ad42e3cf6bb1",
-    "real": "r1@ad42e3cf6bb1"
+    "r1": "r1@fd3c3c58f253",
+    "real": "r1@fd3c3c58f253"
   }
 }
