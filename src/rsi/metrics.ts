@@ -29,6 +29,32 @@ export const C_FN = 3;
 /** 误报率超过这个值直接判不可用，不论 cost 多低 */
 export const HARD_MAX_FP_RATE = 0.7;
 
+/**
+ * Wilson score interval —— 比例型指标的小样本置信区间。
+ *
+ * 为什么不用正态近似（p̂ ± 1.96·se）：小样本、接近 0 或 1 时会越界（出负值或 >1），
+ * 而我们这两类指标恰恰都在极端：48 样本的 44/48=91.7%、14 条的 3/10=30%。
+ * Wilson 在极端比例与 n<30 时表现稳定，是比例 CI 的推荐默认。
+ *
+ * 返回 [下限, 上限]，置信水平默认 95%（z=1.96）。
+ */
+export function wilson(k: number, n: number, z = 1.96): [number, number] {
+  if (n <= 0) return [0, 1];
+  const p = k / n;
+  const denom = 1 + (z * z) / n;
+  const center = (p + (z * z) / (2 * n)) / denom;
+  const half = (z * Math.sqrt((p * (1 - p)) / n + (z * z) / (4 * n * n))) / denom;
+  return [Math.max(0, center - half), Math.min(1, center + half)];
+}
+
+/** `44/48 = 91.7% [80.0–96.7]` —— 一律带区间，避免把点估计当结论 */
+export function formatRate(k: number, n: number): string {
+  if (n <= 0) return "n/a";
+  const [lo, hi] = wilson(k, n);
+  const pct = (x: number): string => `${(x * 100).toFixed(1)}%`;
+  return `${k}/${n} = ${pct(k / n)} [${pct(lo)}–${pct(hi)}]`;
+}
+
 export interface Metrics {
   /** 报出的问题数（= tp + fp） */
   reported: number;
@@ -67,7 +93,8 @@ export function computeMetrics(tp: number, fp: number, fn: number): Metrics {
 export function formatMetrics(m: Metrics | null | undefined): string {
   if (!m) return "—";
   const pct = (x: number): string => `${(x * 100).toFixed(1)}%`;
-  return `P ${pct(m.precision)} / R ${pct(m.recall)} / cost ${m.cost}${m.unusable ? " ⛔不可用" : ""}`;
+  const pn = (k: number, d: number): string => { const [lo, hi] = wilson(k, d); return `${pct(k / d)} [${pct(lo)}–${pct(hi)}]`; };
+  return `P ${pn(m.tp, m.tp + m.fp)} / R ${pn(m.tp, m.tp + m.fn)} / cost ${m.cost}${m.unusable ? " ⛔不可用" : ""}`;
 }
 
 /** 候选相对父版本是否被接受 —— 控制器用的那条判定链 */

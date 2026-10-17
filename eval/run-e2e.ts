@@ -1,3 +1,4 @@
+import { formatRate } from "../src/rsi/metrics.js";
 import { stamp } from "../src/rsi/testset.js";
 /**
  * 端到端评测 —— **这才是产品的真实指标**。
@@ -395,7 +396,7 @@ async function main(): Promise<void> {
   }
 
   console.log(`\n${"─".repeat(56)}`);
-  console.log(`端到端准确率 : ${ok}/${total}  (${pct(ok, total)})`);
+  console.log(`端到端准确率 : ${formatRate(ok, total)}（95% Wilson）`);
   console.log(`  其中不可答 : ${unanswerable} 条（gold 命题未被抽取层覆盖）`);
   console.log(`\n按 mention 类型:`);
   for (const k of ["explicit_noun", "repeated_surface", "vague_pronoun"] as MentionKind[]) {

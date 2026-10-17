@@ -1,3 +1,4 @@
+import { formatRate } from "../src/rsi/metrics.js";
 import { stamp } from "../src/rsi/testset.js";
 /**
  * 黄金集评测脚本 —— docs/design.md 6.8、docs/rsi-log.md 的实现。
@@ -392,7 +393,7 @@ async function main(): Promise<void> {
   const errored = rows.filter((r) => r.error).length;
 
   console.log(`\n${"─".repeat(56)}`);
-  console.log(`总体准确率: ${ok}/${total}  (${pct(ok, total)})${errored ? `   调用失败 ${errored}` : ""}`);
+  console.log(`总体准确率: ${formatRate(ok, total)}（95% Wilson）${errored ? `   调用失败 ${errored}` : ""}`);
 
   console.log(`\n按 mention 类型:`);
   for (const k of ["explicit_noun", "repeated_surface", "vague_pronoun"] as MentionKind[]) {

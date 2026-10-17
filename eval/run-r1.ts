@@ -1,3 +1,4 @@
+import { formatRate } from "../src/rsi/metrics.js";
 import { stamp } from "../src/rsi/testset.js";
 /**
  * R1 真阳性验证 —— 在**故意写坏的**剧本上测精确率与召回率。
@@ -287,8 +288,8 @@ async function main(): Promise<void> {
   }
 
   console.log(`\n${"─".repeat(62)}`);
-  console.log(`精确率 ${pct(tp, tp + fp)}（真阳性 ${tp} / 报出 ${tp + fp}）`);
-  console.log(`召回率 ${pct(tp, tp + fn)}（抓到 ${tp} / 注入 ${tp + fn}）`);
+  console.log(`精确率 ${formatRate(tp, tp + fp)}（95% Wilson 区间）`);
+  console.log(`召回率 ${formatRate(tp, tp + fn)}（95% Wilson 区间）`);
   console.log(`误报   ${fp} 条`);
 
   if (fps.length) {
