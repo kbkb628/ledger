@@ -57,15 +57,24 @@ async function main(): Promise<void> {
   console.log(`\n[1] 无账本时 check → ${String(before.raw).slice(0, 60)}`);
 
   // ── 2. 建账 ──
+  // 客户端默认请求超时 60s（SDK -32001）。这里放宽到 180s 以便测量真实耗时；
+  // 产品侧的应对是 ingest 分块续跑（每次调用只并入一块），见 server.ts。
+  const LONG = { timeout: 180_000 };
   const script = readFileSync(join(here, "script-jiuzhang.md"), "utf8");
-  console.log(`\n[2] ledger_ingest（${script.length} 字符，约 30-40 秒）…`);
+  console.log(`\n[2] ledger_ingest（${script.length} 字符）…`);
   const t0 = Date.now();
-  const ing = payload(await client.callTool({ name: "ledger_ingest", arguments: { script, overwrite: true } }));
+  const ing = payload(await client.callTool({ name: "ledger_ingest", arguments: { script, overwrite: true } }, undefined, LONG));
   console.log(`     ${Math.round((Date.now() - t0) / 1000)}s →`, JSON.stringify(ing));
 
-  // ── 3. 冻结不变量：重复 ingest 必须被拒绝 ──
-  const again = await client.callTool({ name: "ledger_ingest", arguments: { script } });
-  console.log(`\n[3] 重复 ingest → ${(again as ToolText).isError ? "已拒绝 ✓" : "⚠️ 竟然成功了"}`);
+  // ── 3. 冻结不变量：已建账的场次不重算（无新场次则拒绝，有剩余则续跑） ──
+  const again = (await client.callTool({ name: "ledger_ingest", arguments: { script } }, undefined, LONG)) as ToolText;
+  console.log(
+    `\n[3] 两次 ingest → ${
+      again.isError
+        ? "已拒绝（没有新场次）✓"
+        : `续跑，剩余 ${String((payload(again).progress as { remaining?: number } | undefined)?.remaining ?? "?")} 场`
+    }`,
+  );
 
   // ── 4. check：一条应当泄漏的台词 ──
   const leak = payload(

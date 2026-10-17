@@ -63,7 +63,10 @@ export async function extractScenes(scenes: Scene[], opts: ExtractOptions = {}):
     throw new Error("缺少抽取服务配置。请设置 JUDGE_BASE_URL / JUDGE_API_KEY / JUDGE_MODEL（或 EXTRACT_* 覆盖）");
   }
   const temperature = opts.temperature ?? Number(process.env.EXTRACT_TEMPERATURE ?? 0);
-  const thinking = opts.thinking ?? process.env.EXTRACT_THINKING?.trim() ?? process.env.JUDGE_THINKING?.trim();
+  // 抽取默认**关思考**：thinking 开着时单场 54 字要 47s / $0.0162（22 场整本 ≈ 18 分钟），
+  // 关掉是 2s / $0.0019，而 dev 指标逐项相同（P 50% / R 30% / 误报 3 条）。
+  // 关思考不是「省钱手段」，是**把 MCP 的请求超时（默认 60s）从不可用救回可用**。
+  const thinking = opts.thinking ?? process.env.EXTRACT_THINKING?.trim() ?? process.env.JUDGE_THINKING?.trim() ?? "disabled";
   const priceIn = Number(process.env.JUDGE_PRICE_IN ?? 0);
   const priceOut = Number(process.env.JUDGE_PRICE_OUT ?? 0);
 
@@ -77,24 +80,40 @@ export async function extractScenes(scenes: Scene[], opts: ExtractOptions = {}):
   let rejectedDeltas = 0;
   const started = Date.now();
 
-  for (const scene of scenes) {
+  // ── 抽取：**有界并发**，但后处理仍按原场序 ──
+  //
+  // 逐场抽取彼此独立（每场只依赖自己的原文），串行只是实现简单。
+  // 但 MCP 客户端的请求默认 60s 超时（SDK 实测 `-32001 Request timed out`），
+  // 一本 5–6 场的短剧本串行要 40s+，建账会「看起来坏了」——
+  // 产品路径上的硬伤，必须靠并发压到超时线以内。
+  //
+  // 并发只改**等待方式**，不改任何 prompt，也不改后处理顺序：
+  // 结果先按 index 落位，再顺序做「原文可查」过滤与计数，输出与串行逐字节相同。
+  const concurrency = Math.max(1, Math.min(8, Number(process.env.EXTRACT_CONCURRENCY ?? 4)));
+  const rawResults = await mapLimit(scenes, concurrency, async (scene) => {
     const sceneText = renderScene(scene);
-    let parsed: { propositions: ScenePropositionDraft[]; deltas: KnowledgeDelta[] };
     try {
       const r = await callExtractor({
         baseUrl, apiKey, model, temperature, thinking, priceIn, priceOut,
         prompt: renderExtractionPrompt(scene, sceneText),
       });
-      costUsd += r.costUsd;
-      calls += 1;
-      parsed = r;
+      return { ok: true as const, scene, sceneText, parsed: r, costUsd: r.costUsd };
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
-      failures.push({ scene: scene.id, error: message });
-      if (opts.verbose) process.stdout.write(`  ${scene.id} ✗ ${message.slice(0, 100)}\n`);
+      return { ok: false as const, scene, message };
+    }
+  });
+
+  for (const res of rawResults) {
+    const { scene } = res;
+    if (!res.ok) {
+      failures.push({ scene: scene.id, error: res.message });
+      if (opts.verbose) process.stdout.write(`  ${scene.id} ✗ ${res.message.slice(0, 100)}\n`);
       continue;
     }
-
+    const { sceneText, parsed } = res;
+    costUsd += res.costUsd;
+    calls += 1;
     const kept: ScenePropositionDraft[] = [];
     for (const d of parsed.propositions) {
       const surfaces: ExtractedSurface[] = [];
@@ -146,6 +165,24 @@ export async function extractScenes(scenes: Scene[], opts: ExtractOptions = {}):
     knowledgeDeltas,
     rejectedDeltas,
   };
+}
+
+/**
+ * 有界并发 map：**结果顺序与输入一致**（不是完成顺序）。
+ * 串行→并发的等价性依赖这一点：后处理按原场序跑，输出才与串行相同。
+ */
+async function mapLimit<T, R>(items: T[], limit: number, fn: (item: T, index: number) => Promise<R>): Promise<R[]> {
+  const out = new Array<R>(items.length);
+  let next = 0;
+  const worker = async (): Promise<void> => {
+    for (;;) {
+      const i = next++;
+      if (i >= items.length) return;
+      out[i] = await fn(items[i]!, i);
+    }
+  };
+  await Promise.all(Array.from({ length: Math.min(limit, items.length) }, worker));
+  return out;
 }
 
 /** 原文可查：先直接子串匹配，再去掉所有空白后匹配（容忍换行/空格差异）。 */

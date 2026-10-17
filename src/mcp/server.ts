@@ -85,29 +85,47 @@ function toStored(props: DraftProposition[], existing: StoredProposition[] = [])
   });
 }
 
-async function buildLedger(script: string, series: string): Promise<LedgerFile> {
-  const scenes = parseScenes(script);
-  const extracted = await extractScenes(scenes, {});
-  const merged = await mergeScenes(extracted.scenes, scenes, { provider });
-  const props = toStored(merged.propositions);
-  const { facts } = buildKnowledge(props, extracted.scenes);
-  for (const d of defaultKnowledge(props, scenes)) {
-    facts.push({ ...d, kind: "learns", evidence: "(默认:施事/在场)" });
-  }
+/** 只建空壳：逐场并入时用（不再「一次抽完整本」） */
+function emptyLedger(script: string, series: string): LedgerFile {
   const now = new Date().toISOString();
   return {
-    version: 1,
-    series,
-    path: "",
-    script,
-    sceneOrder: scenes.map((s) => s.id),
-    scenes,
-    propositions: props,
-    knowledge: facts,
-    waivers: [],
-    createdAt: now,
-    updatedAt: now,
+    version: 1, series, path: "", script,
+    sceneOrder: [], scenes: [], propositions: [], knowledge: [], waivers: [],
+    createdAt: now, updatedAt: now,
   };
+}
+
+/**
+ * 并入一场并**立刻落盘**。
+ *
+ * 抽出来是为了让 `ledger_record`（用户逐场写）与 `ledger_ingest`（整本建账）
+ * 走同一条路 —— 整本建账因此变成**可续跑**的：每场落盘后即使客户端超时，
+ * 重试会从断点继续，而不是从头再来。
+ */
+async function recordScene(ledger: LedgerFile, scene: Scene, series: string): Promise<number> {
+  const extracted = await extractScenes([scene], {});
+  const merged = await mergeScenes(extracted.scenes, [scene], {
+    provider,
+    seed: ledger.propositions,
+  });
+  ledger.propositions = toStored(merged.propositions, ledger.propositions);
+  const { facts } = buildKnowledge(ledger.propositions, extracted.scenes);
+  const seen = new Set(ledger.knowledge.map((k) => `${k.character}|${k.propositionId}|${k.scene}`));
+  for (const f of facts) {
+    if (!seen.has(`${f.character}|${f.propositionId}|${f.scene}`)) ledger.knowledge.push(f);
+  }
+  for (const d of defaultKnowledge(ledger.propositions)) {
+    const key = `${d.character}|${d.propositionId}|${d.scene}`;
+    if (!seen.has(key)) ledger.knowledge.push({ ...d, kind: "learns", evidence: "(默认:施事/在场)" });
+  }
+  ledger.scenes.push(scene);
+  ledger.sceneOrder.push(scene.id);
+  saveLedger(ledger);
+  appendDecision({
+    at: new Date().toISOString(), kind: "record", series, scene: scene.id,
+    newPropositions: extracted.scenes[0]?.propositions.length ?? 0,
+  });
+  return extracted.scenes[0]?.propositions.length ?? 0;
 }
 
 const server = new Server(
@@ -218,17 +236,70 @@ server.setRequestHandler(CallToolRequestSchema, async (req) => {
       case "ledger_ingest": {
         const script = String(args.script ?? "");
         if (!script.trim()) throw new Error("script 不能为空");
+        // 每次调用只并入一个批次：MCP 客户端的请求默认 60s 超时，
+        // 整本一次抽完必然超时（实测 23 场 / 2818 字 → -32001 Request timed out）。
+        // 逐场落盘 + 批次预算 ⇒ 超时不再是失败，重试即续跑。
+        const allScenes = parseScenes(script);
         const existing = loadLedger(ledgerHome(), series);
-        if (existing && args.overwrite !== true) {
+        const ledger =
+          existing && args.overwrite !== true
+            ? existing
+            : existing && args.overwrite === true
+              ? { ...emptyLedger(script, series), createdAt: existing.createdAt }
+              : emptyLedger(script, series);
+        const done = new Set(ledger.sceneOrder);
+        const todo = allScenes.filter((s) => !done.has(s.id));
+        if (existing && args.overwrite !== true && todo.length === 0) {
           throw new Error(
-            `账本已冻结（${existing.path}，${existing.propositions.length} 条命题）。` +
-              `账本一旦落盘就不再重算 —— 新增戏份请用 ledger_record 增量并入；确需重建请传 overwrite=true（会丢失既有豁免）。`,
+            `账本已冻结（${existing.path}，${existing.propositions.length} 条命题，${done.size} 场已建账），` +
+              `这份剧本没有新的场次。新增剧情请用 ledger_record 逐场并入。`,
           );
         }
-        const ledger = await buildLedger(script, series);
-        saveLedger(ledger);
+        saveLedger(ledger); // 先落空壳/保留既有，保证 path 与后续增量一致
+
+        // 主闸是**时间预算**，条数只是上限。
+        //
+        // ⚠️ 这里必须「一次抽一块、只归并一次」：先按场逐个 recordScene 会让每场都对
+        // 全量种子重做归并，复杂度接近平方 —— 实测 23 场会撞穿 60s 超时；
+        // 而「整块抽取（内部有界并发）+ 一次归并」只要 15s（抽取 10.3s + 归并 4.5s）。
+        const budget = Math.max(1, Number(args.maxScenes ?? process.env.INGEST_MAX_SCENES ?? 40));
+        const chunk = todo.slice(0, budget);
+        let ingested = 0;
+        const failures: Array<{ scene: string; error: string }> = [];
+        if (chunk.length) {
+          const extracted = await extractScenes(chunk, {});
+          failures.push(...extracted.failures);
+          const merged = await mergeScenes(extracted.scenes, chunk, { provider, seed: ledger.propositions });
+          ledger.propositions = toStored(merged.propositions, ledger.propositions);
+          const { facts } = buildKnowledge(ledger.propositions, extracted.scenes);
+          const seen = new Set(ledger.knowledge.map((k) => `${k.character}|${k.propositionId}|${k.scene}`));
+          for (const f of facts) {
+            if (!seen.has(`${f.character}|${f.propositionId}|${f.scene}`)) ledger.knowledge.push(f);
+          }
+          for (const d of defaultKnowledge(ledger.propositions)) {
+            const key = `${d.character}|${d.propositionId}|${d.scene}`;
+            if (!seen.has(key)) ledger.knowledge.push({ ...d, kind: "learns", evidence: "(默认:施事/在场)" });
+          }
+          const failedIds = new Set(extracted.failures.map((f) => f.scene));
+          for (const s of chunk) {
+            if (failedIds.has(s.id)) continue;
+            ledger.scenes.push(s);
+            ledger.sceneOrder.push(s.id);
+            ingested += 1;
+          }
+          saveLedger(ledger);
+        }
+        const remaining = todo.length - ingested - failures.length;
         appendDecision({ at: new Date().toISOString(), kind: "ingest", series, ...summarize(ledger) });
-        return text({ ok: true, ...summarize(ledger) });
+        return text({
+          ok: failures.length === 0,
+          ...summarize(ledger),
+          progress: { total: allScenes.length, done: ledger.sceneOrder.length, thisCall: ingested, remaining },
+          ...(remaining > 0
+            ? { next: `还有 ${remaining} 场未建账：再用同样的 script 调用一次 ledger_ingest 即可接着建（已建的场次不会重算）。` }
+            : {}),
+          ...(failures.length ? { failures } : {}),
+        });
       }
 
       case "ledger_record": {
@@ -240,30 +311,8 @@ server.setRequestHandler(CallToolRequestSchema, async (req) => {
           throw new Error(`场景 ${sceneId} 已在账本里（账本冻结，不重算）。改剧情请用新的场景 id。`);
         }
         const scene: Scene = { id: sceneId, meta: [], lines: body.split(/\r?\n/).map((s) => s.trim()).filter(Boolean) };
-        const extracted = await extractScenes([scene], {});
-        const merged = await mergeScenes(extracted.scenes, [scene], {
-          provider,
-          seed: ledger.propositions,
-        });
-        ledger.propositions = toStored(merged.propositions, ledger.propositions);
-        const { facts } = buildKnowledge(ledger.propositions, extracted.scenes);
-        // 只追加新的知识记录，保留已冻结的
-        const seen = new Set(ledger.knowledge.map((k) => `${k.character}|${k.propositionId}|${k.scene}`));
-        for (const f of facts) {
-          if (!seen.has(`${f.character}|${f.propositionId}|${f.scene}`)) ledger.knowledge.push(f);
-        }
-        for (const d of defaultKnowledge(ledger.propositions)) {
-          const key = `${d.character}|${d.propositionId}|${d.scene}`;
-          if (!seen.has(key)) ledger.knowledge.push({ ...d, kind: "learns", evidence: "(默认:施事/在场)" });
-        }
-        ledger.scenes.push(scene);
-        ledger.sceneOrder.push(sceneId);
-        saveLedger(ledger);
-        appendDecision({
-          at: new Date().toISOString(), kind: "record", series, scene: sceneId,
-          newPropositions: extracted.scenes[0]?.propositions.length ?? 0,
-        });
-        return text({ ok: true, scene: sceneId, ...summarize(ledger) });
+        const newProps = await recordScene(ledger, scene, series);
+        return text({ ok: true, scene: sceneId, newPropositions: newProps, ...summarize(ledger) });
       }
 
       case "ledger_check": {
