@@ -70,7 +70,18 @@ function loadEnv(path: string): void {
 }
 loadEnv(join(process.cwd(), ".env"));
 
-const provider = new JevProvider();
+/**
+ * 判定层**延迟创建**。
+ *
+ * 以前是模块级 `new JevProvider()`：缺 key 时 server 在 import 阶段就抛异常退出，
+ * MCP 客户端看到的是 `-32000 Connection closed` —— 信息量为零，用户不知道是缺 key。
+ * 现在改成第一次真要用时才创建，异常落进那一次工具调用的错误里，客户端能读到原因。
+ */
+let providerRef: JevProvider | null = null;
+function provider(): JevProvider {
+  providerRef ??= new JevProvider();
+  return providerRef;
+}
 
 /** 把抽出的 DraftProposition 转成落盘形态 */
 function toStored(props: DraftProposition[], existing: StoredProposition[] = []): StoredProposition[] {
@@ -105,7 +116,7 @@ function emptyLedger(script: string, series: string): LedgerFile {
 async function recordScene(ledger: LedgerFile, scene: Scene, series: string): Promise<number> {
   const extracted = await extractScenes([scene], {});
   const merged = await mergeScenes(extracted.scenes, [scene], {
-    provider,
+    provider: provider(),
     seed: ledger.propositions,
   });
   ledger.propositions = toStored(merged.propositions, ledger.propositions);
@@ -269,7 +280,7 @@ server.setRequestHandler(CallToolRequestSchema, async (req) => {
         if (chunk.length) {
           const extracted = await extractScenes(chunk, {});
           failures.push(...extracted.failures);
-          const merged = await mergeScenes(extracted.scenes, chunk, { provider, seed: ledger.propositions });
+          const merged = await mergeScenes(extracted.scenes, chunk, { provider: provider(), seed: ledger.propositions });
           ledger.propositions = toStored(merged.propositions, ledger.propositions);
           const { facts } = buildKnowledge(ledger.propositions, extracted.scenes);
           const seen = new Set(ledger.knowledge.map((k) => `${k.character}|${k.propositionId}|${k.scene}`));
@@ -350,7 +361,7 @@ server.setRequestHandler(CallToolRequestSchema, async (req) => {
         // 使用点：命中账本缓存则复用（wiki 第三条通道），否则重算并写回
         const stamps = { scorer: scorerStamp("r1"), contextProtocol: contextStamp() };
         const rawUsages = buildUsages(ledger.propositions, ledger.scenes, { skipNames: true }).usages;
-        const resolvedU = await resolveUsages(ledger.propositions, { usages: ledger.usages, stamps: ledger.usageStamps }, () => rawUsages, { provider, verify: process.env.R1_USAGE_VERIFY !== "0", stamps });
+        const resolvedU = await resolveUsages(ledger.propositions, { usages: ledger.usages, stamps: ledger.usageStamps }, () => rawUsages, { provider: provider(), verify: process.env.R1_USAGE_VERIFY !== "0", stamps });
         if (!resolvedU.fromCache) { ledger.usages = resolvedU.usages; ledger.usageStamps = resolvedU.stamps; saveLedger(ledger); }
         const usages = resolvedU.usages;
         const idx = new Map(ledger.sceneOrder.map((s, i) => [s, i]));

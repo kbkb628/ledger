@@ -77,10 +77,16 @@ async function main(): Promise<void> {
 
   const transport = new StdioClientTransport({
     command: "npx",
-    args: ["-y", tgz],
+    // ⚠️ 必须用**相对** spec：`npx -y C:\...\ledger-0.1.0.tgz` 在 Windows 上会静默什么都不做
+    // （exit 0、无输出），客户端只会看到 `-32000 Connection closed`。相对路径 + cwd 才行。
+    args: ["-y", `./${tgz.replace(/^.*[\\/]/, "")}`],
     cwd: work,
     env,
-    stderr: "inherit",
+    // pipe 而不是 inherit：子进程如果连不起来，stderr 才是唯一线索（-32000 什么也不说）
+    stderr: "pipe",
+  });
+  transport.stderr?.on("data", (b: Buffer) => {
+    for (const l of b.toString("utf8").split(/\r?\n/)) if (l.trim()) console.log(`    [server] ${l}`);
   });
   const client = new Client({ name: "ledger-npx-smoke", version: "0" }, { capabilities: {} });
   await client.connect(transport);

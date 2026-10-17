@@ -27,8 +27,19 @@ AI 短剧的生产工具已经很多，但它们管的是**成本**：花了多�
 ```bash
 npm install
 cp .env.example .env      # 填入 JEV_API_KEY 与 JUDGE_API_KEY，见下
-npm run mcp               # 启动 MCP server（stdio）
+npm run mcp               # 仓库内开发用：tsx 直接起 server（stdio）
 ```
+
+打包成可安装的 MCP server（`bin` → `dist/mcp.js`，esbuild 单文件，约 70 KB）：
+
+```bash
+npm run build                       # → dist/mcp.js
+npm pack                            # → ledger-0.1.0.tgz（prepack 会自动构建）
+npx -y ./ledger-0.1.0.tgz           # 在任意目录里就能起 server
+```
+
+`package.json` 里 `bin: { "ledger-mcp": "dist/mcp.js" }`、`files: ["dist"]`，
+所以装出来的包只需要 node ≥20，不需要 tsx，也不需要在仓库里。
 
 ### 需要的两个 key
 
@@ -43,38 +54,77 @@ npm run mcp               # 启动 MCP server（stdio）
 
 ## 挂到本地 agent 上
 
+两条接入方式都在本机真连过，配置与输出见本节末尾的「接入记录」。密钥一律走环境变量或 `.env`，
+**不要写进配置文件** —— server 启动时会读 `cwd/.env`（`src/mcp/server.ts` 的 `loadEnv`），
+所以把 `cwd` 指到你自己的剧本目录、在那放一份 `.env` 就够了。
+
 ### DeepSeek Harness（DSH）
 
+写进当前 profile 的 `cordis.patch.yml`（本机路径 `~/.dsh/profiles/desktop/cordis.patch.yml`）：
+
 ```yaml
-- id: mcp-ledger
-  name: '@deepseek-ai/dsh-mcp-client'
-  config:
-    serverName: ledger
-    transport: stdio
-    command: npx
-    args: ['tsx', 'src/mcp/server.ts']
-    cwd: /path/to/your/script-project
-    env:
-      LEDGER_HOME: /path/to/your/script-project/.ledger
-      JEV_API_KEY: !!js process.env.JEV_API_KEY
-    toolCallTimeoutMs: 120000      # 整本 ingest 约 40 秒，默认 60 秒够但偏紧
+- insert:
+    - id: mcp-ledger
+      name: '@deepseek-ai/dsh-mcp-client'
+      config:
+        serverName: ledger
+        transport: stdio
+        command: node
+        args: ['E:\恺英\dist\mcp.js']      # 换成你的路径；用打包产物，不要指向 src
+        cwd: 'E:\恺英'                     # server 从这个目录读 .env 与 .ledger
+        toolCallTimeoutMs: 180000          # 整本建账约 14–40 秒，默认 60 秒偏紧
 ```
 
+工具随后以 `mcp__ledger__ledger_check` 这类名字出现在模型工具表里。**改动需要重启 harness 生效**
+（`patchReload: live` 对新会话生效，已在跑的会话工具表不会热插）。
+
 ### Claude Code / Cursor / 其他 MCP 客户端
+
+Claude Code 一行：
+
+```bash
+claude mcp add --scope user ledger \
+  node /abs/path/to/node_modules/ledger/dist/mcp.js \
+  -e JEV_API_KEY=... -e JEV_BASE_URL=... -e JEV_MODEL=... -e LEDGER_HOME=/abs/path/to/.ledger
+```
+
+> `-e` 是可变参数，**必须放在命令后面**，否则会把 `<name>` 一起吃掉（实测报 `missing required argument`）。
+
+其他 MCP 客户端的等价 JSON：
 
 ```json
 {
   "mcpServers": {
     "ledger": {
-      "command": "npx",
-      "args": ["tsx", "/path/to/ledger/src/mcp/server.ts"],
-      "env": { "LEDGER_HOME": "/path/to/your/script-project/.ledger" }
+      "command": "node",
+      "args": ["/abs/path/to/node_modules/ledger/dist/mcp.js"],
+      "env": { "LEDGER_HOME": "/abs/path/to/script-project/.ledger" }
     }
   }
 }
 ```
 
 装好后工具以 `mcp__ledger__*` 出现。
+
+### 接入记录（本机实测，2026-10-18）
+
+**① 空目录里从 tgz 装起来跑完整路径**（`npm run npx:smoke`，临时目录在仓库之外、未设 `LEDGER_HOME`）：
+
+```
+打包：ledger-0.1.0.tgz（27 KB）
+✅ listTools 返回 6 个工具 — ledger_ingest,ledger_record,ledger_check,ledger_audit,ledger_page,ledger_waive
+✅ ledger_ingest 建成账本 — 13s · {"ok":true,"series":"default","ledgerPath":"…\Temp\ledger-npx-1D9Cpg\.ledger\default\…”}
+✅ 账本落在 cwd/.ledger（未设 LEDGER_HOME）
+✅ check 拦住泄漏台词 — ⚠️ 1 处泄漏：「你三年前在码头做了什么」→ 陆见深三年前在码头做了某件事
+✅ check 放过正常台词
+```
+
+**② Claude Code**：`claude mcp get ledger` → `Status: ✓ Connected`（`node …/node_modules/ledger/dist/mcp.js`，
+env 四项齐全）。注意 `claude -p` 由模型发起工具调用需要先在 CLI 里 `/login`；本机未登录，
+所以上面第 ① 条的真实拦截输出是用 MCP SDK 客户端在**同一个安装产物**上取到的。
+
+**③ DSH**：配置已写入 `~/.dsh/profiles/desktop/cordis.patch.yml`（上面那段），重启 harness 后
+`mcp__ledger__ledger_check` 进入工具表。配置里不写 key 的原因见本节开头。
 
 ## 六个工具
 

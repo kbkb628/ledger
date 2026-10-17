@@ -112,19 +112,25 @@ export function experimentsDir(root = process.cwd()): string {
   return join(root, "experiments");
 }
 
+/** 读一条记录。**剥 BOM**：Windows 上 Set-Content/记事本写出的 UTF-8 会带 BOM，
+ *  一个字节就让 JSON.parse 抛错，进而 `nextExperimentId` 连整个库都读不出来（exp-033 就踩过）。 */
+function readRecord(path: string): ExperimentRecord {
+  return JSON.parse(readFileSync(path, "utf8").replace(/^\uFEFF/, "")) as ExperimentRecord;
+}
+
 export function listExperiments(root = process.cwd()): ExperimentRecord[] {
   const dir = experimentsDir(root);
   if (!existsSync(dir)) return [];
   return readdirSync(dir)
     .filter((f) => f.endsWith(".json"))
-    .map((f) => JSON.parse(readFileSync(join(dir, f), "utf8")) as ExperimentRecord)
+    .map((f) => readRecord(join(dir, f)))
     .sort((a, b) => a.id.localeCompare(b.id));
 }
 
 export function loadExperiment(id: string, root = process.cwd()): ExperimentRecord {
   const p = join(experimentsDir(root), `${id}.json`);
   if (!existsSync(p)) throw new Error(`没有实验记录 ${id}`);
-  return JSON.parse(readFileSync(p, "utf8")) as ExperimentRecord;
+  return readRecord(p);
 }
 
 const pad = (n: number): string => String(n).padStart(3, "0");

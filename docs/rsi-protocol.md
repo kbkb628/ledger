@@ -973,3 +973,37 @@ dev 只有 10 条标注（一条 = 10pp）、`--remerge` 重复本身在 tp 3/2 
 **处置：goal 标记 blocked，等人在「扩标注集做测量回合」与「调整判据」之间选一个。**
 所有相关开关默认关（`R1_MERGE_EXACT` / `R1_NO_SELF_ESTABLISH` / `R1_SHOULD_ALLOW` / `R1_LEAK_JUDGE`），
 dev 复核仍 P 50.0% / R 30.0%，产品行为不变。
+
+### 回合 35（交付面回合）能装、能连：把 MCP server 打成包，并在三个位置验证它真的能起来
+
+**这一回合不做能力裁决**：不动抽取、归并、R1 规则，不动标注集。dev 缓存、real 冻结账本、
+holdout 全部没有触碰，三套数字一个都没变。它解决的是「卖点没有证据」：
+`bin` 之前指向 `src/mcp/server.ts`，而那是 tsx 才能解释的 TypeScript —— 装到空目录里根本没有 tsx。
+
+**做法**
+
+1. `esbuild` 单文件 `dist/mcp.js`（保留 shebang，`@modelcontextprotocol/sdk` 留在 dependencies，
+   `prepack` 自动构建），`bin → dist/mcp.js`、`files: ["dist", "README.md"]`、`engines: node>=20`。
+2. 新增 `eval/npx-smoke.ts`：在**系统临时目录**（仓库之外、不设 `LEDGER_HOME`）里
+   `npm pack` → `npx -y ./ledger-0.1.0.tgz` → 真 MCP 客户端走 listTools / ingest / check。
+3. 产品缺陷：`JevProvider` 原是**模块级** `new`，缺 key 时 server 在 import 阶段就退出，
+   客户端只看到 `-32000 Connection closed` —— 零信息量。改成延迟创建，异常落进那一次工具调用。
+4. 记录缺陷：`experiments/exp-033.json` 带 UTF-8 BOM（Windows `Set-Content` 的默认行为），
+   `JSON.parse` 抛错 → `nextExperimentId` 连整个实验库都读不出来。剥 BOM + 在读取处兜底。
+
+**实测（本机）**
+
+| 位置 | 结果 |
+|---|---|
+| 空目录 + `npx -y ./tgz` | 6 个工具 · ingest 13s · 默认账本落 `cwd/.ledger` · `check` 拦住一条、放过一条 —— 全过 |
+| Claude Code | `claude mcp get ledger` → `Status: ✓ Connected`（装的是 `node_modules/ledger/dist/mcp.js`，四项 env 齐全） |
+| DSH | 配置写进 `~/.dsh/profiles/desktop/cordis.patch.yml`（`patchReload: live`），**需重启 harness** 才进工具表 |
+
+**三个坑（都值得记）**
+
+1. Windows 上 `npx -y <绝对路径>.tgz` 会**静默什么都不做**（exit 0、无输出），客户端只能看到
+   `-32000 Connection closed`；必须是相对 spec `./x.tgz` + `cwd`。
+2. `claude mcp add` 的 `-e` 是**可变参数**：放在 `<name>` 前面会把 name 一起吃掉，
+   报 `missing required argument 'name'`。必须 `<name> <cmd> <args> -e ...`。
+3. DSH 的 MCP 配置要写进**正在跑的那个 profile** —— 本机跑的是 `desktop`，
+   先写 `web` 白折腾一轮（无进程、无日志、无从判断）。
