@@ -238,7 +238,15 @@ async function main(): Promise<void> {
         const knows = facts.filter((f) => f.character === a.character && f.propositionId === p.id);
         console.log(`      ${p.id} ${p.canonical.slice(0, 34)}　${a.character} 的知识记录 ${knows.length} 条`);
       }
-      // 桶的原料：命题是否存在、知情记录有多少、其中多少来自默认层
+      // 桶的原料：命题是否存在、该处有没有使用点、最早的知情记录来自哪里
+      const usageAtSite = usages.some(
+        (u) => u.scene === a.scene && u.character === a.character && owners.some((p) => p.id === u.propositionId),
+      );
+      const knowledge = owners
+        .flatMap((p) => facts.filter((f) => f.character === a.character && f.propositionId === p.id))
+        .sort((x, y) => (sceneOrder.get(x.scene) ?? 0) - (sceneOrder.get(y.scene) ?? 0));
+      const earliest = knowledge[0];
+
       trace.push(
         JSON.stringify({
           kind: "annotation",
@@ -249,6 +257,10 @@ async function main(): Promise<void> {
           character: a.character,
           surface: a.surface,
           ownerPropositions: owners.map((p) => p.id),
+          usageAtSite,
+          earliestKnowledge: earliest
+            ? { scene: earliest.scene, source: earliest.source ?? "extracted", evidence: earliest.evidence }
+            : null,
           knowledgeCounts: owners.map((p) => ({
             propositionId: p.id,
             total: facts.filter((f) => f.character === a.character && f.propositionId === p.id).length,

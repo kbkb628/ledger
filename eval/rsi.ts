@@ -27,7 +27,9 @@ import {
   type FailureBucket,
   FAILURE_BUCKETS,
 } from "../src/rsi/experiments.js";
+import { analyze, type TraceEntry } from "../src/rsi/buckets.js";
 import { computeMetrics, formatMetrics, judgeCandidate } from "../src/rsi/metrics.js";
+import { renderProposal } from "../src/rsi/proposer.js";
 import { versionFingerprint } from "../src/rsi/version.js";
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -129,6 +131,32 @@ async function main(): Promise<void> {
       return;
     }
 
+    case "analyze": {
+      const runId = process.argv[3];
+      if (!runId) throw new Error("用法：analyze <run-id>");
+      const tracePath = join(root, "runs", runId, "trace.jsonl");
+      if (!existsSync(tracePath)) throw new Error(`没有轨迹文件 ${tracePath}`);
+      const entries = readFileSync(tracePath, "utf8")
+        .split(/\r?\n/)
+        .filter(Boolean)
+        .map((l) => JSON.parse(l) as TraceEntry)
+        .filter((e) => e.kind === "annotation" || e.kind === "issue");
+
+      const report = analyze(entries);
+      console.log(`\n诊断 · run ${runId}（失败共 ${report.classified.length} 条）\n`);
+      for (const h of report.histogram) {
+        console.log(`  ${h.bucket.padEnd(20)} ${String(h.count).padStart(2)}  ${"█".repeat(h.count)}`);
+        for (const w of h.why.slice(0, 3)) console.log(`      · ${w}`);
+        if (h.why.length > 3) console.log(`      …另 ${h.why.length - 3} 条同类`);
+      }
+      if (report.top) {
+        console.log(`\n本轮最大洞：${report.top.bucket}（${report.top.count} 条）\n`);
+        console.log(renderProposal(report.top.bucket, report.top.count));
+      }
+      console.log("");
+      return;
+    }
+
     case "judge": {
       const id = process.argv[3];
       if (!id) throw new Error("用法：judge <exp-id>");
@@ -171,7 +199,7 @@ async function main(): Promise<void> {
 
     default:
       console.log(`未知命令：${cmd}`);
-      console.log("可用：version / list / show / table / new / judge / accept / reject");
+      console.log("可用：version / list / show / table / new / judge / analyze / accept / reject");
   }
 }
 
