@@ -1,0 +1,35 @@
+{
+  "id": "exp-022",
+  "parent": "exp-020",
+  "createdAt": "2026-10-17T12:54:49.083Z",
+  "version": {
+    "hash": "22e0fc6571be",
+    "commit": "e080e42-dirty",
+    "extractModel": "deepseek-v4-pro",
+    "judgeModel": "jev-latest",
+    "promptHash": "0b8239f6aa03",
+    "flags": {
+      "R1_AGENT": "default",
+      "R1_PRESENCE": "default",
+      "R1_UNITS": "default",
+      "R1_CHAR_HINT": "default",
+      "R1_SHORTKEY": "default",
+      "R1_KEY_LEN": "default",
+      "R1_KEY_FREQ": "default",
+      "E2E_PAD": "default",
+      "EVAL_CONTEXT": "default",
+      "EVAL_ORDER": "default",
+      "JEV_CRITERIA_MODE": "default"
+    }
+  },
+  "change": {
+    "bucket": "other",
+    "hypothesis": "评测结果没有声明「模型到底看到了什么上下文」，导致跨上下文配置的分数被误当可比（P1-1 就是例子：上下文一句→两句，准确率 91.7%→100%）",
+    "file": "src/rsi/context-protocol.ts",
+    "switch": "NONE",
+    "params": {}
+  },
+  "result": {},
+  "status": "accepted",
+  "note": "测量回合：上下文不变量进结果契约，重建基线"
+}

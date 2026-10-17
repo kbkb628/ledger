@@ -1,3 +1,4 @@
+import { contextStamp } from "../src/rsi/context-protocol.js";
 import { scorerStamp } from "../src/rsi/scorer.js";
 import { stamp } from "../src/rsi/testset.js";
 /**
@@ -147,7 +148,7 @@ async function main(): Promise<void> {
       knowledge: facts.length,
       issueRate: usages.length === 0 ? 0 : Number((issues.length / usages.length).toFixed(4)),
     },
-    extra: { script: SCRIPT, cache: CACHE, nameSkip: process.env.R1_NAME_SKIP !== "0", testset: stamp("chaguan"), scorer: scorerStamp("r1") },
+    extra: { script: SCRIPT, cache: CACHE, nameSkip: process.env.R1_NAME_SKIP !== "0", testset: stamp("chaguan"), scorer: scorerStamp("r1"), contextProtocol: contextStamp() },
     evalCost: { usd: 0, seconds: 0 },
   }, issues.map((i) => JSON.stringify({ kind: "issue", scene: i.useScene, character: i.character, surface: i.surface, propositionId: i.propositionId })));
 }

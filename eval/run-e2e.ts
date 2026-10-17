@@ -1,3 +1,4 @@
+import { contextStamp } from "../src/rsi/context-protocol.js";
 import { scorerStamp } from "../src/rsi/scorer.js";
 import { formatRate } from "../src/rsi/metrics.js";
 import { stamp } from "../src/rsi/testset.js";
@@ -441,6 +442,7 @@ async function main(): Promise<void> {
         goldenSet: process.env.GOLDENSET ?? "goldenset.json",
         testset: stamp("golden"),
         scorer: scorerStamp("e2e"),
+        contextProtocol: contextStamp(),
       },
       evalCost: { usd: costUsd, seconds: 0 },
     },

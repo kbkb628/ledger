@@ -1,0 +1,47 @@
+{
+  "id": "exp-021",
+  "parent": "exp-020",
+  "createdAt": "2026-10-17T12:48:07.473Z",
+  "version": {
+    "hash": "22e0fc6571be",
+    "commit": "e080e42-dirty",
+    "extractModel": "deepseek-v4-pro",
+    "judgeModel": "jev-latest",
+    "promptHash": "0b8239f6aa03",
+    "flags": {
+      "R1_AGENT": "default",
+      "R1_PRESENCE": "default",
+      "R1_UNITS": "default",
+      "R1_CHAR_HINT": "default",
+      "R1_SHORTKEY": "default",
+      "R1_KEY_LEN": "default",
+      "R1_KEY_FREQ": "default",
+      "E2E_PAD": "default",
+      "EVAL_CONTEXT": "default",
+      "EVAL_ORDER": "default",
+      "JEV_CRITERIA_MODE": "default"
+    }
+  },
+  "change": {
+    "bucket": "masked_by_presence",
+    "hypothesis": "泄漏台词本身是该事实的首次出现，于是在场者规则把泄漏者自己的话当成了他得知的证据（STAGE 的「不得未来泄漏」）",
+    "file": "src/audit/r1.ts",
+    "switch": "R1_NO_SELF_ESTABLISH",
+    "params": {}
+  },
+  "result": {
+    "dev": {
+      "reported": 18,
+      "tp": 6,
+      "fp": 12,
+      "fn": 4,
+      "precision": 0.3333333333333333,
+      "recall": 0.6,
+      "cost": 24,
+      "fpRate": 0.6666666666666666,
+      "unusable": false
+    }
+  },
+  "status": "rejected",
+  "note": "精确率跌 17-18pp、cost 不降；需先补 should_allow 类规则吸收连带误报，再复验"
+}

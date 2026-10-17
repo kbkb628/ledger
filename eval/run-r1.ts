@@ -1,3 +1,4 @@
+import { contextStamp } from "../src/rsi/context-protocol.js";
 import { scorerStamp } from "../src/rsi/scorer.js";
 import { formatRate } from "../src/rsi/metrics.js";
 import { stamp } from "../src/rsi/testset.js";
@@ -80,6 +81,8 @@ const FLAGS = {
   units: flag("R1_UNITS", false),
   /** 归并判定时附人物别称表（实测让 P/R 从 66.7% 掉到 50%/33.3% → 默认关闭） */
   charHint: flag("R1_CHAR_HINT", false),
+  /** 不得用自己台词作为自己知情来源（治 masked_by_presence） */
+  noSelfEstablish: flag("R1_NO_SELF_ESTABLISH", false),
   /** 过滤「纯人名」说法（提到人名 ≠ 使用命题，真实剧本测试暴露） */
   nameSkip: flag("R1_NAME_SKIP", true),
   /** 在场者规则改从「确立场」起算（治 masked_by_presence） */
@@ -157,7 +160,7 @@ async function main(): Promise<void> {
   const ledger = cache.merged.propositions;
 
   const { facts } = buildKnowledge(ledger, cache.extracted.scenes);
-  const defaults = defaultKnowledge(ledger, scenes, { agent: FLAGS.agent, presence: FLAGS.presence, established: FLAGS.established });
+  const defaults = defaultKnowledge(ledger, scenes, { agent: FLAGS.agent, presence: FLAGS.presence, established: FLAGS.established, noSelfEstablish: FLAGS.noSelfEstablish });
   for (const d of defaults) {
     facts.push({ ...d, kind: "learns", evidence: "(默认:施事/在场)", source: "default" });
   }
@@ -320,6 +323,7 @@ async function main(): Promise<void> {
         split: useHoldout ? "all" : "dev",
         testset: stamp("leaks"),
         scorer: scorerStamp("r1"),
+        contextProtocol: contextStamp(),
         ledger: { propositions: ledger.length, usages: usages.length, knowledge: facts.length },
         flags: FLAGS,
         ledgerCache: CACHE,

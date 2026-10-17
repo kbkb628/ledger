@@ -1,5 +1,5 @@
 {
-  "at": "2026-10-17T12:37:18.196Z",
+  "at": "2026-10-17T12:54:42.984Z",
   "k": 3,
   "config": {
     "judge": {
@@ -21,21 +21,21 @@
     }
   },
   "version": {
-    "hash": "7c13a4ccdec8",
-    "commit": "f0dada7",
+    "hash": "22e0fc6571be",
+    "commit": "e080e42-dirty",
     "promptHash": "0b8239f6aa03"
   },
   "judge": {
-    "ok": 43,
+    "ok": 44,
     "total": 48
   },
   "e2e": {
-    "median": 26,
+    "median": 27,
     "total": 48,
     "trials": [
-      26,
-      26,
-      25
+      24,
+      29,
+      27
     ]
   },
   "r1": {
@@ -47,7 +47,7 @@
     "cost": 24,
     "trials": [
       24,
-      24,
+      20,
       24
     ]
   },
@@ -57,8 +57,8 @@
   },
   "scorers": {
     "judge": "judge@4fa9eeed25f3",
-    "e2e": "e2e@814709cd595e",
-    "r1": "r1@93e022118bf3",
-    "real": "r1@93e022118bf3"
+    "e2e": "e2e@f9a6e1610bef",
+    "r1": "r1@512f41d0572d",
+    "real": "r1@512f41d0572d"
   }
 }

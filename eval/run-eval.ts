@@ -1,3 +1,4 @@
+import { contextStamp } from "../src/rsi/context-protocol.js";
 import { scorerStamp } from "../src/rsi/scorer.js";
 import { formatRate } from "../src/rsi/metrics.js";
 import { stamp } from "../src/rsi/testset.js";
@@ -501,6 +502,7 @@ async function main(): Promise<void> {
         order: process.env.EVAL_ORDER ?? "recall",
         testset: stamp("golden"),
         scorer: scorerStamp("judge"),
+        contextProtocol: contextStamp(),
       },
       evalCost: { usd: cost, seconds: 0 },
     },

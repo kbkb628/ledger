@@ -244,16 +244,57 @@ function establishedSceneOf(p: DraftProposition): string | undefined {
   return p.establishedAt === undefined ? p.scenes[0] : (p.establishedAt ?? p.scenes[0]);
 }
 
+
+/**
+ * 某角色视角下，这条命题**首次由他人披露**的场次。
+ *
+ * ## 为什么需要（这是「不得自证」原则的落地）
+ *
+ * `masked_by_presence` 这个洞的机制是：**泄漏台词本身就是该事实的首次出现**，
+ * 于是「首见场景在场者得知」把泄漏者自己那句话，变成了他"得知"的证据 —— 泄漏自我掩盖。
+ *
+ * 这与 STAGE 基准里那条标注约束是同一件事：
+ * **「同场次后续证据不得回流为前置知识」**（防 future leakage）。
+ *
+ * 所以规则应当是：**一个人不能用自己的台词作为自己知情的来源。**
+ * 只有当某条命题的说法出现在**别人说的台词**（或叙述行）里，且该角色在场，才算他得知。
+ *
+ * 副作用（必须承认）：如果某条事实全剧只有当事人自己说过（如「老爷半年前就走了」），
+ * 这条规则会让他失去"在场知情"，从而可能误报。这类应由「当事人/亲历」类规则覆盖，
+ * 不能靠这条兜底 —— 所以要实测净收益。
+ */
+function firstDisclosureScene(
+  p: DraftProposition,
+  character: string,
+  scenes: Scene[],
+): string | undefined {
+  const surfaces = [...new Set(p.aliases.map((a) => a.surface.replace(/\s+/g, "")))].filter(
+    (s) => s.length >= 3,
+  );
+  if (surfaces.length === 0) return undefined;
+  for (const scene of scenes) {
+    for (const line of scene.lines) {
+      const flat = line.replace(/\s+/g, "");
+      if (!surfaces.some((s) => flat.includes(s))) continue;
+      const sp = speakerOf(line);
+      if (sp === character) continue; // 自己说的，不能自证
+      return scene.id;
+    }
+  }
+  return undefined;
+}
 export function defaultKnowledge(
   ledger: DraftProposition[],
   scenes?: Scene[],
-  opts: { agent?: boolean; presence?: boolean; established?: boolean } = {},
+  opts: { agent?: boolean; presence?: boolean; established?: boolean; noSelfEstablish?: boolean } = {},
 ): Array<{ character: string; propositionId: string; scene: string }> {
   const useAgent = opts.agent ?? true;
   const usePresence = opts.presence ?? true;
   // R1_ESTABLISHED：在场者规则从「确立场」而不是「首见场」起算。
   // 关掉即退回旧行为（首见场），用于 A/B 与回退。
   const useEstablished = opts.established ?? true;
+  // R1_NO_SELF_ESTABLISH：不得用自己台词作为自己知情来源（治 masked_by_presence）
+  const noSelfEstablish = opts.noSelfEstablish ?? false;
   const out: Array<{ character: string; propositionId: string; scene: string }> = [];
   const byId = new Map((scenes ?? []).map((s) => [s.id, s]));
 
@@ -273,6 +314,27 @@ export function defaultKnowledge(
       const grantScene = useEstablished ? (establishedSceneOf(p) ?? scene) : scene;
       for (const who of presentCharacters(byId.get(grantScene))) {
         if (p.agents.includes(who)) continue; // 已由规则 1 覆盖
+        // 规则 2b：**一个人不能用自己的台词作为自己知情的来源**（R1_NO_SELF_ESTABLISH）。
+        // 这是 STAGE 那条「同场次后续证据不得回流为前置知识」在本项目里的落地。
+        //
+        // ⚠️ 严格版（把知情推迟到"他人首次披露场"）实测代价过大：
+        // 召回 30%→60%，但误报 3→12、cost 持平 24、精确率 −16.7pp → 被闸门拒绝。
+        // 所以这里用**外科版**：不动全局授知，只在「本场内该说法的出现全部来自他自己台词」时
+        // 才判定这条在场证据无效。这恰好命中 masked_by_presence 的机制，而不波及其他人。
+        if (noSelfEstablish) {
+          const sceneObj = byId.get(grantScene);
+          if (sceneObj) {
+            const surfaces = [...new Set(p.aliases.map((a) => a.surface.replace(/\s+/g, "")))].filter(
+              (s) => s.length >= 3,
+            );
+            const hits = sceneObj.lines.filter((l) => {
+              const flat = l.replace(/\s+/g, "");
+              return surfaces.some((s) => flat.includes(s));
+            });
+            const allOwn = hits.length > 0 && hits.every((l) => speakerOf(l) === who);
+            if (allOwn) continue; // 本场只有他自己说过 → 这条在场证据无效
+          }
+        }
         out.push({ character: who, propositionId: p.id, scene });
       }
     }
