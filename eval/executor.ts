@@ -103,10 +103,10 @@ function main(): void {
     const extra = task === "r1" && process.argv.includes("--reuse") ? ["--reuse"] : [];
     const extraFresh = task === "r1" && process.argv.includes("--fresh") ? ["--fresh"] : [];
     console.log(`\n▶ ${task}（${script}）`);
-    // Windows 上 npx 是 .cmd，必须用 npx.cmd + shell:false；
-    // 用 shell:true 传 args 会触发 DEP0190 且参数不做转义
-    const npx = process.platform === "win32" ? "npx.cmd" : "npx";
-    const res = spawnSync(npx, ["tsx", script, ...args, ...extra, ...extraFresh], {
+    // 不用 npx：Windows 上 npx 是 .cmd，需要 cmd.exe（shell:true 又会触发 DEP0190 且不转义参数）。
+    // 直接调 tsx 的 JS 入口 —— 跨平台、无 shell、参数安全。
+    const tsxCli = join(root, "node_modules", "tsx", "dist", "cli.mjs");
+    const res = spawnSync(process.execPath, [tsxCli, script, ...args, ...extra, ...extraFresh], {
       cwd: root,
       stdio: "inherit", // 不接管 stdout，避免管道限制，也让进度可见
       env: { ...process.env, RSI_RUN_DIR: runDir },
