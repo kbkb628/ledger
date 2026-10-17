@@ -1,3 +1,4 @@
+import { fetchWithTimeout } from "../util/http.js";
 import { BIND_MENTION_INSTRUCTIONS } from "./prompt.js";
 import type { JudgmentRequest, JudgmentProvider, JudgmentResult } from "./types.js";
 
@@ -96,14 +97,14 @@ export class JevProvider implements JudgmentProvider {
     // model 是**必填**字段 —— TypeSafe 直连缺省会返回 422（Field required）
     body.model = this.model;
 
-    const res = await fetch(this.baseUrl, {
+    const res = await fetchWithTimeout(this.baseUrl, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${this.apiKey}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify(body),
-    });
+    }, "JEV 判定");
 
     const latencyMs = Date.now() - started;
 

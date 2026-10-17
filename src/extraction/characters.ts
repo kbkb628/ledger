@@ -1,3 +1,4 @@
+import { fetchWithTimeout } from "../util/http.js";
 import { renderScene, type Scene } from "./script.js";
 
 /**
@@ -62,7 +63,7 @@ export async function extractCharacters(scenes: Scene[], opts: { verbose?: boole
   const scriptText = scenes.map((s) => `## ${s.id}\n${renderScene(s)}`).join("\n\n");
   const started = Date.now();
 
-  const res = await fetch(`${baseUrl}/chat/completions`, {
+  const res = await fetchWithTimeout(`${baseUrl}/chat/completions`, {
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
     body: JSON.stringify({
@@ -72,7 +73,7 @@ export async function extractCharacters(scenes: Scene[], opts: { verbose?: boole
       temperature: 0,
       ...(thinking ? { thinking: { type: thinking } } : {}),
     }),
-  });
+  }, "人物表抽取");
   if (!res.ok) throw new Error(`人物表抽取返回 ${res.status}：${(await res.text()).slice(0, 200)}`);
 
   const payload = (await res.json()) as {

@@ -1,3 +1,4 @@
+import { fetchWithTimeout } from "../util/http.js";
 import { buildPrompt } from "./prompt.js";
 import type { JudgmentRequest, JudgmentProvider, JudgmentResult } from "./types.js";
 
@@ -139,7 +140,7 @@ export class OpenAiCompatProvider implements JudgmentProvider {
   }
 
   private async judgeOnce(req: JudgmentRequest): Promise<SingleRun> {
-    const res = await fetch(`${this.baseUrl}/chat/completions`, {
+    const res = await fetchWithTimeout(`${this.baseUrl}/chat/completions`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -154,7 +155,7 @@ export class OpenAiCompatProvider implements JudgmentProvider {
         ...(this.thinking ? { thinking: { type: this.thinking } } : {}),
         ...(this.reasoningEffort ? { reasoning_effort: this.reasoningEffort } : {}),
       }),
-    });
+    }, "判定");
 
     if (!res.ok) {
       const body = await res.text().catch(() => "");

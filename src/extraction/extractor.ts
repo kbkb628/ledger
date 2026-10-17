@@ -1,3 +1,4 @@
+import { fetchWithTimeout } from "../util/http.js";
 import { renderExtractionPrompt } from "./prompt.js";
 import { renderScene, type Scene } from "./script.js";
 import type {
@@ -170,7 +171,7 @@ interface CallArgs {
 async function callExtractor(
   a: CallArgs,
 ): Promise<{ propositions: ScenePropositionDraft[]; deltas: KnowledgeDelta[]; costUsd: number }> {
-  const res = await fetch(`${a.baseUrl}/chat/completions`, {
+  const res = await fetchWithTimeout(`${a.baseUrl}/chat/completions`, {
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${a.apiKey}` },
     body: JSON.stringify({
@@ -180,7 +181,7 @@ async function callExtractor(
       temperature: a.temperature,
       ...(a.thinking ? { thinking: { type: a.thinking } } : {}),
     }),
-  });
+  }, "抽取");
 
   if (!res.ok) {
     const body = await res.text().catch(() => "");

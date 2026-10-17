@@ -114,9 +114,26 @@ export const EXTRACTION_INSTRUCTIONS = `你是剧本的结构化抽取器。每�
 **不要**把「读者能推断出来的」当成「这个角色得知了」——
 角色已知的渠道必须发生在剧本里，否则审计会把它误判成知识泄漏。
 
+## established —— 本场是**揭示**这件事，还是只是**引用**它
+每条命题还要给一个布尔值 established。
+
+判据：**本场有没有给出这件事的来源**（谁说的、何时发生、在哪看到的）？
+
+- true —— 本场把它作为信息**揭示**出来，观众/角色从此才知道。
+  例：「周管：老爷临走前说，真正的那份遗嘱，在书房暗格里。」
+  （给了来源：老爷临走前说 —— 这是揭示）
+- false —— 本场只是把它当**已知前提**引用：当筹码、当质问、当辩解、当结论。
+  说话人不提供任何来源。
+  例：「林昭：暗格里那份，我父亲是留给我的。」
+  （只断言，没有来源 —— 这是引用）
+
+⚠️ 这一栏直接影响审计能不能发现「角色用了不该知道的信息」：
+若把**引用**误判成**揭示**，系统会认为「他既然说了，那他当然知道」，
+于是漏掉真正的知识泄漏。
+
 ## 输出
 只输出 json，不要任何解释或代码块：
-{"propositions":[{"canonical":"...","surfaces":[{"text":"...","kind":"explicit"}],"agents":["..."]}],"knowledge_deltas":[{"character":"...","about":"...","kind":"learns"}]}
+{"propositions":[{"canonical":"...","surfaces":[{"text":"...","kind":"explicit"}],"agents":["..."],"established":true}],"knowledge_deltas":[{"character":"...","about":"...","kind":"learns"}]}
 本场没有事实性命题时 propositions 为空数组；没有知识变化时 knowledge_deltas 为空数组。`;
 
 export function renderExtractionPrompt(scene: Scene, sceneText: string): string {

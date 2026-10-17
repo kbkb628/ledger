@@ -1,3 +1,4 @@
+import { fetchWithTimeout } from "../util/http.js";
 import type { DraftProposition } from "./types.js";
 
 /**
@@ -113,7 +114,7 @@ export async function promoteUnits(
 ${listing}`;
 
   const started = Date.now();
-  const res = await fetch(`${baseUrl}/chat/completions`, {
+  const res = await fetchWithTimeout(`${baseUrl}/chat/completions`, {
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
     body: JSON.stringify({
@@ -123,7 +124,7 @@ ${listing}`;
       temperature,
       ...(thinking ? { thinking: { type: thinking } } : {}),
     }),
-  });
+  }, "promotion");
   const latencyMs = Date.now() - started;
   if (!res.ok) {
     const body = await res.text().catch(() => "");
