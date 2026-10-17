@@ -36,6 +36,7 @@ import { buildNormalizer, extractCharacters, type CharacterEntry } from "../src/
 import { promoteUnits } from "../src/extraction/promote.js";
 import { extractScenes, type ExtractResult } from "../src/extraction/extractor.js";
 import { mergeScenes, type MergeResult } from "../src/extraction/merge.js";
+import { allowLeaks } from "../src/audit/leak-allow.js";
 import { parseScenes } from "../src/extraction/script.js";
 import { JevProvider } from "../src/judgment/jev-provider.js";
 import { OpenAiCompatProvider } from "../src/judgment/openai-provider.js";
@@ -324,9 +325,21 @@ async function main(): Promise<void> {
     for (const c of clusters) for (const id of c.members) unitOf.set(id, c.unit);
   }
 
-  const { issues, units } = useUnits
+  const { issues: rawIssues, units } = useUnits
     ? auditOnUnits(ledger, usages, facts, sceneOrder, unitOf)
     : { issues: detectLeaks(ledger, usages, facts, sceneOrder), units: ledger };
+
+  // `should_allow` 的判定层版（R1_LEAK_JUDGE=1）：只对已报出的候选问一次
+  // 「此人是否可能通过当事人/目击/被专门告知/公开信息而合法知道」
+  let issues = rawIssues;
+  if (process.env.R1_LEAK_JUDGE === "1" && rawIssues.length > 0) {
+    const allow = await allowLeaks(rawIssues, ledger, { provider: judgeWatch.provider, scenes, verbose: true });
+    issues = allow.issues;
+    console.log(
+      `【豁免判定】放行 ${allow.allowed} / 存疑 ${allow.unsure} / 保留 ${allow.issues.length}` +
+        `　${allow.calls} 次调用 $${allow.costUsd.toFixed(4)}　${(allow.latencyMs / 1000).toFixed(1)}s`,
+    );
+  }
 
   console.log(`\n${"─".repeat(62)}`);
   console.log(`账本 : ${ledger.length} 条命题 / ${usages.length} 个使用点 / ${facts.length} 条知识状态`);

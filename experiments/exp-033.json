@@ -1,0 +1,44 @@
+﻿{
+  "id": "exp-033",
+  "kind": "capability",
+  "parent": "exp-032",
+  "createdAt": "2026-10-18T05:20:00.000Z",
+  "version": {
+    "hash": "34e7825f9f25",
+    "commit": "f9ba8a7-dirty",
+    "extractModel": "deepseek-v4-pro",
+    "judgeModel": "openai-compat:deepseek-v4-pro",
+    "promptHash": "0b8239f6aa03",
+    "flags": {
+      "R1_NO_SELF_ESTABLISH": "all",
+      "R1_SHOULD_ALLOW": "1",
+      "R1_LEAK_JUDGE": "1",
+      "R1_MERGE_EXACT": "0",
+      "R1_JUDGE_PROVIDER": "openai"
+    }
+  },
+  "change": {
+    "bucket": "should_allow",
+    "hypothesis": "词表级 should_allow 挡不住「说话人本来就该知道自己说的事」；把这一层升级为判定层语义问询（当事人/目击/被专门告知/公开信息），就能让许可层的 all 模式开店而不炸精确率",
+    "file": "src/audit/leak-allow.ts",
+    "switch": "R1_LEAK_JUDGE",
+    "params": { "R1_LEAK_JUDGE": "1", "R1_NO_SELF_ESTABLISH": "all", "R1_SHOULD_ALLOW": "1" }
+  },
+  "result": {
+    "dev": {
+      "reported": 11,
+      "tp": 5,
+      "fp": 6,
+      "fn": 5,
+      "precision": 0.4545,
+      "recall": 0.5,
+      "cost": 24,
+      "fpRate": 0.5455,
+      "unusable": false
+    },
+    "devSet": { "version": "leaks@1#cc59a5ad9de1", "size": 10 }
+  },
+  "evalCost": { "usd": 0.09, "seconds": 219 },
+  "status": "rejected",
+  "note": "必要条件未过：dev P 5/11 = 45.5%（需 ≥50%），比不带判定层时的 33.3% 好很多（误报 12→6），但比 `later` 的 62.5% 差，且召回没涨（R 50%，与 later 相同）。判定层豁免放行 6 / 存疑 2 / 保留 11，其中**放行了 1 条真泄漏** —— 语义问询比词表宽松，把「他只是大概听说过」判成了合法。**成本是硬伤**：17 次调用 218.6s / $0.09（单次判定 ≈13s，openai-compat 思考模式），放在产品路径上意味着每次审计多 1~4 分钟，不能直接上。**结论：这一层方向对（误报砍半）但判据没达，且成本不可接受；下探的正确方向不是继续拧阈值**（dev 只有 10 条标注，1 条 = 10pp，而 `--remerge` 同配置重复本身在 tp 3/2 间跳，1 条级别的差异不可分辨）。三回合（exp-031/032/033）的 in-scope 杠杆用尽：许可层能抓时序、抓不到孤命题型无源泄漏；判定层能把误报砍半但会放过真泄漏且贵。"
+}

@@ -44,6 +44,7 @@ const SCORER_FILES: Record<ScorerKind, string[]> = {
     "src/audit/r1.ts",
     "src/audit/check.ts",
     "src/audit/usage-verify.ts", // usage 语义校验：改变"哪些使用点算数"
+    "src/audit/leak-allow.ts", // 报出后的合法渠道复核（should_allow 判定层版）：改变"哪些问题算泄漏"
     "src/extraction/merge.ts", // 归并决策会改变账本，从而改变可报出的东西
   ],
   /** 判定层：指令 + provider + 候选呈现 */
@@ -73,6 +74,7 @@ const R1_FLAGS = [
   "R1_ESTABLISHED",
   "R1_MERGE_EXACT",
   "R1_SHOULD_ALLOW",
+  "R1_LEAK_JUDGE",
 ] as const;
 
 export type ScorerKind = "r1" | "judge" | "e2e";
