@@ -16,6 +16,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { writeTaskResult } from "../src/eval/report.js";
 import { linesOf, parseScenes, type Scene } from "../src/extraction/script.js";
 import { JevProvider } from "../src/judgment/jev-provider.js";
 import { OpenAiCompatProvider } from "../src/judgment/openai-provider.js";
@@ -483,6 +484,27 @@ async function main(): Promise<void> {
   console.log(`\n延迟: 中位 ${median}ms   总计 ${latencies.reduce((a, b) => a + b, 0)}ms`);
   console.log(`成本: $${cost.toFixed(6)}   （按 1000 次折算约 $${((cost / total) * 1000).toFixed(4)}）`);
   console.log(`${"─".repeat(56)}\n`);
+
+  // ── 交给任务执行器（设了 RSI_RUN_DIR 才写文件；数字完全不变）──
+  writeTaskResult(
+    {
+      task: "judge",
+      metrics: { ok, total, errored },
+      extra: {
+        provider: provider.name,
+        goldenSet: process.env.GOLDENSET ?? "goldenset.json",
+        criteriaMode: process.env.JEV_CRITERIA_MODE ?? null,
+        context: process.env.EVAL_CONTEXT ?? "line",
+        order: process.env.EVAL_ORDER ?? "recall",
+      },
+      evalCost: { usd: cost, seconds: 0 },
+    },
+    rows
+      .filter((r) => !r.correct)
+      .map((r) =>
+        JSON.stringify({ kind: "sample", verdict: "wrong", id: r.sample.id, expected: r.sample.gold, got: r.choice }),
+      ),
+  );
 }
 
 main().catch((err) => {

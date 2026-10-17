@@ -36,6 +36,7 @@ import { assignPropositions, diceBigram, matchInfo, pairScore, type PropositionL
 import type { ExtractResult } from "../src/extraction/extractor.js";
 import type { MergeResult } from "../src/extraction/merge.js";
 import { promoteUnits, type PromoteResult } from "../src/extraction/promote.js";
+import { writeTaskResult } from "../src/eval/report.js";
 import { parseScenes, type Scene } from "../src/extraction/script.js";
 import type { DraftProposition } from "../src/extraction/types.js";
 import { JevProvider } from "../src/judgment/jev-provider.js";
@@ -424,6 +425,22 @@ async function main(): Promise<void> {
     for (const w of wrong) console.log(`  ${w}`);
   }
   console.log("");
+
+  // ── 交给任务执行器（设了 RSI_RUN_DIR 才写文件；数字完全不变）──
+  writeTaskResult(
+    {
+      task: "e2e",
+      metrics: { ok, total, unanswerable, accepted, acceptedOk },
+      extra: {
+        pad: process.env.E2E_PAD ?? "id",
+        diag,
+        ledgerCache: CACHE,
+        goldenSet: process.env.GOLDENSET ?? "goldenset.json",
+      },
+      evalCost: { usd: costUsd, seconds: 0 },
+    },
+    wrong.map((w) => JSON.stringify({ kind: "sample", verdict: "wrong", detail: w })),
+  );
 }
 
 await main();

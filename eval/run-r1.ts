@@ -26,6 +26,7 @@ import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { auditOnUnits, buildKnowledge, buildUsages, defaultKnowledge, detectLeaks } from "../src/audit/r1.js";
+import { writeTaskResult } from "../src/eval/report.js";
 import { buildNormalizer, extractCharacters, type CharacterEntry } from "../src/extraction/characters.js";
 import { promoteUnits } from "../src/extraction/promote.js";
 import { extractScenes, type ExtractResult } from "../src/extraction/extractor.js";
@@ -185,6 +186,8 @@ async function main(): Promise<void> {
   const hitLeak = new Set<string>();
   const fps: typeof issues = [];
   const flaggedMustNot = new Map<string, string>();
+  /** 给执行器采集的轨迹（每条一行 JSON） */
+  const trace: string[] = [];
 
   for (const iss of issues) {
     const surface = strip(iss.surface);
@@ -196,6 +199,7 @@ async function main(): Promise<void> {
     );
     if (matched.length > 0) {
       for (const m of matched) hitLeak.add(m.id);
+      trace.push(JSON.stringify({ kind: "issue", verdict: "true_positive", matched: matched.map((m) => m.id), scene: iss.useScene, character: iss.character, surface: iss.surface, propositionId: iss.propositionId }));
       continue;
     }
     // 命中「应当放过」的标注 → 设计错误，单独点名
@@ -207,6 +211,8 @@ async function main(): Promise<void> {
     );
     if (mn) flaggedMustNot.set(`${mn.character}|${mn.surface}`, iss.useScene);
     fps.push(iss);
+    // 桶的判定留给组件 3（评测器升级）；这里只把原料记全
+    trace.push(JSON.stringify({ kind: "issue", verdict: mn ? "should_allow" : "false_positive", scene: iss.useScene, character: iss.character, surface: iss.surface, propositionId: iss.propositionId, mustNotFlag: mn ? `${mn.character}|${mn.surface}` : null }));
   }
 
   const missed = ann.leaks.filter((a) => !hitLeak.has(a.id));
@@ -232,6 +238,24 @@ async function main(): Promise<void> {
         const knows = facts.filter((f) => f.character === a.character && f.propositionId === p.id);
         console.log(`      ${p.id} ${p.canonical.slice(0, 34)}　${a.character} 的知识记录 ${knows.length} 条`);
       }
+      // 桶的原料：命题是否存在、知情记录有多少、其中多少来自默认层
+      trace.push(
+        JSON.stringify({
+          kind: "annotation",
+          verdict: "missed",
+          id: a.id,
+          leakKind: a.kind,
+          scene: a.scene,
+          character: a.character,
+          surface: a.surface,
+          ownerPropositions: owners.map((p) => p.id),
+          knowledgeCounts: owners.map((p) => ({
+            propositionId: p.id,
+            total: facts.filter((f) => f.character === a.character && f.propositionId === p.id).length,
+            fromDefault: facts.filter((f) => f.character === a.character && f.propositionId === p.id && f.source === "default").length,
+          })),
+        }),
+      );
     }
   }
 
@@ -253,6 +277,34 @@ async function main(): Promise<void> {
   }
 
   console.log(`\n抽取成本 $${cache.extracted.costUsd.toFixed(4)} + 归并 $${cache.merged.costUsd.toFixed(4)}\n`);
+
+  // ── 交给任务执行器（设了 RSI_RUN_DIR 才写文件；逻辑与数字完全不变）──
+  writeTaskResult(
+    {
+      task: "r1",
+      metrics: {
+        tp,
+        fp,
+        fn,
+        reported: tp + fp,
+        precision: tp + fp === 0 ? 0 : tp / (tp + fp),
+        recall: tp + fn === 0 ? 0 : tp / (tp + fn),
+        annotations: ann.leaks.length,
+      },
+      extra: {
+        devSet: { version: ann.meta.name, size: ann.leaks.length },
+        ledger: { propositions: ledger.length, usages: usages.length, knowledge: facts.length },
+        flags: FLAGS,
+        ledgerCache: CACHE,
+        flaggedMustNot: [...flaggedMustNot.entries()],
+      },
+      evalCost: {
+        usd: cache.extracted.costUsd + cache.merged.costUsd,
+        seconds: 0,
+      },
+    },
+    trace,
+  );
 }
 
 await main();
