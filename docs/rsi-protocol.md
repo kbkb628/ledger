@@ -997,7 +997,7 @@ holdout 全部没有触碰，三套数字一个都没变。它解决的是「卖
 |---|---|
 | 空目录 + `npx -y ./tgz` | 6 个工具 · ingest 13s · 默认账本落 `cwd/.ledger` · `check` 拦住一条、放过一条 —— 全过 |
 | Claude Code | `claude mcp get ledger` → `Status: ✓ Connected`（装的是 `node_modules/ledger/dist/mcp.js`，四项 env 齐全） |
-| DSH | 配置写进 `~/.dsh/profiles/desktop/cordis.patch.yml`（`patchReload: live`），**需重启 harness** 才进工具表 |
+| DSH | 配置写进 `~/.dsh/profiles/desktop/cordis.patch.yml`；重启 harness 后 `mcp__ledger__ledger_check` 出现在工具表，模型侧调用返回 `leak: true`（E-002，沈知微 无知情记录）|
 
 **三个坑（都值得记）**
 

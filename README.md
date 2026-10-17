@@ -123,8 +123,18 @@ claude mcp add --scope user ledger \
 env 四项齐全）。注意 `claude -p` 由模型发起工具调用需要先在 CLI 里 `/login`；本机未登录，
 所以上面第 ① 条的真实拦截输出是用 MCP SDK 客户端在**同一个安装产物**上取到的。
 
-**③ DSH**：配置已写入 `~/.dsh/profiles/desktop/cordis.patch.yml`（上面那段），重启 harness 后
-`mcp__ledger__ledger_check` 进入工具表。配置里不写 key 的原因见本节开头。
+**③ DSH**：配置写入 `~/.dsh/profiles/desktop/cordis.patch.yml`（上面那段）后重启 harness，
+`mcp__ledger__ledger_check` 进入工具表（配置里不写 key 的原因见本节开头）。真实的模型侧调用：
+
+```
+ledger_check { line: "你三年前在码头做了什么？", character: "沈知微", scene: "S02-02" }
+→ { "leak": true,
+    "hits": [{ "propositionId": "E-002",
+               "canonical": "陆见深三年前在码头做了某件事",
+               "surface": "你三年前在码头做了什么",
+               "knownAt": null, "waived": false,
+               "reason": "全剧没有记录 沈知微 得知过这条命题" }] }
+```
 
 ## 六个工具
 
