@@ -259,3 +259,81 @@ chaguan 测不了召回。**召回必须靠注入**（等价于变异测试）�
 
 **可行路径**：用 STAGE 的中文剧本 + 它的 epistemic-access 骨架做真实集，
 配 ConStory-Bench 的 5×19 分类法自建标注规范。
+
+---
+
+## 九、STAGE 可得性核查与结论（**上一版建议作废**）
+
+核实了 STAGE 仓库（`github.com/roytian1992/STAGE_v0`，490MB / 2319 文件 / 2026-08 更新）。
+**结论：schema 可以抄，数据不能拿。** 我此前「取它的 42 部中文剧本做真实集」的建议**不成立**。
+
+### 9.1 三个硬事实
+
+| 事实 | 原文/证据 | 后果 |
+|---|---|---|
+| **不发布剧本原文** | README：「Full screenplay text is not distributed in this repository. No `script.json` is included.」 | **不能用来测抽取** —— 而抽取正是我的瓶颈（54.2% vs 91.7%） |
+| **剧本是受版权保护的在映影片** | `chinese_movie_info.csv` 里是《一代宗师》(2013)、《乘风破浪》(2017)、《三轮车夫》(1995)，附第三方 `script_url` | 可本地研究，**不能进仓库、不能随产品分发** |
+| **仓库无 LICENSE 文件** | `license: null`；README 只有一节 Rights：「Screenplay rights remain with their respective holders」 | 标注本身的授权未声明 → **默认保留所有权利**，不能二次分发 |
+
+### 9.2 但它的 schema 有一个我完全缺失的关键块：`context_protocol`
+
+这是整个调研里最该抄的东西 —— 它把「上下文控制」写成**可审计的不变量**：
+
+```jsonc
+"context_protocol": {
+  "full_screenplay_prefix_used": false,          // 不给模型整本前缀
+  "previous_state_visible_to_memory_extractor": false,   // 上一步的模型输出不得回流
+  "previous_state_model_projection": "claim_text_only",  // 只传递 claim 文本，不传递模型答案
+  "memory_extractor_inputs": ["character", "aliases", "screenplay_interval"],
+  "screenplay_scope": "previous_checkpoint_exclusive_to_current_checkpoint_inclusive"
+}
+```
+
+> `screenplay_scope` 这一行，**就是我一直靠踩坑才总结出来的「不得未来泄漏」**。
+> 它不是一个原则口号，而是写进数据文件、可被程序核验的边界。
+
+我的评测结果里**没有任何这类声明** —— 也就是说，别人无法从我的产出判断
+「抽取时到底看到了多少上下文」「上一场的结论有没有回流」。
+
+### 9.3 输出 schema：claim 必须带证据场次
+
+```jsonc
+"output_schema": {
+  "current_state": { "item_fields": ["claim", "evidence_scene_orders"], "type": "array" },
+  "developments_since_previous_checkpoint": { "item_fields": ["claim", "evidence_scene_orders"] }
+}
+```
+
+**每条 claim 都挂 `evidence_scene_orders`** —— 这就是「provenance-linked backbone」：
+任何一条断言都能追到支撑它的场次。我的知识记录只有 `about` 片段与 `evidence: "(默认:在场)"`，
+**没有场次级证据链**，所以无法机械核验「他到底凭哪一场得知的」。
+
+### 9.4 指标分解：三值 × 两段
+
+```
+current_state_reference_coverage      development_reference_coverage
+current_state_unsupported_rate        development_unsupported_rate
+current_state_contradiction_rate      development_contradiction_rate
+```
+
+即 ①**覆盖率**（类召回）②**无支撑率** ③**矛盾率**，且**按「当前状态」与「自上次以来的发展」分段**。
+这正好补上我「只报一个 P/R」的缺陷，也与 VeriScore 的三值标签一致。
+
+### 9.5 另一处可全盘照搬的设计：`STAGE_Anon`
+
+151 部片子同时提供 **ordinary 与 identity-anonymized 成对条件**。
+这就是「反事实改写」的工程化版本：换掉身份保留结构，**能力测不变、记忆失效**。
+
+**我该怎么做**：给《茶馆》写一个**反事实改写版**（换人名/地名/时代但不改结构与冲突），
+原版与改写版配对使用 —— 这是**合法**（改写是我自己的作品）、**便宜**（一次改写）、
+且能直接量化「记忆增益」的路径。这比去找 42 部受版权的中文剧本可行得多。
+
+### 9.6 修订后的路线
+
+| 原计划 | 修订 |
+|---|---|
+| 取 STAGE 的 42 部中文剧本做真实集 | ❌ 作废（无原文 + 受版权 + 无授权） |
+| —— | ✅ 抄 `context_protocol`：把上下文不变量写进结果，可核验 |
+| —— | ✅ 抄 claim 的 `evidence_scene_orders`：知识记录必须带场次证据链 |
+| —— | ✅ 指标改三值（覆盖率 / 无支撑率 / 矛盾率）并按「当前状态 / 发展」分段 |
+| —— | ✅ 给《茶馆》自制 **Anon 对照版**，配对使用以量化污染 |
