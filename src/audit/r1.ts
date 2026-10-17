@@ -151,7 +151,10 @@ export function presentCharacters(scene: Scene | undefined): string[] {
 export function defaultKnowledge(
   ledger: DraftProposition[],
   scenes?: Scene[],
+  opts: { agent?: boolean; presence?: boolean } = {},
 ): Array<{ character: string; propositionId: string; scene: string }> {
+  const useAgent = opts.agent ?? true;
+  const usePresence = opts.presence ?? true;
   const out: Array<{ character: string; propositionId: string; scene: string }> = [];
   const byId = new Map((scenes ?? []).map((s) => [s.id, s]));
 
@@ -160,14 +163,18 @@ export function defaultKnowledge(
     if (!scene) continue;
 
     // 规则 1：施事
-    for (const agent of p.agents) {
-      out.push({ character: agent, propositionId: p.id, scene });
+    if (useAgent) {
+      for (const agent of p.agents) {
+        out.push({ character: agent, propositionId: p.id, scene });
+      }
     }
 
     // 规则 2：首见场景的在场者
-    for (const who of presentCharacters(byId.get(scene))) {
-      if (p.agents.includes(who)) continue; // 已由规则 1 覆盖
-      out.push({ character: who, propositionId: p.id, scene });
+    if (usePresence) {
+      for (const who of presentCharacters(byId.get(scene))) {
+        if (p.agents.includes(who)) continue; // 已由规则 1 覆盖
+        out.push({ character: who, propositionId: p.id, scene });
+      }
     }
   }
   return out;

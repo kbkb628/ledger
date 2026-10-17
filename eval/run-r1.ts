@@ -52,11 +52,37 @@ interface LeaksFile {
   leaks: Annotation[];
   must_not_flag: MustNotFlag[];
 }
+/**
+ * RSI 变体开关 —— **每个都默认关闭或保持已成基线**，改动只在打开时生效。
+ *
+ * 为什么这样设计（用户明确要求：「措施不要反而让效果更差、引入噪声，RSI 要能回退」）：
+ *   - 任何一招不删代码，只换开关 → 变差了一条命令关掉，不用 revert 一堆 diff
+ *   - 每轮必须记 `docs/rsi-protocol.md` 的回合表：commit + 开关组合 + 实测数字
+ *   - 上游（抽取/归并）用 `--reuse` 冻结，**只变 R1 层**，避免把「JEV 抖动」误判成「改动有效」
+ */
+function flag(name: string, def: boolean): boolean {
+  const v = process.env[name];
+  if (v === undefined) return def;
+  return v !== "0" && v !== "false";
+}
+
+const FLAGS = {
+  /** 施事 ⇒ 知道（已基线化：实测误报 23 → 18） */
+  agent: flag("R1_AGENT", true),
+  /** 命题首见场景的在场者 ⇒ 知道 */
+  presence: flag("R1_PRESENCE", true),
+  /** R1 跑在审计单元层（需 promotion；实测在小样本上 promotion 退化成单元素组） */
+  units: flag("R1_UNITS", false),
+  /** 归并判定时附人物别称表（实测让 P/R 从 66.7% 掉到 50%/33.3% → 默认关闭） */
+  charHint: flag("R1_CHAR_HINT", false),
+};
+
 interface CacheShape {
   extracted: ExtractResult;
   merged: MergeResult;
   characters: CharacterEntry[];
 }
+
 
 function loadEnv(path: string): void {
   let text: string;
@@ -75,6 +101,9 @@ const strip = (s: string): string => s.replace(/[\s。，、！？：；「」�
 const pct = (n: number, d: number): string => (d === 0 ? "n/a" : `${((n / d) * 100).toFixed(1)}%`);
 
 async function loadCache(): Promise<CacheShape> {
+  if (process.argv.includes("--reuse") && existsSync(CACHE)) {
+    return JSON.parse(readFileSync(CACHE, "utf8")) as CacheShape;
+  }
   if (!process.argv.includes("--fresh") && existsSync(CACHE)) {
     return JSON.parse(readFileSync(CACHE, "utf8")) as CacheShape;
   }
@@ -90,10 +119,12 @@ async function loadCache(): Promise<CacheShape> {
   const merged = await mergeScenes(extracted.scenes, scenes, {
     provider: new JevProvider(),
     normalize,
-    characterHint: chars.characters
-      .filter((c) => c.aliases.length > 0)
-      .map((c) => `${c.name} = ${c.aliases.join(" = ")}`)
-      .join("\n"),
+    characterHint: FLAGS.charHint
+      ? chars.characters
+          .filter((c) => c.aliases.length > 0)
+          .map((c) => `${c.name} = ${c.aliases.join(" = ")}`)
+          .join("\n")
+      : undefined,
     verbose: true,
   });
   const cache: CacheShape = { extracted, merged, characters: chars.characters };
@@ -111,7 +142,8 @@ async function main(): Promise<void> {
   const ledger = cache.merged.propositions;
 
   const { facts } = buildKnowledge(ledger, cache.extracted.scenes);
-  for (const d of defaultKnowledge(ledger, scenes)) {
+  const defaults = defaultKnowledge(ledger, scenes, { agent: FLAGS.agent, presence: FLAGS.presence });
+  for (const d of defaults) {
     facts.push({ ...d, kind: "learns", evidence: "(默认:施事/在场)", source: "default" });
   }
   const { usages } = buildUsages(ledger, scenes);
@@ -121,7 +153,7 @@ async function main(): Promise<void> {
   // 实测依据（test-plan.md §5.11）：同一事实被抽成三条命题（E-004/E-005/E-007），
   // 告知记录挂在一条、使用点在另一条，**按命题比对永远对不上**。
   // 知识是关于「那个秘密」的，使用也是，所以必须在单元层比对。
-  const useUnits = !process.argv.includes("--no-units");
+  const useUnits = FLAGS.units;
   const promoCache = join(here, "out", "promotion-leak.json");
   let unitOf = new Map<string, string>();
   if (useUnits) {
