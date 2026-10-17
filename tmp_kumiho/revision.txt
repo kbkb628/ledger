@@ -1,0 +1,1804 @@
+﻿"reference internal" href="../changelog.html#id49">[0.10.2] - 2026-07-03
+Fixed
+
+Added
+
+
+
+
+[0.10.1] - 2026-07-03
+Fixed
+
+
+
+
+[0.10.0] - 2026-06-17
+Added
+
+Changed
+
+
+
+
+[0.9.24] - 2026-04-17
+Fixed
+
+
+
+
+[0.9.23] - 2026-04-17
+Changed
+
+
+
+
+[0.9.22] - 2026-04-02
+Fixed
+
+
+
+
+[0.9.21] - 2026-04-02
+Added
+
+
+
+
+[0.9.20] - 2026-03-15
+Fixed
+
+
+
+
+[0.9.19] - 2026-03-10
+Added
+
+
+
+
+[0.9.18] - 2026-03-10
+Fixed
+
+
+
+
+[0.9.17] - 2026-03-09
+Added
+
+
+
+
+[0.9.16] - 2026-03-08
+Fixed
+
+
+
+
+[0.9.15] - 2026-03-07
+Fixed
+
+
+
+
+[0.4.0] - 2025-12-03
+Added
+
+Changed
+
+Notes
+
+
+
+
+[0.3.0] - 2024-XX-XX
+Added
+
+Changed
+
+Fixed
+
+
+
+
+[0.2.0] - 2024-XX-XX
+Added
+
+Changed
+
+
+
+
+[0.1.0] - 2024-XX-XX
+Added
+
+
+
+
+
+
+
+Contributing
+Development Setup
+
+Code Style
+
+Documentation
+
+Testing
+
+Pull Request Process
+
+License
+
+
+
+
+
+
+ 
+
+ 
+
+ 
+
+ 
+ 
+ Kumiho Python SDK
+ 
+
+ 
+ 
+ 
+ 
+ 
+
+ kumiho.revision
+
+ 
+ View page source
+ 
+
+ 
+ 
+
+
+ 
+ 
+ 
+ 
+kumiho.revision飪?/a>
+
+Revision module for Kumiho asset management.
+
+This module provides the Revision class, which represents a specific
+iteration of an item. Revisions contain artifacts (file references), tags,
+and metadata, and can be linked to other revisions to track dependencies.
+
+
+Example
+
+Working with revisions:
+
+import kumiho
+
+# Get a revision
+revision = kumiho.get_revision("kref://project/models/hero.model?r=1")
+
+# Add artifacts
+revision.create_artifact("mesh", "/assets/hero.fbx")
+revision.create_artifact("textures", "/assets/hero_tex.zip")
+
+# Tag the revision
+revision.tag("approved")
+revision.tag("ready-for-lighting")
+
+# Create edges to dependencies
+texture_revision = kumiho.get_revision("kref://project/textures/skin.texture?r=3")
+revision.create_edge(texture_revision, kumiho.DEPENDS_ON)
+
+
+
+
+
+
+
+
+
+class kumiho.revision.Revision[source]
+
+Bases: KumihoObject
+
+A specific iteration of an item in the Kumiho system.
+
+Revisions are immutable snapshots of an item at a point in time. Each
+revision can have multiple artifacts (file references), tags for
+categorization, and edges to other revisions for dependency tracking.
+
+The revision鈥檚 kref includes the revision number:
+kref://project/space/item.kind?r=1
+
+Revisions support dynamic tag checking鈥攖he tags property automatically
+refreshes from the server if the local data might be stale (older than 5
+seconds). This ensures tags like 鈥渓atest鈥?are always current.
+
+
+
+kref
+
+The unique reference URI for this revision.
+
+
+Type:
+
+Kref
+
+
+
+
+
+
+
+
+
+item_kref
+
+Reference to the parent item.
+
+
+Type:
+
+Kref
+
+
+
+
+
+
+
+
+
+number
+
+The revision number (1-based).
+
+
+Type:
+
+int
+
+
+
+
+
+
+
+
+
+latest
+
+Whether this is currently the latest revision.
+
+
+Type:
+
+bool
+
+
+
+
+
+
+
+
+
+tags
+
+Tags applied to this revision (auto-refreshes).
+
+
+Type:
+
+List[str]
+
+
+
+
+
+
+
+
+
+metadata
+
+Custom metadata key-value pairs.
+
+
+Type:
+
+Dict[str, str]
+
+
+
+
+
+
+
+
+
+created_at
+
+ISO timestamp when the revision was created.
+
+
+Type:
+
+Optional[str]
+
+
+
+
+
+
+
+
+
+author
+
+The user ID who created the revision.
+
+
+Type:
+
+str
+
+
+
+
+
+
+
+
+
+deprecated
+
+Whether the revision is deprecated.
+
+
+Type:
+
+bool
+
+
+
+
+
+
+
+
+
+published
+
+Whether the revision is published.
+
+
+Type:
+
+bool
+
+
+
+
+
+
+
+
+
+username
+
+Display name of the creator.
+
+
+Type:
+
+str
+
+
+
+
+
+
+
+
+
+default_artifact
+
+Name of the default artifact.
+
+
+Type:
+
+Optional[str]
+
+
+
+
+
+
+
+
+Example
+
+Creating and managing revisions:
+
+import kumiho
+
+item = kumiho.get_item("kref://project/models/hero.model")
+
+# Create a revision with metadata
+v1 = item.create_revision(metadata={
+ "artist": "jane.doe",
+ "software": "maya-2024",
+ "notes": "Initial model"
+})
+
+# Add artifacts
+mesh = v1.create_artifact("mesh", "/assets/hero.fbx")
+rig = v1.create_artifact("rig", "/assets/hero_rig.fbx")
+
+# Set default artifact (for resolve)
+v1.set_default_artifact("mesh")
+
+# Tag the revision
+v1.tag("approved")
+
+# Check tags
+if v1.has_tag("approved"):
+ print("Revision is approved!")
+
+# Get all artifacts
+for r in v1.get_artifacts():
+ print(f" {r.name}: {r.location}")
+
+# Edge to dependencies
+texture = kumiho.get_revision("kref://project/tex/skin.texture?r=2")
+v1.create_edge(texture, kumiho.DEPENDS_ON)
+
+
+
+
+
+
+
+
+
+__init__(pb_revision, client)[source]
+
+Initialize a Revision from a protobuf response.
+
+
+Parameters:
+
+
+pb_revision (RevisionResponse) 鈥?The protobuf RevisionResponse message.
+
+
+client (_Client) 鈥?The client instance for making API calls.
+
+
+
+
+
+Return type:
+
+None
+
+
+
+
+
+
+
+
+
+property tags: List[str]
+
+Get the current tags for this revision.
+
+This property automatically refreshes from the server if the data
+might be stale (older than 5 seconds), ensuring dynamic tags like
+鈥渓atest鈥?are always current.
+
+
+Returns:
+
+The list of tags on this revision.
+
+
+
+Return type:
+
+List[str]
+
+
+
+
+
+Example
+
+>>> revision = item.get_revision(1)
+>>> print(revision.tags) # ['latest', 'approved']
+
+
+
+
+
+
+
+
+
+
+
+
+__repr__()[source]
+
+Return a string representation of the Revision.
+
+
+Return type:
+
+str
+
+
+
+
+
+
+
+
+
+create_artifact(name, location, metadata=None, *, idempotency_key=None, archived_operation=None, deletion_guard_id=None)[source]
+
+Create a new artifact for this revision.
+
+Artifacts are file references that point to actual assets on disk
+or network storage. Kumiho tracks the path and metadata but does
+not upload or copy the files.
+
+
+Parameters:
+
+
+name (str) 鈥?The name of the artifact (e.g., 鈥渕esh鈥? 鈥渢extures鈥? 鈥渞ig鈥?.
+
+
+location (str) 鈥?The file path or URI where the artifact is stored.
+
+
+metadata (Optional[Dict[str, str]]) 鈥?Optional key-value metadata for the artifact.
+
+
+idempotency_key (str | None)
+
+
+archived_operation (str | None)
+
+
+deletion_guard_id (str | None)
+
+
+
+
+
+Returns:
+
+The newly created Artifact object.
+
+
+
+Return type:
+
+Artifact
+
+
+
+
+
+Example
+
+>>> mesh = revision.create_artifact("mesh", "/assets/hero.fbx")
+>>> textures = revision.create_artifact("textures", "smb://server/tex/hero.zip",
+... metadata={"format": "png", "resolution": "4k"})
+
+
+
+
+
+
+
+
+
+
+
+
+set_metadata(metadata, *, archived_operation=None, deletion_guard_id=None)[source]
+
+Set or update metadata for this revision.
+
+Metadata is merged with existing metadata鈥攅xisting keys are
+overwritten and new keys are added.
+
+
+Parameters:
+
+
+metadata (Dict[str, str]) 鈥?Dictionary of metadata key-value pairs.
+
+
+archived_operation (str | None)
+
+
+deletion_guard_id (str | None)
+
+
+
+
+
+Returns:
+
+The updated Revision object.
+
+
+
+Return type:
+
+Revision
+
+
+
+
+
+Example
+
+>>> revision.set_metadata({
+... "render_engine": "arnold",
+... "frame_range": "1-100",
+... "resolution": "4K"
+... })
+
+
+
+
+
+
+
+
+
+
+
+
+set_attribute(key, value)[source]
+
+Set a single metadata attribute.
+
+This allows granular updates to metadata without replacing the entire
+metadata map.
+
+
+Parameters:
+
+
+key (str) 鈥?The attribute key to set.
+
+
+value (str) 鈥?The attribute value.
+
+
+
+
+
+Returns:
+
+True if the attribute was set successfully.
+
+
+
+Return type:
+
+bool
+
+
+
+
+
+Example
+
+>>> revision.set_attribute("render_engine", "cycles")
+True
+
+
+
+
+
+
+
+
+
+
+
+
+get_attribute(key)[source]
+
+Get a single metadata attribute.
+
+
+Parameters:
+
+key (str) 鈥?The attribute key to retrieve.
+
+
+
+Return type:
+
+Optional[str]
+
+
+
+Returns:
+
+The attribute value if it exists, None otherwise.
+
+
+
+
+
+Example
+
+>>> revision.get_attribute("render_engine")
+"cycles"
+
+
+
+
+
+
+
+
+
+
+
+
+delete_attribute(key)[source]
+
+Delete a single metadata attribute.
+
+
+Parameters:
+
+key (str) 鈥?The attribute key to delete.
+
+
+
+Returns:
+
+True if the attribute was deleted successfully.
+
+
+
+Return type:
+
+bool
+
+
+
+
+
+Example
+
+>>> revision.delete_attribute("old_field")
+True
+
+
+
+
+
+
+
+
+
+
+
+
+has_tag(tag)[source]
+
+Check if this revision currently has a specific tag.
+
+This makes a server call to ensure the tag status is current.
+
+
+Parameters:
+
+tag (str) 鈥?The tag to check for.
+
+
+
+Returns:
+
+True if the revision has the tag, False otherwise.
+
+
+
+Return type:
+
+bool
+
+
+
+
+
+Example
+
+>>> if revision.has_tag("approved"):
+... print("Ready for production!")
+
+
+
+
+
+
+
+
+
+
+
+
+tag(tag)[source]
+
+Apply a tag to this revision.
+
+Tags are used to categorize revisions and mark their status.
+Common tags include 鈥渓atest鈥? 鈥減ublished鈥? 鈥渁pproved鈥? etc.
+
+
+Note
+
+The 鈥渓atest鈥?tag is automatically managed鈥攊t always points
+to the newest revision.
+
+
+
+
+Parameters:
+
+tag (str) 鈥?The tag to apply.
+
+
+
+Return type:
+
+None
+
+
+
+
+
+Example
+
+>>> revision.tag("approved")
+>>> revision.tag("ready-for-lighting")
+
+
+
+
+
+
+
+
+
+
+
+
+untag(tag)[source]
+
+Remove a tag from this revision.
+
+
+Parameters:
+
+tag (str) 鈥?The tag to remove.
+
+
+
+Return type:
+
+None
+
+
+
+
+
+Example
+
+>>> revision.untag("work-in-progress")
+
+
+
+
+
+
+
+
+
+
+
+
+was_tagged(tag)[source]
+
+Check if this revision was ever tagged with a specific tag.
+
+This checks the historical record, not just current tags.
+
+
+Parameters:
+
+tag (str) 鈥?The tag to check for.
+
+
+
+Returns:
+
+True if the revision was ever tagged with this tag.
+
+
+
+Return type:
+
+bool
+
+
+
+
+
+Example
+
+>>> if revision.was_tagged("approved"):
+... print("Was approved at some point")
+
+
+
+
+
+
+
+
+
+
+
+
+get_artifact(name)[source]
+
+Get a specific artifact by name from this revision.
+
+
+Parameters:
+
+name (str) 鈥?The name of the artifact.
+
+
+
+Returns:
+
+The Artifact object.
+
+
+
+Return type:
+
+Artifact
+
+
+
+Raises:
+
+grpc.RpcError 鈥?If the artifact is not found.
+
+
+
+
+
+Example
+
+>>> mesh = revision.get_artifact("mesh")
+>>> print(mesh.location)
+
+
+
+
+
+
+
+
+
+
+
+
+get_artifacts()[source]
+
+Get all artifacts associated with this revision.
+
+
+Returns:
+
+A list of Artifact objects.
+
+
+
+Return type:
+
+List[Artifact]
+
+
+
+
+
+Example
+
+>>> for artifact in revision.get_artifacts():
+... print(f"{artifact.name}: {artifact.location}")
+
+
+
+
+
+
+
+
+
+
+
+
+get_locations()[source]
+
+Get the file locations of all artifacts in this revision.
+
+This is a convenience method to quickly get all file paths.
+
+
+Returns:
+
+A list of file location strings.
+
+
+
+Return type:
+
+List[str]
+
+
+
+
+
+Example
+
+>>> locations = revision.get_locations()
+>>> for loc in locations:
+... print(loc)
+
+
+
+
+
+
+
+
+
+
+
+
+get_item()[source]
+
+Get the parent item of this revision.
+
+
+Returns:
+
+The Item object that contains this revision.
+
+
+
+Return type:
+
+Item
+
+
+
+
+
+Example
+
+>>> item = revision.get_item()
+>>> print(item.item_name)
+
+
+
+
+
+
+
+
+
+
+
+
+get_space()[source]
+
+Get the space that contains this revision鈥檚 item.
+
+
+Returns:
+
+The Space object.
+
+
+
+Return type:
+
+Space
+
+
+
+
+
+Example
+
+>>> space = revision.get_space()
+>>> print(space.path)
+
+
+
+
+
+
+
+
+
+
+
+
+get_project()[source]
+
+Get the project that contains this revision.
+
+
+Returns:
+
+The Project object.
+
+
+
+Return type:
+
+Project
+
+
+
+
+
+Example
+
+>>> project = revision.get_project()
+>>> print(project.name)
+
+
+
+
+
+
+
+
+
+
+
+
+refresh()[source]
+
+Refresh this revision鈥檚 data from the server.
+
+This updates all properties to reflect the current state in the
+database, including tags that may have changed (like 鈥渓atest鈥?.
+
+
+Example
+
+>>> revision.refresh()
+>>> print(revision.tags) # Now shows current tags
+
+
+
+
+
+
+
+
+Return type:
+
+None
+
+
+
+
+
+
+
+
+
+set_default_artifact(artifact_name)[source]
+
+Set the default artifact for this revision.
+
+The default artifact is used when resolving the revision鈥檚 kref
+without specifying an artifact name.
+
+
+Parameters:
+
+artifact_name (str) 鈥?The name of the artifact to set as default.
+
+
+
+Return type:
+
+None
+
+
+
+
+
+Example
+
+>>> revision.set_default_artifact("mesh")
+>>> # Now kref://project/model.kind?r=1 resolves to the mesh
+
+
+
+
+
+
+
+
+
+
+
+
+delete(force=False)[source]
+
+Delete this revision.
+
+
+Parameters:
+
+force (bool) 鈥?If True, force deletion even if the revision has
+artifacts. If False (default), deletion may fail.
+
+
+
+Raises:
+
+grpc.RpcError 鈥?If deletion fails.
+
+
+
+Return type:
+
+None
+
+
+
+
+
+Example
+
+>>> revision.delete() # Fails if has artifacts
+>>> revision.delete(force=True) # Force delete
+
+
+
+
+
+
+
+
+
+
+
+
+set_deprecated(status)[source]
+
+Set the deprecated status of this revision.
+
+Deprecated revisions are hidden from default queries but remain
+accessible for historical reference.
+
+
+Parameters:
+
+status (bool) 鈥?True to deprecate, False to restore.
+
+
+
+Return type:
+
+None
+
+
+
+
+
+Example
+
+>>> revision.set_deprecated(True) # Hide from queries
+
+
+
+
+
+
+
+
+
+
+
+
+create_edge(target_revision, edge_type, metadata=None, idempotency_key=None)[source]
+
+Create an edge from this revision to another revision.
+
+Edges represent relationships between revisions, such as dependencies,
+references, or derivations. This is useful for tracking asset lineage.
+
+
+Parameters:
+
+
+target_revision (Revision) 鈥?The target revision to link to.
+
+
+edge_type (str) 鈥?The type of edge. Use constants from kumiho.EdgeType:
+- kumiho.DEPENDS_ON: This revision depends on target.
+- kumiho.DERIVED_FROM: This revision was derived from target.
+- kumiho.REFERENCED: This revision references target.
+- kumiho.CONTAINS: This revision contains target.
+
+
+metadata (Optional[Dict[str, str]]) 鈥?Optional metadata for the edge.
+
+
+idempotency_key (Optional[str]) 鈥?Stable tenant-scoped identity for retry-safe creation.
+
+
+
+
+
+Returns:
+
+The created Edge object.
+
+
+
+Return type:
+
+Edge
+
+
+
+
+
+Example
+
+>>> import kumiho
+
+
+
+
+
+>>> # Edge to a texture dependency
+>>> texture = kumiho.get_revision("kref://project/tex/skin.texture?r=2")
+>>> revision.create_edge(texture, kumiho.DEPENDS_ON)
+
+
+
+
+
+>>> # Edge with metadata
+>>> base = kumiho.get_revision("kref://project/models/base.model?r=1")
+>>> revision.create_edge(base, kumiho.DERIVED_FROM, {
+... "modification": "Added details"
+... })
+
+
+
+
+
+
+
+
+
+
+
+
+get_edges(edge_type_filter=None, direction=0)[source]
+
+Get edges involving this revision.
+
+
+Parameters:
+
+
+edge_type_filter (Optional[str]) 鈥?Optional filter for edge type.
+
+
+direction (int) 鈥?The direction of edges to retrieve:
+- kumiho.OUTGOING (0): Edges from this revision.
+- kumiho.INCOMING (1): Edges to this revision.
+- kumiho.BOTH (2): Edges in both directions.
+
+
+
+
+
+Returns:
+
+A list of Edge objects.
+
+
+
+Return type:
+
+List[Edge]
+
+
+
+
+
+Example
+
+>>> import kumiho
+
+
+
+
+
+>>> # Get all dependencies
+>>> deps = revision.get_edges(kumiho.DEPENDS_ON, kumiho.OUTGOING)
+
+
+
+
+
+>>> # Get all revisions that depend on this one
+>>> dependents = revision.get_edges(kumiho.DEPENDS_ON, kumiho.INCOMING)
+
+
+
+
+
+
+
+
+
+
+
+
+delete_edge(target_revision, edge_type)[source]
+
+Delete an edge from this revision.
+
+
+Parameters:
+
+
+target_revision (Revision) 鈥?The target revision of the edge.
+
+
+edge_type (str) 鈥?The type of edge to delete.
+
+
+
+
+
+Return type:
+
+None
+
+
+
+
+
+Example
+
+>>> revision.delete_edge(texture_revision, kumiho.DEPENDS_ON)
+
+
+
+
+
+
+
+
+
+
+
+
+get_all_dependencies(edge_type_filter=None, max_depth=10, limit=100)[source]
+
+Get all transitive dependencies of this revision.
+
+Traverses outgoing edges to find all revisions this revision
+depends on, directly or indirectly.
+
+
+Parameters:
+
+
+edge_type_filter (Optional[List[str]]) 鈥?Filter by edge types (e.g., [kumiho.DEPENDS_ON]).
+
+
+max_depth (int) 鈥?Maximum traversal depth (default: 10, max: 20).
+
+
+limit (int) 鈥?Maximum number of results (default: 100, max: 1000).
+
+
+
+
+
+Returns:
+
+Contains all discovered revisions and paths.
+
+
+
+Return type:
+
+TraversalResult
+
+
+
+
+
+Example
+
+>>> import kumiho
+
+
+
+
+
+>>> # Get all dependencies up to 5 hops
+>>> deps = revision.get_all_dependencies(
+... edge_type_filter=[kumiho.DEPENDS_ON],
+... max_depth=5
+... )
+>>> for kref in deps.revision_krefs:
+... print(f"Depends on: {kref}")
+
+
+
+
+
+
+
+
+
+
+
+
+get_all_dependents(edge_type_filter=None, max_depth=10, limit=100)[source]
+
+Get all revisions that transitively depend on this revision.
+
+Traverses incoming edges to find all revisions that depend on
+this revision, directly or indirectly. Useful for impact analysis.
+
+
+Parameters:
+
+
+edge_type_filter (Optional[List[str]]) 鈥?Filter by edge types.
+
+
+max_depth (int) 鈥?Maximum traversal depth.
+
+
+limit (int) 鈥?Maximum number of results.
+
+
+
+
+
+Returns:
+
+Contains all dependent revisions.
+
+
+
+Return type:
+
+TraversalResult
+
+
+
+
+
+Example
+
+>>> # Find everything that would be affected by changing this texture
+>>> dependents = texture_v1.get_all_dependents([kumiho.DEPENDS_ON])
+>>> print(f"{len(dependents.revision_krefs)} revisions would be affected")
+
+
+
+
+
+
+
+
+
+
+
+
+find_path_to(target, edge_type_filter=None, max_depth=10, all_paths=False)[source]
+
+Find the shortest path from this revision to another.
+
+Uses graph traversal to find how two revisions are connected.
+
+
+Parameters:
+
+
+target (Revision) 鈥?The target revision to find a path to.
+
+
+edge_type_filter (Optional[List[str]]) 鈥?Filter by edge types.
+
+
+max_depth (int) 鈥?Maximum path length to search.
+
+
+all_paths (bool) 鈥?If True, returns all shortest paths via result.paths.
+
+
+
+
+
+Return type:
+
+Optional[RevisionPath]
+
+
+
+Returns:
+
+RevisionPath if a path exists, None otherwise.
+Use all_paths=True and access result.paths for multiple paths.
+
+
+
+
+
+Example
+
+>>> path = model_v1.find_path_to(texture_v3)
+>>> if path:
+... print(f"Path length: {path.total_depth}")
+... for step in path.steps:
+... print(f" -> {step.revision_kref} via {step.edge_type}")
+
+
+
+
+
+
+
+
+
+
+
+
+analyze_impact(edge_type_filter=None, max_depth=10, limit=100)[source]
+
+Analyze the impact of changes to this revision.
+
+Returns all revisions that directly or indirectly depend on this
+revision, sorted by impact depth (closest dependencies first).
+
+
+Parameters:
+
+
+edge_type_filter (Optional[List[str]]) 鈥?Edge types to follow (default: all).
+
+
+max_depth (int) 鈥?How far to traverse (default: 10).
+
+
+limit (int) 鈥?Maximum results (default: 100).
+
+
+
+
+
+Returns:
+
+Revisions that would be impacted.
+
+
+
+Return type:
+
+List[ImpactedRevision]
+
+
+
+
+
+Example
+
+>>> # Before modifying a shared texture
+>>> impact = texture_v1.analyze_impact()
+>>> print(f"{len(impact)} revisions would need review")
+>>> for iv in impact[:5]:
+... print(f" {iv.revision_kref} (depth {iv.impact_depth})")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+ 
+
+ 
+ Previous
+ Next 
+ 
+
+
+ 
+
+ 
+ © Copyright 2025, Kumiho Clouds.
+
+ 
+
+
+ Built with Sphinx using a
+ theme
+ provided by Read the Docs.
+ 
+
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+
+

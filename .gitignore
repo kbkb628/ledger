@@ -1,0 +1,11 @@
+node_modules/
+.npm-cache/
+.env
+.env.*
+.env.bak
+!.env.example
+*.log
+dist/
+.next/
+.vercel
+eval/out/

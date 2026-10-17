@@ -1,0 +1,55 @@
+{
+  "schema_version": 1,
+  "diagram_type": "dataflow",
+  "meta": {
+    "title": "数据怎么一步步变成一条可举证的问题",
+    "output": "ledger-dataflow.html",
+    "quality_profile": "showcase",
+    "viewBox": [1400, 600],
+    "views": [
+      { "id": "two-sources", "label": "两处原文", "focus": ["raw3", "raw12", "s0307", "s1202"], "note": "同一个信息，在两集里以两种身份出现：一次被使用，一次被获知或相信。" },
+      { "id": "merge", "label": "归并成一条命题", "focus": ["use", "know", "canon", "fact"], "note": "「烧仓库」和「那件事」被认成同一条命题，泄漏才可能被查出。" },
+      { "id": "mind", "label": "真相 vs 认知", "focus": ["fact", "mind", "use", "finding"], "note": "判定读的是角色心智，不是客观真相——否则误信会被错判成泄漏。" }
+    ]
+  },
+  "stages": [
+    { "label": "剧本原文" },
+    { "label": "切场与时间锚定" },
+    { "label": "逐场抽取 (map)" },
+    { "label": "事实归并 (reduce)" },
+    { "label": "认知与判定" }
+  ],
+  "nodes": [
+    { "id": "raw3", "type": "external", "label": "第 3 集原文", "sublabel": "你三年前烧了那间仓库", "stage": 0, "row": 0 },
+    { "id": "raw12", "type": "external", "label": "第 12 集原文", "sublabel": "她在门外听见了那件事", "stage": 0, "row": 2 },
+
+    { "id": "s0307", "type": "backend", "label": "第 3 集 · 第 7 场", "sublabel": "时间锚：现在", "stage": 1, "row": 0 },
+    { "id": "s1202", "type": "backend", "label": "第 12 集 · 第 2 场", "sublabel": "时间锚：闪回·三年前", "stage": 1, "row": 2 },
+
+    { "id": "use", "type": "backend", "label": "使用事实", "sublabel": "女主用到「烧仓库」", "stage": 2, "row": 0 },
+    { "id": "know", "type": "backend", "label": "获知事实", "sublabel": "女主得知「烧仓库」· 偷听", "stage": 2, "row": 2 },
+
+    { "id": "canon", "type": "backend", "label": "规范化命题 F-017", "sublabel": "「烧仓库」＝「那件事」", "stage": 3, "row": 1 },
+
+    { "id": "finding", "type": "frontend", "label": "知识泄漏", "sublabel": "第3集时她还不该知道", "stage": 4, "row": 0, "tag": "R1" },
+    { "id": "mind", "type": "database", "label": "角色心智", "sublabel": "女主相信 F-017 · 第12集起", "stage": 4, "row": 1 },
+    { "id": "fact", "type": "database", "label": "客观事实 F-017", "sublabel": "故事真相 · 不参与判定", "stage": 4, "row": 2 }
+  ],
+  "flows": [
+    { "id": "cut-3", "from": "raw3", "to": "s0307", "label": "切场" },
+    { "id": "cut-12", "from": "raw12", "to": "s1202", "label": "切场" },
+    { "id": "extract-use", "from": "s0307", "to": "use", "label": "抽取" },
+    { "id": "extract-know", "from": "s1202", "to": "know", "label": "抽取" },
+    { "id": "merge-use", "from": "use", "to": "canon", "label": "归并", "variant": "emphasis" },
+    { "id": "merge-know", "from": "know", "to": "canon", "label": "归并", "variant": "emphasis" },
+    { "id": "canon-fact", "from": "canon", "to": "fact", "label": "命题" },
+    { "id": "canon-mind", "from": "canon", "to": "mind", "label": "挂到角色", "route": "straight" },
+    { "id": "use-verdict", "from": "use", "to": "finding", "label": "使用记录", "variant": "emphasis", "route": "straight" },
+    { "id": "mind-verdict", "from": "mind", "to": "finding", "label": "心智状态" }
+  ],
+  "cards": [
+    { "dot": "cyan", "title": "五个阶段的产物", "items": ["文本 → 场次+时间锚 → 事实三元组 → 规范化命题 → finding", "每一步的产物都能单独检查，错了能定位到是哪一步"] },
+    { "dot": "emerald", "title": "归并决定成败", "items": ["「烧仓库」和「那件事」必须认成同一条命题", "认不出会漏报，认错了会误报，两种都致命"] },
+    { "dot": "rose", "title": "判定看认知，不看真相", "items": ["账本同时存客观事实与每个角色的心智状态", "「她相信什么」是判定依据，真相只作参考", "这样才不会把「误信」错判成「知识泄漏」"] }
+  ]
+}

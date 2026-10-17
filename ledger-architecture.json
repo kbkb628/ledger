@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "《账本》叙事一致性审计 · 系统架构",
+    "output": "ledger-architecture.html",
+    "quality_profile": "showcase",
+    "views": [
+      { "id": "main-path", "label": "主路径", "focus": ["script", "segment", "extract", "resolve", "ledger", "audit", "findings"], "note": "剧本到问题清单：唯一的端到端路径。" },
+      { "id": "judgement", "label": "判定与反驳", "focus": ["resolve", "ledger", "audit", "findings", "waiver"], "note": "事实消解决定误报率，waiver 让判定可被推翻。" },
+      { "id": "cost", "label": "代价折算", "focus": ["findings", "audit", "prodledger", "cost"], "note": "第二阶段：把叙事硬伤折算成重做代价。" }
+    ]
+  },
+  "components": [
+    { "id": "script", "type": "external", "label": "分集剧本", "sublabel": "创作输入", "pos": [40, 330], "size": [120, 64] },
+    { "id": "segment", "type": "backend", "label": "分场与时间锚定", "sublabel": "闪回可人工改判", "pos": [240, 330], "size": [130, 64] },
+    { "id": "extract", "type": "backend", "label": "逐场抽取", "sublabel": "map · 可并发", "pos": [450, 330], "size": [130, 64] },
+    { "id": "resolve", "type": "backend", "label": "事实消解", "sublabel": "reduce · 实体归并", "pos": [660, 330], "size": [130, 64] },
+    { "id": "ledger", "type": "database", "label": "叙事账本", "sublabel": "事实 × 角色 × 时间", "pos": [870, 330], "size": [130, 64] },
+    { "id": "audit", "type": "backend", "label": "审计引擎", "sublabel": "R1 / R2 / R3", "pos": [1080, 330], "size": [130, 64] },
+    { "id": "findings", "type": "frontend", "label": "问题清单", "sublabel": "可定位 · 可反驳", "pos": [1290, 330], "size": [130, 64] },
+
+    { "id": "models", "type": "cloud", "label": "pi-ai 模型层", "sublabel": "多 provider 结构化输出", "pos": [450, 150], "size": [130, 60] },
+    { "id": "mcp", "type": "external", "label": "MCP 监督模块", "sublabel": "挂载到任意宿主", "pos": [1290, 150], "size": [130, 60] },
+    { "id": "prodledger", "type": "database", "label": "生产账本", "sublabel": "资产 × 镜头 × 版本", "pos": [450, 520], "size": [130, 60] },
+    { "id": "cost", "type": "backend", "label": "代价折算", "sublabel": "k 与 w 分列", "pos": [1080, 520], "size": [130, 60], "tag": "第二阶段" },
+    { "id": "waiver", "type": "database", "label": "否决记录", "sublabel": "一键反驳", "pos": [1290, 520], "size": [130, 60] }
+  ],
+  "connections": [
+    { "id": "script-to-segment", "from": "script", "to": "segment", "label": "剧本", "variant": "emphasis" },
+    { "id": "segment-to-extract", "from": "segment", "to": "extract", "label": "按场" },
+    { "id": "extract-to-resolve", "from": "extract", "to": "resolve", "label": "事实" },
+    { "id": "resolve-to-ledger", "from": "resolve", "to": "ledger", "label": "规范化" },
+    { "id": "ledger-to-audit", "from": "ledger", "to": "audit", "label": "时间轴" },
+    { "id": "audit-to-findings", "from": "audit", "to": "findings", "label": "硬伤" },
+
+    { "id": "models-to-extract", "from": "models", "to": "extract", "label": "结构化抽取", "variant": "dashed", "fromSide": "bottom", "toSide": "top", "labelDy": 24 },
+    { "id": "audit-to-cost", "from": "audit", "to": "cost", "label": "硬伤清单", "fromSide": "bottom", "toSide": "top", "labelDy": 24 },
+    { "id": "prodledger-to-cost", "from": "prodledger", "to": "cost", "label": "镜头依赖", "fromSide": "right", "toSide": "left" },
+    { "id": "findings-to-waiver", "from": "findings", "to": "waiver", "label": "一键否决", "fromSide": "bottom", "toSide": "top", "labelDy": 24 },
+    { "id": "findings-to-mcp", "from": "findings", "to": "mcp", "label": "对外暴露", "fromSide": "top", "toSide": "bottom" }
+  ],
+  "cards": [
+    { "dot": "cyan", "title": "输入与抽取", "items": ["剧本按场切分并锚定剧情时间，闪回由模型推断、人可改判", "逐场抽取角色、新增事实与事实使用，再全局消解同一事实"] },
+    { "dot": "emerald", "title": "判定与反驳", "items": ["R1 知识泄漏 · R2 无源信息 · R3 伏笔未回收", "每条硬伤引用原文，可一键否决并抑制同类误报"] },
+    { "dot": "rose", "title": "代价折算（第二阶段）", "items": ["沿生产账本的依赖边折算受影响镜头与重做成本", "k 与 w 分列：模型不确定性 ≠ 变更代价"] }
+  ]
+}

@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "归并判定的路由与降级",
+    "output": "ledger-merge-workflow.html",
+    "quality_profile": "showcase",
+    "viewBox": [700, 350],
+    "views": [
+      { "id": "zero-cost", "label": "零成本优先", "focus": ["mention", "known", "alias"], "note": "别名表或实体词规则命中就结束，根本不进判定服务。" },
+      { "id": "cascade", "label": "三级路由", "focus": ["jev", "router", "reason", "alias"], "note": "JEV 高置信直接接受，其余升级到强模型判定。" },
+      { "id": "fallback", "label": "降级与记账", "focus": ["jev", "reason", "queue", "telemetry"], "note": "JEV 失败则绕过升级；仍不确定进人工队列；每次调用都记账。" }
+    ]
+  },
+  "lanes": [
+    { "id": "main", "label": "主路径" },
+    { "id": "alt", "label": "升级与记账", "variant": "exception" }
+  ],
+  "phases": [
+    { "id": "prep", "label": "前置", "fromCol": 0, "toCol": 1 },
+    { "id": "decide", "label": "判定", "fromCol": 2, "toCol": 5, "variant": "emphasis" }
+  ],
+  "mainPath": ["mention", "known", "jev", "router", "alias"],
+  "nodes": [
+    { "id": "mention", "lane": "main", "col": 0, "type": "external", "label": "输入", "sublabel": "那件事", "width": 52 },
+    { "id": "known", "lane": "main", "col": 1, "type": "database", "label": "缓存", "sublabel": "命中即返回", "width": 52 },
+    { "id": "jev", "lane": "main", "col": 2, "type": "cloud", "label": "JEV", "sublabel": "返回概率", "width": 52 },
+    { "id": "router", "lane": "main", "col": 4, "type": "security", "label": "路由", "sublabel": "τ+间隔", "width": 52 },
+    { "id": "alias", "lane": "main", "col": 5, "type": "database", "label": "落库", "sublabel": "置信+证据", "width": 52 },
+
+    { "id": "reason", "lane": "alt", "col": 4, "type": "cloud", "label": "升级", "sublabel": "带上下文", "width": 52 },
+    { "id": "queue", "lane": "alt", "col": 5, "type": "security", "label": "人工", "sublabel": "低置信", "width": 52 },
+    { "id": "telemetry", "lane": "alt", "col": 2, "type": "database", "label": "记账", "sublabel": "花费/延迟", "width": 52 }
+  ],
+  "edges": [
+    { "id": "e-mention-known", "from": "mention", "to": "known", "label": "查询", "variant": "emphasis" },
+    { "id": "e-known-jev", "from": "known", "to": "jev" },
+    { "id": "e-jev-router", "from": "jev", "to": "router", "label": "概率" },
+    { "id": "e-jev-telemetry", "from": "jev", "to": "telemetry", "label": "记账", "variant": "dashed", "fromSide": "bottom", "toSide": "top", "route": "drop", "labelDy": 26 },
+    { "id": "e-router-alias", "from": "router", "to": "alias", "label": "接受" },
+    { "id": "e-router-reason", "from": "router", "to": "reason", "label": "不通过", "variant": "security", "fromSide": "bottom", "toSide": "top", "route": "drop" },
+    { "id": "e-jev-reason", "from": "jev", "to": "reason", "label": "降级", "variant": "dashed", "role": "error", "fromSide": "bottom", "toSide": "left", "labelDx": 34 },
+    { "id": "e-reason-alias", "from": "reason", "to": "alias", "label": "通过", "variant": "emphasis", "fromSide": "top", "toSide": "bottom" },
+    { "id": "e-reason-queue", "from": "reason", "to": "queue", "label": "待定" }
+  ],
+  "cards": [
+    { "dot": "cyan", "title": "零成本优先", "items": ["别名表或实体词规则命中，就根本不进判定服务", "命中率随剧集推进递增，wiki 累积直接等于钱"] },
+    { "dot": "emerald", "title": "三道门必须同时过", "items": ["置信度 ≥ τ，且模糊指代的门槛更高", "top1 与 top2 的间隔 ≥ margin", "答案空间里必须有「我不确定」这一项"] },
+    { "dot": "rose", "title": "降级链不能断", "items": ["JEV 超时或报错 → 直接升级，不阻塞管线", "强模型仍不确定 → 进人工队列", "每次判定都记账：花费、延迟、供应商"] }
+  ]
+}

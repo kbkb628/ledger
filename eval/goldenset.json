@@ -1,0 +1,228 @@
+{
+  "meta": {
+    "name": "《旧账》指代绑定黄金集 v2",
+    "revision": "v2 —— 按 rsi-log.md 的三条要求重建：(1) 每个 alias 标 first_seen，支持按时序过滤（处理样本 X 时只能用 first_seen ≤ X 所在场景的说法）；(2) keywords **只收剧本原文真实出现的说法**，删除此前手工添加的提示词（如 F-009 的「保管」「在谁那里」）；(3) 剧本重写，使同一命题在 3–5 个场景被不同措辞提及，让别名累积机制有施展空间。",
+    "script": "eval/script-jiuzhang.md",
+    "purpose": "验证归并判定（mention → 命题绑定）与别名累积的价值。",
+    "size": 48,
+    "candidates_policy": "**候选集由脚本自动召回**（用 mention 的实体词匹配各命题的 aliases），并保证 gold 在内。这比手工列候选更接近真实 blocking，也避免「候选是照答案挑的」这种偏差。",
+    "label_convention": "gold 是集合：真歧义时标多个，选中任一即算对"
+  },
+
+  "propositions": [
+    {
+      "id": "F-001",
+      "canonical": "陆见深三年前在码头与沈父争执，沈父落水，陆见深未施救",
+      "relation": "陆见深 · 见死不救 · 沈父（地点：码头；时间：三年前）",
+      "aliases": [
+        { "surface": "你三年前在码头做了什么", "first_seen": "S02-02" },
+        { "surface": "当年码头那件事", "first_seen": "S12-05" },
+        { "surface": "码头那天", "first_seen": "S20-01" }
+      ],
+      "type": "death", "agent": "陆见深", "patient": "沈父", "object": "码头", "time_ref": "三年前"
+    },
+    {
+      "id": "F-002",
+      "canonical": "苏婉伪造并调换了沈父的遗嘱",
+      "relation": "苏婉 · 伪造调换 · 沈父的遗嘱（时间：三年前）",
+      "aliases": [
+        { "surface": "唯一在册的遗嘱", "first_seen": "S06-03" },
+        { "surface": "亲笔遗嘱", "first_seen": "S08-04" },
+        { "surface": "那份遗嘱是伪造的", "first_seen": "S08-04" },
+        { "surface": "让我改的遗嘱", "first_seen": "S10-02" },
+        { "surface": "那份假遗嘱", "first_seen": "S19-02" }
+      ],
+      "type": "deception", "agent": "苏婉", "patient": "沈父的遗嘱", "time_ref": "三年前"
+    },
+    {
+      "id": "F-003",
+      "canonical": "沈父真正的遗嘱藏在怀表夹层里",
+      "relation": "沈父遗嘱原件 · 藏于 · 怀表夹层（时间：三年前）",
+      "aliases": [
+        { "surface": "最要紧的东西", "first_seen": "S01-03" },
+        { "surface": "我父亲真正的遗嘱", "first_seen": "S11-01" },
+        { "surface": "老爷真正的遗嘱", "first_seen": "S18-04" }
+      ],
+      "type": "transfer", "agent": "沈父", "object": "怀表", "time_ref": "三年前"
+    },
+    {
+      "id": "F-004",
+      "canonical": "苏婉在宴会上向沈知微敬酒",
+      "relation": "苏婉 · 敬酒 · 沈知微（地点：宴会厅；时间：现在）",
+      "aliases": [
+        { "surface": "我敬你", "first_seen": "S01-05" },
+        { "surface": "苏小姐的酒", "first_seen": "S01-05" }
+      ],
+      "type": "other", "other_label": "social_approach", "agent": "苏婉", "patient": "沈知微", "object": "酒", "time_ref": "现在"
+    },
+    {
+      "id": "F-005",
+      "canonical": "存在一份载有陆见深签名的联姻备忘录（伪造）",
+      "relation": "联姻备忘录 · 载有 · 陆见深签名（苏婉伪造；时间：现在）",
+      "aliases": [
+        { "surface": "陆氏与苏氏联姻备忘录", "first_seen": "S07-02" },
+        { "surface": "你和苏婉的婚约", "first_seen": "S09-01" },
+        { "surface": "那份备忘录", "first_seen": "S15-03" },
+        { "surface": "那份婚约", "first_seen": "S17-01" }
+      ],
+      "type": "deal", "agent": "苏婉", "object": "联姻备忘录", "time_ref": "现在"
+    },
+    {
+      "id": "F-006",
+      "canonical": "陈默受苏婉指使经手了遗嘱调换",
+      "relation": "陈默 · 受苏婉指使调换 · 沈父的遗嘱（时间：三年前）",
+      "aliases": [
+        { "surface": "是你经手的", "first_seen": "S05-01" },
+        { "surface": "苏小姐让我改的", "first_seen": "S10-02" },
+        { "surface": "当年我换掉的是副本", "first_seen": "S18-04" }
+      ],
+      "type": "deception", "agent": "陈默", "patient": "沈父的遗嘱", "time_ref": "三年前"
+    },
+    {
+      "id": "F-007",
+      "canonical": "沈父临终前告诉沈知微「怀表里有最要紧的东西」",
+      "relation": "沈父 · 临终遗言 · 沈知微（内容：怀表里有最要紧的东西）",
+      "aliases": [
+        { "surface": "爸走之前跟我说", "first_seen": "S01-03" },
+        { "surface": "他临终前告诉我", "first_seen": "S11-01" }
+      ],
+      "type": "reveal", "agent": "沈父", "patient": "沈知微", "object": "怀表", "time_ref": "三年前"
+    },
+    {
+      "id": "F-008",
+      "canonical": "苏婉命令陈默烧掉遗嘱文件",
+      "relation": "苏婉 · 命令销毁 · 遗嘱文件（未遂；时间：现在）",
+      "aliases": [
+        { "surface": "处理掉。烧了", "first_seen": "S04-02" }
+      ],
+      "type": "harm", "agent": "苏婉", "object": "遗嘱文件", "time_ref": "现在", "note": "modality=intended，未遂"
+    },
+    {
+      "id": "F-009",
+      "canonical": "陈默手上持有沈父遗嘱的原件",
+      "relation": "陈默 · 持有 · 沈父遗嘱原件（时间：现在）",
+      "aliases": [
+        { "surface": "老爷留下的那份东西", "first_seen": "S04-02" },
+        { "surface": "那份东西", "first_seen": "S05-01" },
+        { "surface": "那份原件", "first_seen": "S14-01" },
+        { "surface": "原件我一直收着", "first_seen": "S18-04" }
+      ],
+      "type": "other", "other_label": "possession", "agent": "陈默", "object": "遗嘱原件", "time_ref": "现在"
+    },
+    {
+      "id": "F-010",
+      "canonical": "沈父三年前立过一份遗嘱",
+      "relation": "沈父 · 立下 · 遗嘱（时间：三年前）",
+      "aliases": [
+        { "surface": "我父亲三年前立过一份遗嘱", "first_seen": "S06-03" },
+        { "surface": "那不是他留下的那一份", "first_seen": "S06-03" }
+      ],
+      "type": "other", "other_label": "document_exists", "agent": "沈父", "object": "遗嘱", "time_ref": "三年前"
+    },
+    {
+      "id": "F-011",
+      "canonical": "苏婉三年间从沈氏转走两千三百万",
+      "relation": "苏婉 · 挪用 · 沈氏资金两千三百万（时间：三年间）",
+      "aliases": [
+        { "surface": "有几笔对不上", "first_seen": "S13-02" },
+        { "surface": "两千三百万", "first_seen": "S16-02" },
+        { "surface": "那笔钱", "first_seen": "S19-02" }
+      ],
+      "type": "transfer", "agent": "苏婉", "patient": "沈氏资金", "time_ref": "三年间"
+    },
+    {
+      "id": "F-012",
+      "canonical": "苏婉并非沈家远亲，她的身份是假的",
+      "relation": "苏婉 · 冒充 · 沈家远亲",
+      "aliases": [
+        { "surface": "我的身份", "first_seen": "S15-03" },
+        { "surface": "你根本不是沈家的远亲", "first_seen": "S19-02" }
+      ],
+      "type": "impersonate", "agent": "苏婉", "time_ref": "现在"
+    },
+    {
+      "id": "F-013",
+      "canonical": "沈知微带着前世记忆重生回到三年前",
+      "relation": "沈知微 · 重生 · （携带前世记忆）",
+      "aliases": [
+        { "surface": "我回来了", "first_seen": "S01-01" },
+        { "surface": "我做过一遍的梦", "first_seen": "S20-05" }
+      ],
+      "type": "identity_change", "agent": "沈知微", "time_ref": "现在", "note": "她的前世记忆是若干命题的「无源」获得渠道，R2 检测需专门处理"
+    },
+    {
+      "id": "F-014",
+      "canonical": "陆见深当年是为保住沈知微才没有施救",
+      "relation": "陆见深 · 为保沈知微而未施救（时间：三年前）",
+      "aliases": [
+        { "surface": "我伸了手，就保不住你", "first_seen": "S20-01" }
+      ],
+      "type": "reveal", "agent": "陆见深", "patient": "沈知微", "time_ref": "三年前"
+    }
+  ],
+
+  "samples": [
+    { "id": "G-001", "mention": { "surface": "你三年前在码头做了什么", "scene": "S02-02", "kind": "explicit_noun", "context": "你三年前在码头做了什么，你自己清楚。" }, "gold": ["F-001"] },
+    { "id": "G-002", "mention": { "surface": "当年码头那件事", "scene": "S12-05", "kind": "vague_pronoun", "context": "当年码头那件事，知微已经知道了。" }, "gold": ["F-001"], "note": "对照 G-001：措辞由「做了什么」变为「那件事」，实体线索只剩「码头」" },
+    { "id": "G-003", "mention": { "surface": "码头那天", "scene": "S20-01", "kind": "vague_pronoun", "context": "码头那天，你明明可以伸手。" }, "gold": ["F-001"] },
+    { "id": "G-004", "mention": { "surface": "那份协议", "scene": "S03-05", "kind": "explicit_noun", "context": "那份协议，你签不签？" }, "gold": ["NEW"], "note": "**NEW 负例**：协议本身不在命题清单里，是码头事件的起因但不等于该事件" },
+
+    { "id": "G-005", "mention": { "surface": "唯一在册的遗嘱", "scene": "S06-03", "kind": "explicit_noun", "context": "苏女士手上那份是唯一在册的遗嘱。" }, "gold": ["F-002"] },
+    { "id": "G-006", "mention": { "surface": "亲笔遗嘱", "scene": "S08-04", "kind": "explicit_noun", "context": "这是沈老先生亲笔遗嘱，白纸黑字，有公证。" }, "gold": ["F-002"] },
+    { "id": "G-007", "mention": { "surface": "那份遗嘱是伪造的", "scene": "S08-04", "kind": "explicit_noun", "context": "那份遗嘱是伪造的。" }, "gold": ["F-002"] },
+    { "id": "G-008", "mention": { "surface": "它不是我爸的字", "scene": "S08-04", "kind": "vague_pronoun", "context": "凭我知道它不是我爸的字。" }, "gold": ["F-002"], "note": "无实体词，靠前一句「遗嘱」" },
+    { "id": "G-009", "mention": { "surface": "让我改的遗嘱", "scene": "S10-02", "kind": "explicit_noun", "context": "当年是苏小姐让我改的遗嘱。老爷真正留下的那份，被她换掉了。" }, "gold": ["F-002", "F-006"], "note": "一句含两命题：篡改 + 陈默经手" },
+    { "id": "G-010", "mention": { "surface": "那份假遗嘱", "scene": "S19-02", "kind": "repeated_surface", "context": "那笔钱，那份假遗嘱，还有那份婚约——都是你做的。" }, "gold": ["F-002"], "note": "**repeated_surface**：与 G-007 同指，此处出现在 S19-02（F-002 的别名已累积了 4 条）" },
+
+    { "id": "G-011", "mention": { "surface": "最要紧的东西", "scene": "S01-03", "kind": "vague_pronoun", "context": "这块表里有他最要紧的东西。" }, "gold": ["F-003", "F-007"], "note": "真歧义：可指遗言内容（F-007），也可指遗嘱本身（F-003）" },
+    { "id": "G-012", "mention": { "surface": "我父亲真正的遗嘱", "scene": "S11-01", "kind": "explicit_noun", "context": "我父亲真正的遗嘱，在这里。" }, "gold": ["F-003"], "note": "「真正的」+「在这里」指向藏在怀表里的那份" },
+    { "id": "G-013", "mention": { "surface": "老爷真正的遗嘱", "scene": "S18-04", "kind": "explicit_noun", "context": "小姐，这是老爷真正的遗嘱。" }, "gold": ["F-003"], "note": "此时 F-003 的别名已含 S01-03 与 S11-01 两条说法" },
+
+    { "id": "G-014", "mention": { "surface": "我敬你", "scene": "S01-05", "kind": "explicit_noun", "context": "知微，第一次见面，我敬你。" }, "gold": ["F-004"] },
+    { "id": "G-015", "mention": { "surface": "苏小姐的酒", "scene": "S01-05", "kind": "explicit_noun", "context": "苏小姐的酒，我不喝。" }, "gold": ["F-004"], "note": "沈知微拒绝的理由来自前世记忆（剧本未交代）——R2 的候选案例" },
+
+    { "id": "G-016", "mention": { "surface": "陆氏与苏氏联姻备忘录", "scene": "S07-02", "kind": "explicit_noun", "context": "茶几上放着一份文件：《陆氏与苏氏联姻备忘录》，末尾有陆见深的签名。" }, "gold": ["F-005"] },
+    { "id": "G-017", "mention": { "surface": "你和苏婉的婚约", "scene": "S09-01", "kind": "explicit_noun", "context": "你和苏婉的婚约，什么时候的事？" }, "gold": ["F-005"], "note": "**关键对照**：与 G-016 同指，措辞从「备忘录」变为「婚约」" },
+    { "id": "G-018", "mention": { "surface": "那份备忘录", "scene": "S15-03", "kind": "repeated_surface", "context": "那份备忘录你签也得签，不签也得签。" }, "gold": ["F-005"] },
+    { "id": "G-019", "mention": { "surface": "那份婚约", "scene": "S17-01", "kind": "repeated_surface", "context": "你用了我的名义，签了那份婚约？" }, "gold": ["F-005"], "note": "此时 F-005 已累积 3 条别名" },
+
+    { "id": "G-020", "mention": { "surface": "是你经手的", "scene": "S05-01", "kind": "vague_pronoun", "context": "那份东西要是没了，谁也不知道是你经手的。" }, "gold": ["F-006", "F-009"], "note": "「经手」指向 F-006；「那份东西」指向 F-009" },
+    { "id": "G-021", "mention": { "surface": "苏小姐让我改的", "scene": "S10-02", "kind": "vague_pronoun", "context": "当年是苏小姐让我改的。" }, "gold": ["F-006", "F-002"], "note": "省略宾语，测零指代" },
+    { "id": "G-022", "mention": { "surface": "当年我换掉的是副本", "scene": "S18-04", "kind": "explicit_noun", "context": "当年我换掉的是副本，原件我一直收着。" }, "gold": ["F-006"], "note": "此时 F-006 已累积 2 条别名" },
+
+    { "id": "G-023", "mention": { "surface": "爸走之前跟我说", "scene": "S01-03", "kind": "vague_pronoun", "context": "爸走之前跟我说，这块表里有他最要紧的东西。" }, "gold": ["F-007"] },
+    { "id": "G-024", "mention": { "surface": "他临终前告诉我", "scene": "S11-01", "kind": "vague_pronoun", "context": "他临终前告诉我，最要紧的东西在表里。" }, "gold": ["F-007", "F-003"], "note": "引述遗言（F-007），内容指向遗嘱（F-003）" },
+
+    { "id": "G-025", "mention": { "surface": "处理掉。烧了", "scene": "S04-02", "kind": "explicit_noun", "context": "处理掉。烧了，别留痕迹。" }, "gold": ["F-008"], "note": "modality=intended —— 抽成已发生即为错" },
+
+    { "id": "G-026", "mention": { "surface": "老爷留下的那份东西", "scene": "S04-02", "kind": "vague_pronoun", "context": "老爷留下的那份东西，还在你手上？" }, "gold": ["F-009"], "note": "**关键**：此处 F-009 刚在同场建立，别名表**尚为空**——真实系统里拿不到额外线索" },
+    { "id": "G-027", "mention": { "surface": "那份东西", "scene": "S05-01", "kind": "repeated_surface", "context": "那份东西要是没了，谁也不知道是你经手的。" }, "gold": ["F-009", "F-006"], "note": "此时 F-009 已有 1 条别名（S04-02）" },
+    { "id": "G-028", "mention": { "surface": "那份原件", "scene": "S14-01", "kind": "repeated_surface", "context": "小姐……那份原件，我一直留着。" }, "gold": ["F-009"], "note": "此时 F-009 已累积 2 条别名" },
+    { "id": "G-029", "mention": { "surface": "原件我一直收着", "scene": "S18-04", "kind": "explicit_noun", "context": "当年我换掉的是副本，原件我一直收着。" }, "gold": ["F-009", "F-006"], "note": "此时 F-009 已累积 3 条别名" },
+
+    { "id": "G-030", "mention": { "surface": "我父亲三年前立过一份遗嘱", "scene": "S06-03", "kind": "explicit_noun", "context": "我父亲三年前立过一份遗嘱。" }, "gold": ["F-010"], "note": "只陈述存在性" },
+    { "id": "G-031", "mention": { "surface": "那不是他留下的那一份", "scene": "S06-03", "kind": "vague_pronoun", "context": "那不是他留下的那一份。" }, "gold": ["F-003", "F-010"], "note": "与 G-030 同场对照：此处指真遗嘱（F-003），也涉及存在性（F-010）" },
+
+    { "id": "G-032", "mention": { "surface": "有几笔对不上", "scene": "S13-02", "kind": "vague_pronoun", "context": "沈小姐，这三年的账，有几笔对不上。" }, "gold": ["F-011"] },
+    { "id": "G-033", "mention": { "surface": "两千三百万", "scene": "S16-02", "kind": "explicit_noun", "context": "三年间，两千三百万从这个账户转走。" }, "gold": ["F-011"] },
+    { "id": "G-034", "mention": { "surface": "那笔钱", "scene": "S19-02", "kind": "vague_pronoun", "context": "那笔钱，那份假遗嘱，还有那份婚约——都是你做的。" }, "gold": ["F-011"], "note": "此时 F-011 已累积 2 条别名" },
+
+    { "id": "G-035", "mention": { "surface": "我的身份", "scene": "S15-03", "kind": "explicit_noun", "context": "我的身份，本来就是沈家给的。" }, "gold": ["F-012"] },
+    { "id": "G-036", "mention": { "surface": "你根本不是沈家的远亲", "scene": "S19-02", "kind": "explicit_noun", "context": "苏婉，你根本不是沈家的远亲。" }, "gold": ["F-012"] },
+
+    { "id": "G-037", "mention": { "surface": "我回来了", "scene": "S01-01", "kind": "vague_pronoun", "context": "三年前。我回来了。" }, "gold": ["F-013"] },
+    { "id": "G-038", "mention": { "surface": "我做过一遍的梦", "scene": "S20-05", "kind": "vague_pronoun", "context": "我做过一遍的梦，不会再做第二遍。" }, "gold": ["F-013"] },
+
+    { "id": "G-039", "mention": { "surface": "我伸了手，就保不住你", "scene": "S20-01", "kind": "vague_pronoun", "context": "我伸了手，就保不住你。" }, "gold": ["F-014"] },
+
+    { "id": "G-040", "mention": { "surface": "沈家一分钱", "scene": "S01-01", "kind": "explicit_noun", "context": "我不会再让任何人动沈家一分钱。" }, "gold": ["NEW"], "note": "**NEW 负例**：当时尚未建立资金挪用命题" },
+    { "id": "G-041", "mention": { "surface": "那件事", "scene": "S02-02", "kind": "vague_pronoun", "context": "你我都清楚那件事。" }, "gold": ["UNSURE"], "note": "**UNSURE 负例**：上下文完全不含实体线索" },
+    { "id": "G-042", "mention": { "surface": "那笔账", "scene": "S13-02", "kind": "vague_pronoun", "context": "三年那笔账，总要有人还。" }, "gold": ["UNSURE"], "note": "**UNSURE 负例**：候选全部落在「三年」这一时间层，线索不足以区分" },
+    { "id": "G-043", "mention": { "surface": "那份文件", "scene": "S08-04", "kind": "vague_pronoun", "context": "苏婉把一份文件推到桌上。" }, "gold": ["F-002"], "note": "同场里 F-002 的别名已含 S06-03 的「唯一在册的遗嘱」" },
+    { "id": "G-044", "mention": { "surface": "那个签名", "scene": "S07-02", "kind": "vague_pronoun", "context": "沈知微盯着那个签名看了很久。" }, "gold": ["F-005"], "note": "指备忘录上的签名" },
+    { "id": "G-045", "mention": { "surface": "我的名义", "scene": "S17-01", "kind": "vague_pronoun", "context": "你用了我的名义，签了那份婚约？" }, "gold": ["F-005"] },
+    { "id": "G-046", "mention": { "surface": "同一个离岸账户", "scene": "S13-02", "kind": "explicit_noun", "context": "走的都是同一个离岸账户。" }, "gold": ["F-011"] },
+    { "id": "G-047", "mention": { "surface": "老爷的遗嘱", "scene": "S04-02", "kind": "explicit_noun", "context": "小姐，那是老爷的……" }, "gold": ["F-009", "F-002"], "note": "高歧义：语境同时激活「持有」（F-009）与「伪造/销毁」（F-002、F-008）" },
+    { "id": "G-048", "mention": { "surface": "证据", "scene": "S19-02", "kind": "vague_pronoun", "context": "陈叔留着的原件，就是证据。" }, "gold": ["F-009"], "note": "「原件」指 F-009 持有的那份" }
+  ]
+}

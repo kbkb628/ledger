@@ -1,0 +1,45 @@
+{
+  "meta": {
+    "name": "《旧账·泄漏样本》R1 标注",
+    "script": "eval/script-leak.md",
+    "purpose": "验证 R1 的真阳性能力。正本《旧账》是内部自洽的，上面只能测到误报，所以另建这份故意写坏的剧本。",
+    "note": "exact_scene=true 表示「只允许在该场景命中」；false 表示同一角色在别的场景命中也可接受（时序泄漏可能被更早的使用点先捕获）。"
+  },
+  "leaks": [
+    {
+      "id": "L-01",
+      "kind": "no_source",
+      "character": "陈立",
+      "scene": "S03-01",
+      "surface": "暗格",
+      "why": "「书房暗格里那份」——暗格这件事只在 S02-01 由周管私下告诉林昭（在场仅林昭、周管），陈立无渠道知道。属于无源信息。",
+      "exact_scene": false
+    },
+    {
+      "id": "L-02",
+      "kind": "timing",
+      "character": "林昭",
+      "scene": "S01-03",
+      "surface": "暗格",
+      "why": "林昭到 S02-01 才从周管口中得知暗格，却在 S01-03 就用「暗格里那份」。属于超前知情。",
+      "exact_scene": true
+    },
+    {
+      "id": "L-03",
+      "kind": "no_source",
+      "character": "周管",
+      "scene": "S05-01",
+      "surface": "两千三百万",
+      "why": "「两千三百万是经陈立的手走的」——该事实只在 S03-01 何静与陈立的私下对话（在场仅何静、陈立）里出现，周管无渠道知道。属于无源信息。",
+      "exact_scene": false
+    }
+  ],
+  "must_not_flag": [
+    { "character": "何静", "scene": "S01-02", "surface": "公证", "why": "她本人经手的遗嘱公证" },
+    { "character": "周管", "scene": "S01-01", "surface": "半年前", "why": "亲历老爷去世" },
+    { "character": "林昭", "scene": "S02-02", "surface": "父亲的字", "why": "当场看到信封上的字" },
+    { "character": "何静", "scene": "S03-01", "surface": "烧了", "why": "误信（她以为自己烧了），按设计「误信被正确使用不算泄漏」" },
+    { "character": "陈立", "scene": "S03-01", "surface": "对不上", "why": "他的本职（会计查账）" },
+    { "character": "林昭", "scene": "S05-02", "surface": "暗格", "why": "S02-01 已由周管告知，合法" }
+  ]
+}

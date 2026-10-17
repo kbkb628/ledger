@@ -1,0 +1,30 @@
+{
+  "name": "ledger",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "《账本》— AI 短剧的叙事一致性账本。MCP server 形态，可挂到任何本地创作 agent 上。",
+  "bin": {
+    "ledger-mcp": "src/mcp/server.ts"
+  },
+  "scripts": {
+    "mcp": "tsx src/mcp/server.ts",
+    "mcp:smoke": "tsx eval/mcp-smoke.ts",
+    "eval": "tsx eval/run-eval.ts",
+    "eval:rule": "tsx eval/run-eval.ts --provider rule",
+    "eval:extract": "tsx eval/run-extract.ts",
+    "eval:e2e": "tsx eval/run-e2e.ts",
+    "audit": "tsx eval/run-audit.ts",
+    "eval:r1": "tsx eval/run-r1.ts",
+    "eval:validate": "tsx eval/validate-goldenset.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^22.7.5",
+    "tsx": "^4.19.1",
+    "typescript": "^5.6.3"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.32.1"
+  }
+}

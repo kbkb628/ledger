@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "走查：一句台词怎么被判成知识泄漏",
+    "output": "ledger-walkthrough.html",
+    "quality_profile": "showcase",
+    "viewBox": [1450, 620],
+    "column_fit": "spread",
+    "views": [
+      { "id": "ingest", "label": "两集入库", "focus": ["writer", "reader", "resolver", "ledger"], "note": "两条原文分别被抽取、归并、写进同一本账。" },
+      { "id": "audit", "label": "审计比对", "focus": ["auditor", "ledger"], "note": "审计引擎只问一件事：使用时间早于获知时间吗？" },
+      { "id": "feedback", "label": "回到编剧手里", "focus": ["auditor", "writer"], "note": "结论可被确认，也可被否决。" }
+    ]
+  },
+  "participants": [
+    { "id": "writer", "type": "external", "label": "编剧", "sublabel": "提交与裁决" },
+    { "id": "reader", "type": "backend", "label": "抽取器", "sublabel": "逐场读出事实" },
+    { "id": "resolver", "type": "backend", "label": "归并器", "sublabel": "认成同一条事实" },
+    { "id": "ledger", "type": "database", "label": "叙事账本", "sublabel": "谁何时知道什么" },
+    { "id": "auditor", "type": "backend", "label": "审计引擎", "sublabel": "R1 知识泄漏" }
+  ],
+  "segments": [
+    { "from": 150, "to": 275, "label": "第 3 集入库" },
+    { "from": 285, "to": 405, "label": "第 12 集入库" },
+    { "from": 415, "to": 560, "label": "审计与反馈" }
+  ],
+  "messages": [
+    { "id": "submit-3", "from": "writer", "to": "reader", "y": 172, "label": "第3集：你烧了仓库", "variant": "default" },
+    { "id": "usage", "from": "reader", "to": "resolver", "y": 212, "label": "使用事实 @3集·7场", "variant": "default" },
+    { "id": "write-used", "from": "resolver", "to": "ledger", "y": 252, "label": "记 used → F-017", "variant": "default" },
+
+    { "id": "submit-12", "from": "writer", "to": "reader", "y": 300, "label": "第12集：她听见了", "variant": "default" },
+    { "id": "knowledge", "from": "reader", "to": "resolver", "y": 340, "label": "获知事实 @12集·2场", "variant": "default" },
+    { "id": "write-learned", "from": "resolver", "to": "ledger", "y": 380, "label": "记 learned → F-017", "variant": "default" },
+
+    { "id": "ask", "from": "auditor", "to": "ledger", "y": 430, "label": "查询 F-017", "variant": "default" },
+    { "id": "answer", "from": "ledger", "to": "auditor", "y": 468, "label": "used@3集 · learned@12集", "variant": "return" },
+    { "id": "verdict", "from": "auditor", "to": "writer", "y": 500, "label": "知识泄漏：使用早于获知", "variant": "emphasis" },
+    { "id": "decide", "from": "writer", "to": "ledger", "y": 532, "label": "确认修改 / 一键否决", "variant": "dashed" }
+  ],
+  "activations": [
+    { "participant": "writer", "from": 168, "to": 538, "type": "external" },
+    { "participant": "reader", "from": 168, "to": 345, "type": "backend" },
+    { "participant": "resolver", "from": 208, "to": 385, "type": "backend" },
+    { "participant": "ledger", "from": 248, "to": 475, "type": "database" },
+    { "participant": "auditor", "from": 425, "to": 540, "type": "backend" }
+  ],
+  "cards": [
+    { "dot": "cyan", "title": "前两段：入库", "items": ["第 3 集那句台词被抽成「女主用到烧仓库」", "第 12 集那场偷听被抽成「女主获知烧仓库」", "两句原文归并到同一条事实 F-017"] },
+    { "dot": "emerald", "title": "第三段：审计只做一次比对", "items": ["问账本：F-017 的使用时间和获知时间分别是多少", "used@第3集 早于 learned@第12集 → 判定知识泄漏", "规则本身很简单，难的是前面把事实认准"] },
+    { "dot": "rose", "title": "闭环：人始终有判断权", "items": ["结论带着证据链回到编剧手里", "可以确认去改剧本，也可以一键否决", "否决会被记住，同类不再重复报"] }
+  ]
+}

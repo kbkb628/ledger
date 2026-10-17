@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kumiho Cloud Documentation</title>
+    <meta name="description" content="Documentation for Kumiho Cloud SDKs and APIs - Graph-native creative & AI asset management">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🦊</text></svg>">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --bg: #0f172a;
+            --bg-card: #1e293b;
+            --text: #f1f5f9;
+            --text-muted: #94a3b8;
+            --border: #334155;
+            --success: #22c55e;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        /* Header */
+        header {
+            padding: 24px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: var(--text);
+        }
+
+        .logo-icon {
+            font-size: 32px;
+        }
+
+        .logo-text {
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .logo-text span {
+            color: var(--text-muted);
+            font-weight: 400;
+        }
+
+        .header-links {
+            display: flex;
+            gap: 24px;
+        }
+
+        .header-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 14px;
+            transition: color 0.2s;
+        }
+
+        .header-links a:hover {
+            color: var(--text);
+        }
+
+        /* Hero */
+        .hero {
+            text-align: center;
+            padding: 80px 0 60px;
+        }
+
+        .hero h1 {
+            font-size: 48px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            background: linear-gradient(135deg, var(--text) 0%, var(--primary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero p {
+            font-size: 20px;
+            color: var(--text-muted);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* SDK Grid */
+        .sdk-section {
+            padding: 40px 0 80px;
+        }
+
+        .section-title {
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--text-muted);
+            margin-bottom: 24px;
+        }
+
+        .sdk-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+        }
+
+        .sdk-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 32px;
+            text-decoration: none;
+            color: var(--text);
+            transition: all 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .sdk-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(99, 102, 241, 0.15);
+        }
+
+        .sdk-card.coming-soon {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        .sdk-card.coming-soon::after {
+            content: 'Coming Soon';
+            position: absolute;
+            top: 16px;
+            right: -32px;
+            background: var(--primary);
+            color: white;
+            font-size: 11px;
+            padding: 4px 40px;
+            transform: rotate(45deg);
+        }
+
+        .sdk-icon {
+            font-size: 40px;
+            margin-bottom: 16px;
+        }
+
+        .sdk-card h3 {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .sdk-card p {
+            color: var(--text-muted);
+            font-size: 14px;
+            margin-bottom: 16px;
+        }
+
+        .sdk-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            border-radius: 20px;
+            padding: 4px 12px;
+            font-size: 12px;
+            color: var(--primary);
+        }
+
+        .sdk-badge.stable {
+            background: rgba(34, 197, 94, 0.1);
+            border-color: rgba(34, 197, 94, 0.3);
+            color: var(--success);
+        }
+
+        /* API Section */
+        .api-section {
+            padding: 40px 0 80px;
+            border-top: 1px solid var(--border);
+        }
+
+        .api-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 24px;
+        }
+
+        .api-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 32px;
+            text-decoration: none;
+            color: var(--text);
+            transition: all 0.2s;
+        }
+
+        .api-card:hover {
+            border-color: var(--primary);
+        }
+
+        .api-card h3 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .api-card p {
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        /* Footer */
+        footer {
+            border-top: 1px solid var(--border);
+            padding: 40px 0;
+            text-align: center;
+        }
+
+        footer p {
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        footer a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 32px;
+            }
+
+            .hero p {
+                font-size: 16px;
+            }
+
+            .header-links {
+                display: none;
+            }
+
+            .sdk-grid, .api-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <a href="/" class="logo">
+                    <span class="logo-icon">🦊</span>
+                    <span class="logo-text">Kumiho <span>Docs</span></span>
+                </a>
+                <nav class="header-links">
+                    <a href="https://kumiho.io">Home</a>
+                    <a href="https://github.com/kumihoclouds">GitHub</a>
+                    <a href="https://kumiho.io/blog">Blog</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <section class="hero">
+            <div class="container">
+                <h1>Kumiho Cloud Documentation</h1>
+                <p>Graph-native creative & AI asset management. SDKs, APIs, and guides for building with Kumiho.</p>
+            </div>
+        </section>
+
+        <section class="sdk-section">
+            <div class="container">
+                <h2 class="section-title">Client SDKs</h2>
+                <div class="sdk-grid">
+                    <a href="/python/" class="sdk-card">
+                        <div class="sdk-icon">🐍</div>
+                        <h3>Python SDK</h3>
+                        <p>High-level Python client for Kumiho Cloud. Perfect for ComfyUI plugins, automation scripts, and AI pipelines.</p>
+                        <span class="sdk-badge stable">● v0.3.0</span>
+                    </a>
+
+                    <a href="/fastapi/" class="sdk-card coming-soon">
+                        <div class="sdk-icon">⚡</div>
+                        <h3>FastAPI Control Plane</h3>
+                        <p>REST API documentation for the Kumiho control plane. Authentication, tenant management, and routing.</p>
+                        <span class="sdk-badge">In Development</span>
+                    </a>
+
+                    <a href="/cpp/" class="sdk-card coming-soon">
+                        <div class="sdk-icon">⚙️</div>
+                        <h3>C++ SDK</h3>
+                        <p>Native C++ client for DCC plugins. Premiere Pro, DaVinci Resolve, and other professional tools.</p>
+                        <span class="sdk-badge">In Development</span>
+                    </a>
+
+                    <a href="/dart/" class="sdk-card coming-soon">
+                        <div class="sdk-icon">🎯</div>
+                        <h3>Dart SDK</h3>
+                        <p>Flutter-ready SDK for cross-platform mobile and desktop applications.</p>
+                        <span class="sdk-badge">In Development</span>
+                    </a>
+
+                    <a href="/nextjs/" class="sdk-card coming-soon">
+                        <div class="sdk-icon">▲</div>
+                        <h3>Next.js Web App</h3>
+                        <p>Frontend documentation for kumiho.io. Components, hooks, and integration guides.</p>
+                        <span class="sdk-badge">In Development</span>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <section class="api-section">
+            <div class="container">
+                <h2 class="section-title">Resources</h2>
+                <div class="api-grid">
+                    <a href="https://github.com/kumihoclouds/kumiho-python" class="api-card">
+                        <h3>📦 PyPI Package</h3>
+                        <p>Install the Python SDK: <code>pip install kumiho</code></p>
+                    </a>
+
+                    <a href="https://github.com/kumihoclouds" class="api-card">
+                        <h3>🔓 Open Source</h3>
+                        <p>All client SDKs are open source. Contributions welcome!</p>
+                    </a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>© 2025 <a href="https://kumiho.io">Kumiho Clouds</a>. Built with 🦊 in Seoul & San Francisco.</p>
+        </div>
+    </footer>
+</body>
+</html>

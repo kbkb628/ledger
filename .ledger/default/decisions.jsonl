@@ -1,0 +1,6 @@
+{"at":"2026-10-17T02:36:24.642Z","kind":"ingest","series":"default","ledgerPath":"E:\\恺英\\.ledger\\default\\ledger.json","propositions":21,"aliases":38,"knowledge":19,"waivers":0,"scenes":23}
+{"at":"2026-10-17T02:36:24.646Z","kind":"check","series":"default","character":"沈知微","leaks":1}
+{"at":"2026-10-17T02:36:24.647Z","kind":"check","series":"default","character":"陈默","leaks":0}
+{"at":"2026-10-17T02:36:24.650Z","kind":"audit","series":"default","issues":19}
+{"at":"2026-10-17T02:36:24.652Z","kind":"waive","series":"default","key":"沈知微|E-001","reason":"冒烟测试：人工确认为误报"}
+{"at":"2026-10-17T02:36:24.655Z","kind":"audit","series":"default","issues":18}
