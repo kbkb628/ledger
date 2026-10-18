@@ -1,0 +1,56 @@
+{
+  "id": "exp-045",
+  "parent": "exp-044",
+  "createdAt": "2026-10-18T09:12:45.655Z",
+  "version": {
+    "hash": "d627825e36ea",
+    "commit": "d60eae5-dirty",
+    "extractModel": "deepseek-v4-pro",
+    "judgeModel": "jev-latest",
+    "promptHash": "0b8239f6aa03",
+    "flags": {
+      "R1_AGENT": "default",
+      "R1_PRESENCE": "default",
+      "R1_UNITS": "default",
+      "R1_CHAR_HINT": "default",
+      "R1_SHORTKEY": "default",
+      "R1_KEY_LEN": "default",
+      "R1_KEY_FREQ": "default",
+      "R1_NAME_SKIP": "default",
+      "R1_USAGE_VERIFY": "default",
+      "R1_MIN_SURFACE_LEN": "default",
+      "R1_NO_SELF_ESTABLISH": "default",
+      "R1_ESTABLISHED": "default",
+      "R1_MERGE_EXACT": "default",
+      "R1_MERGE_OVERLAP": "default",
+      "R1_MERGE_OVERLAP_MIN": "default",
+      "R1_SHOULD_ALLOW": "default",
+      "R1_LEAK_JUDGE": "default",
+      "R1_QUESTION_SKIP": "default",
+      "R1_JUDGE_PROVIDER": "openai",
+      "EXTRACT_THINKING": "disabled",
+      "EXTRACT_MODEL": "default",
+      "EXTRACT_CONCURRENCY": "default",
+      "E2E_PAD": "default",
+      "EVAL_CONTEXT": "default",
+      "EVAL_ORDER": "default",
+      "JEV_CRITERIA_MODE": "default"
+    }
+  },
+  "change": {
+    "bucket": "other",
+    "hypothesis": "仓库没有 LICENSE（默认「保留所有权利」），package.json 也没有 license 字段 —— 对外交付前别人连「能不能装来用」都不确定，与「挂到你自己的 agent 上」这个卖点直接矛盾。用户定口径：代码与数据都 MIT。",
+    "file": "LICENSE",
+    "switch": "NONE",
+    "params": {
+      "license": "MIT"
+    }
+  },
+  "result": {},
+  "evalCost": {
+    "usd": 0,
+    "seconds": 0
+  },
+  "status": "accepted",
+  "note": "交付面回合，不动任何评测口径（三套数字与代码行为均未变）。四件： ① 新增 `LICENSE`（MIT，Copyright (c) 2026 kbkb628）； ② `package.json` 加 `\"license\": \"MIT\"`（将来 npm publish 也认这个字段）； ③ `eval/script-chaguan.md` 去掉「仅用于本项目的评测」这句**使用限制**（公有领域文本无权加限制，且与 MIT 冲突），补上 Wikisource 来源链接与本仓库许可指向； ④ README §许可 从「未定」改为 MIT（代码 + 文档 + 评测集 + 演示页快照），并单列两处第三方素材：`eval/script-chaguan.md`（老舍 1957，公有领域，源自 Wikisource 转录页）与 `docs/` 演示快照。 顺带修了 README 尾部一处错位：`docs/rsi-round.md` 那一行表格被错放在「许可」小节之后，已归回「文档」表。"
+}

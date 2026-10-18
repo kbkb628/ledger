@@ -220,6 +220,7 @@ npm run eval             # 判定层单点评测
 | `docs/test-plan.md` | 测试计划、已完成实验与结论、失败分类、headroom 排序 |
 | `docs/handoff.md` | 交接说明：当前基线、可复现命令、下一步与已知坑 |
 | `docs/next-steps.md` | 工作单：剩下的活、推荐顺序、每项的验收标准与「不要做的事」 |
+| `docs/rsi-round.md` | 每轮迭代的目标书（范围→目标→评测器→历史路径包），`/goal` 的依据 |
 
 ## 技术栈
 
@@ -230,5 +231,12 @@ npm run eval             # 判定层单点评测
 
 ## 许可
 
-未定。
-| `docs/rsi-round.md` | 每轮迭代的目标书（范围→目标→评测器→历史路径包），`/goal` 的依据 |
+**MIT** —— 代码与本文档、评测集（`eval/script-*.md`、`eval/leaks*.json`、`evalsets/`、`experiments/`）
+一并用 MIT 授权，见 [`LICENSE`](LICENSE)。你可以自由使用、修改、商用、闭源集成，只需保留版权与许可声明。
+
+两处第三方素材：
+
+| 素材 | 说明 |
+|---|---|
+| `eval/script-chaguan.md` | 老舍《茶馆》（1957）。作者 1966 年去世，依中国著作权法（保护期至作者死后 50 年）自 2016 年底起进入**公有领域**；文本由 `eval/import-chaguan.ts` 从 [Wikisource](https://zh.wikisource.org/) 转录页转换而成，仅作零标注的精确率测试集 |
+| `docs/` 演示页 | 页面里展示的是本仓库脚本的真实运行快照（`docs/data.json`），随 MIT 一并提供 |

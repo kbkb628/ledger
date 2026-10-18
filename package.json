@@ -2,6 +2,7 @@
   "name": "ledger",
   "version": "0.1.0",
   "private": true,
+  "license": "MIT",
   "type": "module",
   "description": "《账本》— AI 短剧的叙事一致性账本。MCP server 形态，可挂到任何本地创作 agent 上。",
   "bin": {
