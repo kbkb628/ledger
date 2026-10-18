@@ -307,7 +307,15 @@ server.setRequestHandler(CallToolRequestSchema, async (req) => {
               `这份剧本没有新的场次。新增剧情请用 ledger_record 逐场并入。`,
           );
         }
+        // 先落空壳只在**没有既有账本**时才是安全的。`overwrite: true` 会把既有账本清空，
+        // 如果这一批随后失败（判定层 451、超时、抽取全挂），空壳会留下来 ——
+        // 使用方看到的是「旧账本被清空了」。所以覆盖前先留快照，任何失败都原样写回（回合 52 修）。
+        const backup = existing && args.overwrite === true ? existing : null;
         saveLedger(ledger); // 先落空壳/保留既有，保证 path 与后续增量一致
+
+        let ingested = 0;
+        const failures: Array<{ scene: string; error: string }> = [];
+        try {
 
         // 主闸是**时间预算**，条数只是上限。
         //
@@ -316,8 +324,6 @@ server.setRequestHandler(CallToolRequestSchema, async (req) => {
         // 而「整块抽取（内部有界并发）+ 一次归并」只要 15s（抽取 10.3s + 归并 4.5s）。
         const budget = Math.max(1, Number(args.maxScenes ?? process.env.INGEST_MAX_SCENES ?? 40));
         const chunk = todo.slice(0, budget);
-        let ingested = 0;
-        const failures: Array<{ scene: string; error: string }> = [];
         if (chunk.length) {
           const extracted = await extractScenes(chunk, {});
           failures.push(...extracted.failures);
@@ -341,6 +347,11 @@ server.setRequestHandler(CallToolRequestSchema, async (req) => {
             ingested += 1;
           }
           saveLedger(ledger);
+        }
+        } catch (err) {
+          // 覆盖模式下失败：把既有账本原样写回，别让「失败」看起来像「被清空」
+          if (backup) saveLedger(backup);
+          throw err;
         }
         const remaining = todo.length - ingested - failures.length;
         appendDecision({ at: new Date().toISOString(), kind: "ingest", series, ...summarize(ledger) });
