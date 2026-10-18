@@ -17,3 +17,5 @@ kumiho_mcp.*
 # 演示片（宣发素材）暂时只在本地，不进仓库
 docs/demo-film.html
 docs/video-script.md
+# 动态影片（本地渲染产物 + 渲染台），不进仓库
+docs/film/
