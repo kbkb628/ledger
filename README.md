@@ -164,8 +164,10 @@ claude mcp add --scope user ledger node /abs/path/to/ledger/dist/mcp.js \
 |---|---|
 | `JEV_API_KEY` | 归并判定 / 使用点校验（TypeSafe System One，决策概率） |
 | `JUDGE_BASE_URL` · `JUDGE_API_KEY` · `JUDGE_MODEL` | 逐场抽取（任何 DeepSeek 兼容接口） |
+| `LEDGER_JUDGE_PROVIDER=openai` | 可选：把**判定层**也换成 OpenAI 兼容模型（用上面那组 `JUDGE_*`）。TypeSafe 按地区返回 451（`Typesafe is not available in your region`）时用这个 —— **不自动降级**，换了判定器就是另一种账本，得自己知道 |
 
 抽取默认**关思考**（开着单场 47s / $0.0162，关掉 2s / $0.0019）。
+判定层默认 JEV：48 条黄金集上 91.7% vs 大模型 95.8%（差 2 条、p=0.50），但**快 24 倍、便宜 131 倍** —— 换成大模型判官后，23 场建账会慢到撞穿 MCP 的 60s 超时，这时把 `INGEST_MAX_SCENES` 调小、分批续跑。
 
 ---
 

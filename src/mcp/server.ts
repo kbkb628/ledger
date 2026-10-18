@@ -46,6 +46,7 @@ import { mergeScenes } from "../extraction/merge.js";
 import { parseScenes, type Scene } from "../extraction/script.js";
 import type { DraftProposition } from "../extraction/types.js";
 import { JevProvider } from "../judgment/jev-provider.js";
+import { OpenAiCompatProvider } from "../judgment/openai-provider.js";
 import type { JudgmentProvider } from "../judgment/types.js";
 import {
   appendDecision,
@@ -87,7 +88,14 @@ const judgeStats = { calls: 0, failed: 0, message: "" };
 
 function provider(): JudgmentProvider {
   if (!providerRef) {
-    const inner = new JevProvider();
+    // 判定层选型：默认 JEV（决策概率，快且便宜）。TypeSafe 会按地区返回 451
+    // （"Typesafe is not available in your region"），那种环境下产品**整个建不了账**，
+    // 所以留一个显式出口：`LEDGER_JUDGE_PROVIDER=openai` 换任意 OpenAI 兼容判官。
+    // 不自动降级 —— 换了判定器就会换出一种账本，必须由使用者自己知道并写进配置。
+    const inner: JudgmentProvider =
+      (process.env.LEDGER_JUDGE_PROVIDER ?? "").toLowerCase() === "openai"
+        ? new OpenAiCompatProvider({ name: "openai-compat" })
+        : new JevProvider();
     providerRef = {
       name: inner.name,
       async judge(req) {
