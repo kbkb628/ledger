@@ -1,4 +1,4 @@
-﻿import type { SceneExtraction, DraftProposition } from "../extraction/types.js";
+import type { SceneExtraction, DraftProposition } from "../extraction/types.js";
 import type { Scene } from "../extraction/script.js";
 /**
  * R1 知识泄漏检测 —— 产品的核心输出。
@@ -611,6 +611,16 @@ export function detectLeaks(
     // 得知必须发生在使用之前或同一场（同场得知后用是合法的）
     if (knownIdx <= useIdx) continue;
     if (seen.has(key)) continue;
+    // ── `R1_QUESTION_SKIP`（默认关）：问句不算断言 ──
+    //
+    // 依据（回合 41 的 real 清单）：小吴祥子 S04-24「昨天晚上谁上这儿来啦？」是**在问**，
+    // 不是在断言自己知道，却被当成「无源使用」报了出来。而产品演示里那条招牌拦截
+    // （沈知微「你三年前在码头做了什么？」）**形式完全一样**却是真泄漏 ——
+    // 疑问句本身携带的「我知道发生过某事」与「我在问细节」在词法上不可分。
+    // 所以这个开关只提供一个**可量化的对照**，默认关闭。
+    // 只剪「从未得知」的情形：时序泄漏里问句本身就是泄漏形态（「你三年前在码头做了什么？」），
+    // 那不是「在问细节」而是「在暗示自己知道」。所以 `k` 存在时一律保留。
+    if (process.env.R1_QUESTION_SKIP === "1" && k === undefined && /[？?]|吗[。！]?$|呢[。！]?$/.test(u.line)) continue;
     seen.add(key);
     issues.push({
       character: u.character,

@@ -77,6 +77,7 @@ const R1_FLAGS = [
   "R1_MERGE_OVERLAP_MIN",
   "R1_SHOULD_ALLOW",
   "R1_LEAK_JUDGE",
+  "R1_QUESTION_SKIP",
 ] as const;
 
 export type ScorerKind = "r1" | "judge" | "e2e";

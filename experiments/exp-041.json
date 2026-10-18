@@ -1,0 +1,74 @@
+{
+  "id": "exp-041",
+  "parent": "exp-040",
+  "createdAt": "2026-10-18T08:27:58.616Z",
+  "version": {
+    "hash": "9cb1e9d9d73c",
+    "commit": "45d9abd-dirty",
+    "extractModel": "deepseek-v4-pro",
+    "judgeModel": "jev-latest",
+    "promptHash": "0b8239f6aa03",
+    "flags": {
+      "R1_AGENT": "default",
+      "R1_PRESENCE": "default",
+      "R1_UNITS": "default",
+      "R1_CHAR_HINT": "default",
+      "R1_SHORTKEY": "default",
+      "R1_KEY_LEN": "default",
+      "R1_KEY_FREQ": "default",
+      "R1_NAME_SKIP": "default",
+      "R1_USAGE_VERIFY": "default",
+      "R1_MIN_SURFACE_LEN": "default",
+      "R1_NO_SELF_ESTABLISH": "default",
+      "R1_ESTABLISHED": "default",
+      "R1_MERGE_EXACT": "default",
+      "R1_MERGE_OVERLAP": "default",
+      "R1_MERGE_OVERLAP_MIN": "default",
+      "R1_SHOULD_ALLOW": "default",
+      "R1_LEAK_JUDGE": "default",
+      "R1_QUESTION_SKIP": "default",
+      "R1_JUDGE_PROVIDER": "openai",
+      "EXTRACT_THINKING": "disabled",
+      "EXTRACT_MODEL": "default",
+      "EXTRACT_CONCURRENCY": "default",
+      "E2E_PAD": "default",
+      "EVAL_CONTEXT": "default",
+      "EVAL_ORDER": "default",
+      "JEV_CRITERIA_MODE": "default"
+    }
+  },
+  "change": {
+    "bucket": "other",
+    "hypothesis": "e2e 各次 24–29（±10pp），此前只报中位数（K=1 时就是一个数）。中位数回答不了「这个比例落在哪」，所以并报均值 + 95% Wilson，把「抽样噪声」显式化，避免拿单次 e2e 选版本。",
+    "file": "eval/regression.ts",
+    "switch": "NONE",
+    "params": {
+      "K": "3",
+      "GOLDENSET": "eval/goldenset-v3.json",
+      "E2E_PAD": "id"
+    }
+  },
+  "result": {
+    "devSet": {
+      "version": "leaks@1#cc59a5ad9de1",
+      "size": 10
+    },
+    "regression": {
+      "judge": 44,
+      "e2e": 25,
+      "parentJudge": 44,
+      "parentE2e": 25
+    },
+    "real": {
+      "issues": 7,
+      "usages": 269,
+      "stamps": "r1@408749c3a15f/ctx@0bdbed65bcc4/lg@294963d704e4"
+    }
+  },
+  "evalCost": {
+    "usd": 0.6,
+    "seconds": 600
+  },
+  "status": "accepted",
+  "note": "测量回合。K=3 联合回归：**e2e 各次 27 / 25 / 25 → 中位 25，均值 25.67（53.5%），95% Wilson 39.6–66.8%**。 同一轮里另外三项复现了基线：judge 44/48；real 7 条 / 269 使用点（与回合 39 冻结值一致）；r1 各次 cost 22 / 19 / 23。 以后 e2e 只报「均值 + Wilson」，单次读数不再有裁决权（区间宽 27pp，任何 <10pp 的差异都在里面）。 ⚠️ 过程里修掉一个真错：第一版 Wilson 写成 `wilson(round(mean*total), total)`，把比例又乘了一次 n，区间打出 NaN–NaN —— 数字全对、区间是垃圾。 记这一笔是因为它正是「失效绿灯」的形态：报告看起来完整，实际没有任何约束力。区间由同一组 trials 本地重算得出（wilson 25.67/48），未重跑回归。"
+}

@@ -1,0 +1,64 @@
+{
+  "id": "exp-042",
+  "parent": "exp-041",
+  "createdAt": "2026-10-18T08:27:58.620Z",
+  "version": {
+    "hash": "9cb1e9d9d73c",
+    "commit": "45d9abd-dirty",
+    "extractModel": "deepseek-v4-pro",
+    "judgeModel": "jev-latest",
+    "promptHash": "0b8239f6aa03",
+    "flags": {
+      "R1_AGENT": "default",
+      "R1_PRESENCE": "default",
+      "R1_UNITS": "default",
+      "R1_CHAR_HINT": "default",
+      "R1_SHORTKEY": "default",
+      "R1_KEY_LEN": "default",
+      "R1_KEY_FREQ": "default",
+      "R1_NAME_SKIP": "default",
+      "R1_USAGE_VERIFY": "default",
+      "R1_MIN_SURFACE_LEN": "default",
+      "R1_NO_SELF_ESTABLISH": "default",
+      "R1_ESTABLISHED": "default",
+      "R1_MERGE_EXACT": "default",
+      "R1_MERGE_OVERLAP": "default",
+      "R1_MERGE_OVERLAP_MIN": "default",
+      "R1_SHOULD_ALLOW": "default",
+      "R1_LEAK_JUDGE": "default",
+      "R1_QUESTION_SKIP": "default",
+      "R1_JUDGE_PROVIDER": "openai",
+      "EXTRACT_THINKING": "disabled",
+      "EXTRACT_MODEL": "default",
+      "EXTRACT_CONCURRENCY": "default",
+      "E2E_PAD": "default",
+      "EVAL_CONTEXT": "default",
+      "EVAL_ORDER": "default",
+      "JEV_CRITERIA_MODE": "default"
+    }
+  },
+  "change": {
+    "bucket": "wrong_proposition",
+    "hypothesis": "44/48 里那几条错例从未逐条看过。先归桶再谈修法：如果错的是「选错候选」与「拒答」是两回事，修法方向相反。",
+    "file": "eval/goldenset-v3.json",
+    "switch": "NONE",
+    "params": {
+      "provider": "openai（DeepSeek 兼容）",
+      "EVAL_CONTEXT": "neighbors",
+      "EVAL_ORDER": "recall"
+    }
+  },
+  "result": {
+    "devSet": {
+      "version": "gooden@v3",
+      "size": 48
+    },
+    "real": null
+  },
+  "evalCost": {
+    "usd": 0.35,
+    "seconds": 900
+  },
+  "status": "accepted",
+  "note": "诊断回合，不改任何规则。逐条结果：**45/48 = 93.8% [83.2–97.9]**（本轮 openai provider；基线 44/48 是 JEV 时代的读数，差 1 条在噪声带内）。 三条错例**全都是 UNSURE，不是选错**：G-001「你三年前在码头做了什么」@S02-02、G-002「当年码头那件事」@S12-05、G-041「那件事」@S12-05， 候选集都是 [F-001,F-015,F-016,F-004]（同一事件被拆成 4 条细事实），期望 F-001/F-015(/F-016)，判定器拒答。 结论：判定层的剩余误差**不是语义辨错，而是「指代短语 + 多候选同事件」下的拒答**—— 与 R1 侧的 masked_by_presence 是同一个根（同一事件被拆成多条细事实）。归并粒度做对了，这一桶应当自己变小； 因此**不新增判定层规则**（回合 33 已证明判定层加规则会放过真泄漏）。 级联模拟：接受 43 条全对（接受集准确率 100%），升级 5 条里 3 条原本是错的 —— 说明「升级」这条路本身是有效的，缺的是把 UNSURE 变成可用结论的证据。"
+}

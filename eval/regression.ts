@@ -26,7 +26,7 @@ import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { computeMetrics, formatMetrics, type Metrics } from "../src/rsi/metrics.js";
+import { computeMetrics, formatMetrics, wilson, type Metrics } from "../src/rsi/metrics.js";
 import { verify as testsetVerify } from "../src/rsi/testset.js";
 import { versionFingerprint } from "../src/rsi/version.js";
 
@@ -83,7 +83,7 @@ interface RegressionBaseline {
   config: Record<string, Record<string, string>>;
   version: { hash: string; commit: string; promptHash: string };
   judge: { ok: number; total: number };
-  e2e: { median: number; total: number; trials: number[] };
+  e2e: { median: number; total: number; trials: number[]; mean?: number; wilson95?: number[] };
   r1: { trial: { tp: number; fp: number; fn: number }; cost: number; trials: number[] };
   /** 真实剧本误报数（零标注精确率） */
   real: { issues: number; usages: number };
@@ -189,17 +189,28 @@ function main(): void {
     console.log(`  e2e ${em.ok}/${em.total}　r1 P/R = ${formatMetrics(computeMetrics(rm.tp ?? 0, rm.fp ?? 0, rm.fn ?? 0))}`);
   }
 
-  // ── 聚合：中位数 ──
+  // ── 聚合：中位数 + 均值 + Wilson ──
   const e2eOk = trials.map((t) => t.e2e.ok);
+  const e2eTotal = trials[0]?.e2e.total ?? 48;
   const r1Costs = trials.map((t) => computeMetrics(t.r1.tp, t.r1.fp, t.r1.fn).cost);
   const e2eMedian = median(e2eOk);
+  // e2e 的 ±6 条跨抽取抖动是**抽样**造成的，不是「每次都在真值附近」：
+  // 中位数只回答「典型一次是多少」，回答不了「这个比例落在哪」。所以并报均值 + 95% Wilson。
+  const e2eMean = e2eOk.reduce((a, b) => a + b, 0) / Math.max(1, e2eOk.length);
+  // ⚠️ 传的是**均值本身**（k 可以是小数，wilson 用 k/n 当比例）——
+  // 第一版写成 `wilson(Math.round(mean * total), total)`，等于把比例又乘了一次 n，
+  // 结果区间打出 NaN–NaN。这种「数字全对、区间是垃圾」的错最需要在写的时候就钉住。
+  const e2eWilson = wilson(e2eMean, e2eTotal);
   const r1MedianCost = median(r1Costs);
   const r1MedianTrial = trials.find((t) => computeMetrics(t.r1.tp, t.r1.fp, t.r1.fn).cost === r1MedianCost)!.r1;
   const r1Metrics: Metrics = computeMetrics(r1MedianTrial.tp, r1MedianTrial.fp, r1MedianTrial.fn);
 
-  console.log(`\n${"═".repeat(66)}\n汇总（K=${k}，取中位数）`);
+  console.log(`\n${"═".repeat(66)}\n汇总（K=${k}）`);
   console.log(`  judge ${judgeOk}/${judgeTotal}`);
-  console.log(`  e2e   ${e2eMedian}/${trials[0]?.e2e.total ?? 48}　（各次 ${e2eOk.join(", ")}）`);
+  console.log(
+    `  e2e   中位 ${e2eMedian}/${e2eTotal}　均值 ${e2eMean.toFixed(1)}（${((e2eMean / e2eTotal) * 100).toFixed(1)}%，` +
+      `95% Wilson ${(e2eWilson[0] * 100).toFixed(1)}–${(e2eWilson[1] * 100).toFixed(1)}%）　各次 ${e2eOk.join(", ")}`,
+  );
   console.log(`  r1    ${formatMetrics(r1Metrics)}　（各次 cost ${r1Costs.join(", ")}）`);
   console.log(`  real  ${realIssues} 条报出 / ${realUsages} 使用点`);
 
@@ -216,7 +227,13 @@ function main(): void {
     config: TASK_ENV,
     version: { hash: version.hash, commit: version.commit, promptHash: version.promptHash },
     judge: { ok: judgeOk, total: judgeTotal },
-    e2e: { median: e2eMedian, total: trials[0]?.e2e.total ?? 48, trials: e2eOk },
+    e2e: {
+      median: e2eMedian,
+      total: e2eTotal,
+      trials: e2eOk,
+      mean: Number(e2eMean.toFixed(2)),
+      wilson95: [Number((e2eWilson[0] * 100).toFixed(1)), Number((e2eWilson[1] * 100).toFixed(1))],
+    },
     r1: { trial: r1MedianTrial, cost: r1MedianCost, trials: r1Costs },
     real: { issues: realIssues, usages: realUsages },
     scorers,
