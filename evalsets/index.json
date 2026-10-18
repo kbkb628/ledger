@@ -174,6 +174,23 @@
       "createdAt": "2026-10-18T09:27:25.278Z",
       "supersedes": null,
       "hash": "add87cc2122f"
+    },
+    {
+      "id": "doueyuan",
+      "files": [
+        "eval/script-doueyuan.md",
+        "eval/import-doueyuan.ts"
+      ],
+      "size": {
+        "units": 18
+      },
+      "source": "《竇娥冤》（關漢卿，元）公有领域文本，由 eval/import-doueyuan.ts 从 Wikisource 转录页转换；元杂剧格式（曲牌唱词 + 科白混排）。零标注，real 的第二套跨剧本压力测试。",
+      "changes": "v2：修场次粒度 —— v1 把一折当一场（5 场），「在场」几乎等于全场人物，presence 规则把 121 个使用点里的 104 个（86%）全发了许可，结果 real 0 条；改为按「上/下」上下场标记在折内再切场，得 18 场，在场名单才接近「此刻台上的人」。",
+      "holdoutSealed": false,
+      "version": 2,
+      "createdAt": "2026-10-18T10:04:44.086Z",
+      "supersedes": 1,
+      "hash": "894d86efbc1e"
     }
   ]
 }

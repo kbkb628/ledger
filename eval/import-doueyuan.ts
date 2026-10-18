@@ -98,56 +98,81 @@ function main(): void {
   let lineCount = 0;
   let speakerLines = 0;
   scenes.forEach((sc, idx) => {
-    const id = `D-${String(idx + 1).padStart(2, "0")}`;
+    const act = `D-${String(idx + 1).padStart(2, "0")}`;
     const label = SCENE_TITLES[sc.title] ?? sc.title;
     // 2. 逐段扫：`〔…〕` 是提示语/科白标记，括号外是台词正文
     const tokens: Array<{ kind: "cue" | "speech"; value: string }> = [];
     const body = sc.body.replace(/\r/g, "");
-    let rest = body;
-    const re = /〔([^〕]*)〕/g;
     let last = 0;
-    for (let m = re.exec(rest); m; m = re.exec(rest)) {
-      const before = rest.slice(last, m.index);
+    const re = /〔([^〕]*)〕/g;
+    for (let m = re.exec(body); m; m = re.exec(body)) {
+      const before = body.slice(last, m.index);
       if (before.trim()) tokens.push({ kind: "speech", value: before });
       tokens.push({ kind: "cue", value: m[1]! });
       last = m.index + m[0].length;
     }
-    const tail = rest.slice(last);
-    if (tail.trim()) tokens.push({ kind: "speech", value: tail });
+    const tailText = body.slice(last);
+    if (tailText.trim()) tokens.push({ kind: "speech", value: tailText });
 
-    const lines: string[] = [];
+    // 3. 场内再切场：遇到「上/下」这类上下场标记就断开。
+    //
+    // 为什么必须切（回合 47 自检发现）：一折当一场时「在场」= 整折十几个人物同时在场，
+    // 于是「命题首见场景的在场者得知它」把 121 个使用点里的 104 个（86%）全发了许可 ——
+    // 结果既零误报也零检出，这套集就失去了压力测试的意义。按上下场切开，
+    // 在场名单才接近「此刻台上的人」，与《茶馆》的分场口径可比。
+    const isBoundary = (cue: string): boolean =>
+      /(^|[，。、])[上下]([，。、]|$)/.test(cue) || /[上下]$/.test(cue.trim());
+
+    const subs: string[][] = [[]];
     let current: string | null = null;
     for (const tk of tokens) {
+      const target = subs[subs.length - 1]!;
       if (tk.kind === "cue") {
+        if (isBoundary(tk.value) && target.length > 0) {
+          subs.push([]);
+          current = null;
+          continue;
+        }
         const parsed = parseCue(tk.value);
         if (parsed.speaker && parsed.speaks) current = parsed.speaker;
-        else if (parsed.speaker) lines.push(`（${parsed.action}）`); // 只有动作，不说话
-        else if (parsed.speaks) current = current; // 〔做嘆科，云〕沿用当前说话人
+        else if (parsed.speaker) target.push(`（${parsed.action}）`);
         continue;
       }
-      const body2 = tk.value.replace(/\s+/g, "");
-      if (!body2) continue;
+      const text2 = tk.value.replace(/\s+/g, "");
+      if (!text2) continue;
       if (current) {
-        lines.push(`${current}：${body2}`);
+        target.push(`${current}：${text2}`);
         speakerLines += 1;
       } else {
-        lines.push(body2.startsWith("（") ? body2 : `（${body2}）`);
+        target.push(text2.startsWith("（") ? text2 : `（${text2}）`);
       }
     }
-    if (lines.length === 0) return;
-    lineCount += lines.length;
-    // 在场：从本场出现过台词的说话人反推（零人工标注、可复现）。
-    // 在场信息很重要 —— 它是「命题首见场景的在场者得知它」这条默认知识的唯一来源。
-    const present: string[] = [];
-    for (const l of lines) {
-      const m = /^([^：（）]{1,6})：/.exec(l);
-      if (m && !present.includes(m[1]!)) present.push(m[1]!);
-    }
-    out.push(`## ${id}`, `- 时间锚：${label} · 地点：（未标注） · 在场：${present.join("、")}`, "");
-    out.push(...lines, "", "---", "");
+
+    subs
+      .filter((s) => s.length > 0)
+      .forEach((s, k) => {
+        // 在场：从本场说过台词的说话人反推（零人工标注、可复现）。
+        // 它是「命题首见场景的在场者得知它」这条默认知识的唯一来源，口径必须与台词一致。
+        const present: string[] = [];
+        for (const l of s) {
+          const m = /^([^：（）]{1,6})：/.exec(l);
+          if (m && !present.includes(m[1]!)) present.push(m[1]!);
+        }
+        lineCount += s.length;
+        out.push(
+          `## ${act}-${String(k + 1).padStart(2, "0")}`,
+          `- 时间锚：${label} · 地点：（未标注） · 在场：${present.join("、")}`,
+          "",
+          ...s,
+          "",
+          "---",
+          "",
+        );
+      });
   });
 
   writeFileSync(OUT, out.join("\n"), "utf8");
-  console.log(`写入 ${OUT}：${scenes.length} 场 / ${lineCount} 行（其中 ${speakerLines} 行带说话人）`);
+  const sceneCount = out.filter((l) => /^## /.test(l)).length;
+  console.log(`写入 ${OUT}：${sceneCount} 场 / ${lineCount} 行（其中 ${speakerLines} 行带说话人）`);
 }
 main();
