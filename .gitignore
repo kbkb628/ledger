@@ -14,3 +14,6 @@ runs/
 .kumiho/
 tmp_kumiho/
 kumiho_mcp.*
+# 演示片（宣发素材）暂时只在本地，不进仓库
+docs/demo-film.html
+docs/video-script.md
