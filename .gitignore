@@ -19,3 +19,5 @@ docs/demo-film.html
 docs/video-script.md
 # 动态影片（本地渲染产物 + 渲染台），不进仓库
 docs/film/
+# 研究笔记（第三方文本摘录，只在本地留存，不发布）
+docs/research/
