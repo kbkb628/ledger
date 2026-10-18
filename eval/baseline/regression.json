@@ -58,7 +58,7 @@
   "real": {
     "issues": 7,
     "usages": 269,
-    "testset": "chaguan@2#a2323ea00ae9",
+    "testset": "chaguan@3#ac1af9e4ec65",
     "ledger": "lg@294963d704e4",
     "note": "回合 39 重建：删掉第二/三幕人物表残留后全量重抽（新抽样，与旧 4/241、3/249 不可比）。旧账本归档在 pipeline-chaguan-20261017.json。"
   },

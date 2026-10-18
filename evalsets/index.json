@@ -141,6 +141,22 @@
       "createdAt": "2026-10-17T22:38:13.247Z",
       "supersedes": 1,
       "hash": "a2323ea00ae9"
+    },
+    {
+      "id": "chaguan",
+      "files": [
+        "eval/script-chaguan.md"
+      ],
+      "size": {
+        "units": 72
+      },
+      "source": "《茶馆》公有领域文本（老舍 1957；作者 1966 年去世、保护期至 2016 年底），由 eval/import-chaguan.ts 从 Wikisource 转录页转换。零标注，用于 real 精确率。",
+      "changes": "v3：只改文件头注记——按回合 45 的许可决定去掉「仅用于本项目的评测」这句使用限制（公有领域文本无权加限制，且与 MIT 冲突），补 Wikisource 来源与本仓库许可指向。正文一字未动，`## 场景` 之前的行不参与 parseScenes，故抽取/账本不受影响。",
+      "holdoutSealed": false,
+      "version": 3,
+      "createdAt": "2026-10-18T09:13:03.069Z",
+      "supersedes": 2,
+      "hash": "ac1af9e4ec65"
     }
   ]
 }
