@@ -1,5 +1,7 @@
 <div align="center">
 
+<img src="docs/assets/banner.png" alt="账本 · AI 短剧的叙事一致性账本" width="100%">
+
 # 账本 · Ledger
 
 **AI 短剧的叙事一致性账本 —— 一个能挂进写稿 agent 的 MCP server**
