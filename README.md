@@ -1,12 +1,13 @@
 <div align="center">
 
-<img src="docs/assets/banner.png" alt="账本 · AI 短剧的叙事一致性账本" width="100%">
+<img src="docs/assets/banner.png" alt="账本 · 剧本设定基准" width="100%">
 
 # 账本 · Ledger
 
-**AI 短剧的叙事一致性账本 —— 一个能挂进写稿 agent 的 MCP server**
+**剧本设定基准 —— 把「剧集 bible」从一份静态文档，变成可查询、可校核、可挂载的基准。**
 
-它只回答一个问题：**这个角色，在说这句话的时候，该知道这件事吗？**
+建基准 → 随写随维护 → 落笔前判断 → 全剧校核 → 供任何 agent 查询。
+其中最锋利的一条判据是：**这个角色，在说这句话的时候，该知道这件事吗？**
 
 [![MIT](https://img.shields.io/badge/license-MIT-5eead4.svg)](LICENSE)
 [![Node](https://img.shields.io/badge/node-%E2%89%A5%2020-3b82f6.svg)](package.json)
@@ -38,6 +39,16 @@ agent 调用：ledger_check { line, character: "沈知微", scene: "S02-02" }
 |---|---|---|---|
 | 耗时 | 23 场 **14 秒** | **毫秒级**、不调模型 | 首次 67.6s，复跑 **0.9 秒** |
 | 产出 | 命题 · 说法 · 知识状态 | 拦住 / 放过 + 成因 | 清单 + 一键豁免 |
+
+「基准」不是一次审稿，是贯穿全程的五件事：
+
+| 基准的五个动作 | 工具 | 做什么 |
+|---|---|---|
+| **建**基准 | `ledger_ingest` | 全剧抽出命题、说法，记下谁在第几场得知 |
+| **维护**基准 | `ledger_record` | 每写完一场就并入；别名与豁免逐场累积 |
+| **用**基准 | `ledger_check` | 落笔前判断一条台词 |
+| **校核**基准 | `ledger_audit` | 全剧扫成清单：哪句是「没交代就用了」 |
+| **供**基准 | `ledger_page` · MCP | 任何 agent / 工具可查一条命题的全部说法与判决 |
 
 ---
 
@@ -213,9 +224,9 @@ claude mcp add --scope user ledger node /abs/path/to/ledger/dist/mcp.js \
 |---|---|
 | [`docs/design.md`](docs/design.md) | 总体设计：认知层、事件同一性、三层路由、promotion、审计规则 |
 | [`docs/rsi-protocol.md`](docs/rsi-protocol.md) | **主文档**：评测纪律（两类回合 / 红线 / 三戳）+ 逐回合记录，含被自己推翻的结论 |
-| [`docs/pain-analysis.md`](docs/pain-analysis.md) | **调研报告**：公开报道 / 学术议程 / 方案扫描 / 自有实验四路调研，推导「这个产品为什么应当存在」 |
+| [`docs/调研分析.md`](docs/调研分析.md) | **调研报告**：公开报道 / 学术议程 / 方案扫描 / 自有实验四路调研，推导「这个产品为什么应当存在」 |
 | [`docs/roadmap.md`](docs/roadmap.md) | 后续改进路线：分阶段 + 验收标准 |
-| [`docs/eval-roadmap.md`](docs/eval-roadmap.md) | **以 RSI 为主的评测路线**：五零件、预注册、数字纪律、下一轮计划 |
+| [`docs/后续路线.md`](docs/后续路线.md) | **以 RSI 为主的评测路线**：五零件、预注册、数字纪律、下一轮计划 |
 | [`docs/handoff.md`](docs/handoff.md) | 交接：当前基线、可复现命令、已知坑 |
 | [`docs/testset.md`](docs/testset.md) | 测试集规范与演进日志 |
 | [`docs/extraction-schema.md`](docs/extraction-schema.md) | 抽取层字段定义 |
