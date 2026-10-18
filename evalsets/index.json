@@ -157,6 +157,23 @@
       "createdAt": "2026-10-18T09:13:03.069Z",
       "supersedes": 2,
       "hash": "ac1af9e4ec65"
+    },
+    {
+      "id": "doueyuan",
+      "files": [
+        "eval/script-doueyuan.md",
+        "eval/import-doueyuan.ts"
+      ],
+      "size": {
+        "units": 5
+      },
+      "source": "《竇娥冤》（關漢卿，元）公有领域文本，由 eval/import-doueyuan.ts 从 Wikisource 转录页（zh.wikisource.org/wiki/竇娥冤）转换；元杂剧格式（曲牌唱词 + 科白混排）。零标注，用于 real 的第二套跨剧本压力测试。",
+      "changes": "v1 首版：5 场（楔子 + 四折）/ 316 行 / 297 行带说话人；在场信息由台词说话人反推（零人工标注，可复现）。",
+      "holdoutSealed": false,
+      "version": 1,
+      "createdAt": "2026-10-18T09:27:25.278Z",
+      "supersedes": null,
+      "hash": "add87cc2122f"
     }
   ]
 }

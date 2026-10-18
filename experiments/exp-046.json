@@ -1,0 +1,63 @@
+{
+  "id": "exp-046",
+  "parent": "exp-045",
+  "createdAt": "2026-10-18T09:27:34.515Z",
+  "version": {
+    "hash": "ac5de07c9298",
+    "commit": "a122f16-dirty",
+    "extractModel": "deepseek-v4-pro",
+    "judgeModel": "jev-latest",
+    "promptHash": "0b8239f6aa03",
+    "flags": {
+      "R1_AGENT": "default",
+      "R1_PRESENCE": "default",
+      "R1_UNITS": "default",
+      "R1_CHAR_HINT": "default",
+      "R1_SHORTKEY": "default",
+      "R1_KEY_LEN": "default",
+      "R1_KEY_FREQ": "default",
+      "R1_NAME_SKIP": "default",
+      "R1_USAGE_VERIFY": "default",
+      "R1_MIN_SURFACE_LEN": "default",
+      "R1_NO_SELF_ESTABLISH": "default",
+      "R1_ESTABLISHED": "default",
+      "R1_MERGE_EXACT": "default",
+      "R1_MERGE_OVERLAP": "default",
+      "R1_MERGE_OVERLAP_MIN": "default",
+      "R1_SHOULD_ALLOW": "default",
+      "R1_LEAK_JUDGE": "default",
+      "R1_QUESTION_SKIP": "default",
+      "R1_JUDGE_PROVIDER": "openai",
+      "EXTRACT_THINKING": "disabled",
+      "EXTRACT_MODEL": "default",
+      "EXTRACT_CONCURRENCY": "default",
+      "E2E_PAD": "default",
+      "EVAL_CONTEXT": "default",
+      "EVAL_ORDER": "default",
+      "JEV_CRITERIA_MODE": "default"
+    }
+  },
+  "change": {
+    "bucket": "other",
+    "hypothesis": "real（唯一有分辨力的指标）只有《茶馆》一本，7 条 / 269 使用点到底是「规则的问题」还是「这本戏的问题」，单本永远答不了。加第二套真实剧本（《竇娥冤》，元杂剧，格式完全不同），用同一套规则在同一 provider 下跑一次。",
+    "file": "eval/script-doueyuan.md",
+    "switch": "NONE",
+    "params": {
+      "AUDIT_SCRIPT": "eval/script-doueyuan.md",
+      "R1_JUDGE_PROVIDER": "openai"
+    }
+  },
+  "result": {
+    "real": {
+      "issues": 0,
+      "usages": 121,
+      "stamps": "r1@b91c0bcf23d5/ctx@0bdbed65bcc4/lg@9f711148d4d2/doueyuan@1#add87cc2122f"
+    }
+  },
+  "evalCost": {
+    "usd": 0.7,
+    "seconds": 1500
+  },
+  "status": "accepted",
+  "note": "测量回合（新增测试集 + 建基线），不做能力裁决。新增 `eval/import-doueyuan.ts`（元杂剧转换器：按「== 楔子/第X折 ==」切场，`〔…云/唱〕` 解析说话人——角色名不一定在开头，所以取提示语里**最早出现的角色名**当主语，'在场' 由本场说话人反推），产出 `eval/script-doueyuan.md`（5 场 / 316 行 / 297 行带说话人），登记 `doueyuan@1#add87cc2122f`。 基线：**55 条命题 · 139 条说法 · 121 使用点 · real 0 条问题**（0/121，95% Wilson 0–3.1%）。 与《茶馆》7/269（2.6%）放一起才有意义：**两本是不同分布，real 是脚本相关的**，所以两套各自作为基线、不可互相替代； 元杂剧几乎全是角色自述（自陈来源密集、私密信息少），天然不容易出「无源使用」——这解释了 0 条，也说明茶馆那 7 条更可能是剧本特性的差异而非规则退化。 至此**剧本级测试集共 5 套**：`script-leak`（dev 注入）、`script-jiuzhang-leak`（跨剧本 holdout）、`script-phantom`（机制探针）、`script-chaguan`（real #1）、`script-doueyuan`（real #2）；另有判定层黄金集 `golden@1`。"
+}
