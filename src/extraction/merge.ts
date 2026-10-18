@@ -1,3 +1,4 @@
+import { appendFileSync } from "node:fs";
 import { MERGE_PROPOSITIONS_INSTRUCTIONS } from "../judgment/prompt.js";
 import type { JudgmentProvider, JudgmentRequest } from "../judgment/types.js";
 import { renderScene, type Scene } from "./script.js";
@@ -116,6 +117,10 @@ export async function mergeScenes(
       return m ? Math.max(max, Number(m[1])) : max;
     }, 0) + 1;
   const started = Date.now();
+  // 召回层轨迹：`R1_MERGE_TRACE=<file>` 时旁记每个 draft 的候选表（不参与决策）
+  const tracePath = process.env.R1_MERGE_TRACE || "";
+  const traceRows: Array<{ scene: string; canonical: string; surfaces: string[]; candidates: string[]; choice: string; createdId?: string | null; reason: string }> | null =
+    tracePath ? [] : null;
 
   for (const se of sceneExtractions) {
     const scene = scenes.find((s) => s.id === se.scene) ?? { id: se.scene, meta: [], lines: [] };
@@ -172,7 +177,21 @@ export async function mergeScenes(
           scene: se.scene, canonical: draft.canonical, choice: "NEW",
           candidates: [], confidence: 1, reason: "no_candidate",
         });
-        propositions.push(newProposition(`E-${String(nextId++).padStart(3, "0")}`, { ...draft, agents: draftAgents }, se.scene));
+        const newId = `E-${String(nextId++).padStart(3, "0")}`;
+        propositions.push(newProposition(newId, { ...draft, agents: draftAgents }, se.scene));
+        // 「一条候选都没有」正是召回层失败的那一类，必须进轨迹 ——
+        // 否则轨迹只统计到成功召回的那些，召回率会被系统性高估。
+        if (traceRows) {
+          traceRows.push({
+            scene: se.scene,
+            canonical: draft.canonical,
+            surfaces: draft.surfaces.map((s) => s.text),
+            candidates: [],
+            choice: "NEW",
+            createdId: newId,
+            reason: "no_candidate",
+          });
+        }
         continue;
       }
 
@@ -267,12 +286,14 @@ export async function mergeScenes(
         reason = "new";
       }
 
+      let createdId: string | null = null;
       const target = propositions.find((p) => p.id === choice);
       if (target) {
         reason = "attached";
         attach(propositions, target, draft, draftAgents, se.scene, opts.verbose, confidence);
       } else {
-        propositions.push(newProposition(`E-${String(nextId++).padStart(3, "0")}`, { ...draft, agents: draftAgents }, se.scene));
+        createdId = `E-${String(nextId++).padStart(3, "0")}`;
+        propositions.push(newProposition(createdId, { ...draft, agents: draftAgents }, se.scene));
         if (opts.verbose) {
           process.stdout.write(`    ${se.scene} 「${draft.canonical.slice(0, 26)}」→ NEW (${choice}, ${confidence.toFixed(2)})\n`);
         }
@@ -281,12 +302,33 @@ export async function mergeScenes(
       decisions.push({
         scene: se.scene, canonical: draft.canonical, choice,
         candidates: candidates.map((p) => p.id), confidence, reason,
+        // 召回层轨迹（`R1_MERGE_TRACE=<file>`）：只读式的旁记，不参与任何决策。
+        // 目的：把「候选有没有被召回」从判定层的噪声里剥出来，做成确定性指标 ——
+        // 否则每次改动都要靠 McNemar 在 p≈0.1 附近打转（回合 51/53）。
+        ...(traceRows ? { surfaces: draft.surfaces.map((s) => s.text) } : {}),
       });
+      if (traceRows) {
+        traceRows.push({
+          scene: se.scene,
+          canonical: draft.canonical,
+          surfaces: draft.surfaces.map((s) => s.text),
+          candidates: candidates.map((p) => p.id),
+          choice,
+          createdId,
+          reason,
+        });
+      }
     }
   }
 
   // 兜底：从未被标记为「确立」的命题退回首见场 —— 不额外制造知识，也不静默丢知识
   for (const p of propositions) if (p.establishedAt === undefined) p.establishedAt = p.scenes[0] ?? null;
+
+  if (traceRows) {
+    // 追加而不是覆盖：一次运行里 mergeScenes 可能被调用多次（分块建账），
+    // 覆盖只会留下最后一块的轨迹 —— 那正是第一次跑出「65 条轨迹」的原因。
+    appendFileSync(tracePath!, traceRows.map((r) => JSON.stringify(r)).join("\n") + "\n", "utf8");
+  }
 
   return { propositions, decisions, costUsd, latencyMs: Date.now() - started, calls, unsure };
 }

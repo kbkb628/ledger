@@ -1,0 +1,30 @@
+{
+  "id": "exp-055",
+  "parent": "exp-054",
+  "createdAt": "2026-10-19T09:10:00.000Z",
+  "version": {
+    "hash": "4547256edcdd",
+    "commit": "working-tree",
+    "extractModel": "deepseek-v4-pro",
+    "judgeModel": "openai-compat",
+    "promptHash": "0b8239f6aa03",
+    "flags": { "R1_JUDGE_PROVIDER": "openai", "R1_MERGE_RECALL": "1", "R1_MERGE_TRACE": "runs/trace-on.jsonl" }
+  },
+  "change": {
+    "bucket": "capability",
+    "hypothesis": "用回合 54 的确定性仪器重测同一条召回通道：若它真的把该挂的命题捞进候选表，候选召回率应显著上升，且这一步不受判官采样抖动影响。",
+    "file": "src/extraction/recall.ts + src/extraction/merge.ts",
+    "switch": "R1_MERGE_RECALL",
+    "params": { "minIdf": 1.2, "topK": 4, "trigger": "1" }
+  },
+  "result": {
+    "candidateRecall": "16/51 = 31.4% → **27/51 = 52.9%**（+11 / -0，McNemar 精确 **p = 0.0010**）",
+    "attachGivenRecalled": "5/16 → 11/27（判官利用率 31% → 41%）",
+    "phantomLossBreakdown": "候选未召回 35 → 24；召回了没挂上 11 → 16",
+    "auditLevel": "同一改动在整条链上仍是 phantom 17→23/60（p=0.18，判官噪声）",
+    "mergeCostDelta": "+121%"
+  },
+  "evalCost": { "usd": 0, "seconds": 0 },
+  "status": "candidate",
+  "note": "**结论终于闭合了**：这条通道在自己的层上**效果确定**——11 条新增召回、0 条丢失，McNemar 精确 p = 0.0010。之前两轮（回合 51 的 +5、53 的 +7/-2）之所以只能报 p≈0.07~0.18，不是因为效果不存在，而是因为**用了一个被判官噪声污染的终点指标**去衡量一个决定性的中间层。这是本次 RSI 最值钱的方法教训：**先给每一层配上它自己的指标，再谈统计显著性**。\n\n**瓶颈已经搬家**：\n- 召回层：35 → 24 条未召回（剩下的多是抽取时就已经换了骨架的说法，需要实体/要素索引，见 roadmap 1.6）；\n- **判定层**：候选给出后只挂上 11/27（41%）—— 这是下一个要攻的点，且与 design.md §6.3.1 的结论一致（JEV 靠字面线索，字面不足时倾向判 NEW 来避险）。\n\n**为什么仍 `candidate`、默认关**：\n1. 端到端（审计读数）仍未证显著：phantom 17→23/60，p=0.18 —— 因为判官利用率只有 41%，召回上来不等于抓得到；\n2. 归并花费 **+121%**；\n3. dev / real 回归本回合没跑（默认关，不影响产品）。\n\n**下一轮的顺序（已写进 roadmap）**：① 成本治理（候选去重、与判官批量化合并）→ ② 判定层利用率（给判官补「典型表述 + 要素」而不是更多候选）→ ③ dev/real 回归三条红线。收官判据不变：端到端显著 + 花费可接受 + 三条红线全过，才翻默认。"
+}

@@ -1,0 +1,30 @@
+{
+  "id": "exp-054",
+  "parent": "exp-053",
+  "createdAt": "2026-10-19T08:30:00.000Z",
+  "kind": "measurement",
+  "version": {
+    "hash": "4547256edcdd",
+    "commit": "e1613de",
+    "extractModel": "deepseek-v4-pro",
+    "judgeModel": "openai-compat",
+    "promptHash": "0b8239f6aa03",
+    "flags": { "R1_JUDGE_PROVIDER": "openai", "R1_MERGE_TRACE": "runs/trace-off.jsonl" }
+  },
+  "change": {
+    "bucket": "measurement",
+    "hypothesis": "回合 51/53 都在 p≈0.07~0.18 打转，因为整条链被压成一个「抓到/没抓到」的布尔值，判官的采样抖动盖住了召回层的真实变化。但这条链的前半段（候选有没有被召回）是纯算法、同输入同输出 —— 应该单独量。",
+    "file": "src/extraction/merge.ts（`R1_MERGE_TRACE`）+ eval/score-recall.ts（新）",
+    "switch": "R1_MERGE_TRACE",
+    "params": { "trace": "每 draft 一行：scene/canonical/surfaces/candidates/choice/createdId/reason，append 写入" }
+  },
+  "result": {
+    "phantom": "①抽取覆盖 51/59 = 86.4% ②候选召回 16/51 = 31.4% ③挂载 5/51 = 9.8%",
+    "anchored": "①13.6% ②87.5% ③37.5%（注意：verbatim 重复句通常不重新抽取，这个口径对 anchored 不适用）",
+    "phantomLossBreakdown": "抽取未覆盖 8 条 · 候选未召回 35 条 · 召回了没挂上 11 条",
+    "cost": "0（纯读轨迹，不调模型）"
+  },
+  "evalCost": { "usd": 0, "seconds": 0 },
+  "status": "accepted",
+  "note": "**新仪器：把一条链拆成三层，让「确定性」的那两层不再受判官噪声影响。**\n\n轨迹怎么来：`R1_MERGE_TRACE=<file>` 时 merge 侧把每个 draft 的候选表旁记下来（append，不参与任何决策）。评分器 `eval/score-recall.ts` 从轨迹里还原三件事：①这条台词被抽成 draft 了吗 ②它的**目标命题**（= 它在确立场景长出来的那条）在候选表里吗 ③判官挂上了吗。**全程 0 次模型调用。**\n\n**四条实现坑（都真实踩到）**：\n1. 覆盖式写文件会丢轨迹 —— 一次运行里 `mergeScenes` 可能被调用多次，必须 append（第一次只拿到 65/131 条）；\n2. `no_candidate` 分支必须也记轨迹，否则「一条候选都没有」这一类（正是召回失败）被系统性排除，召回率被高估；\n3. 目标命题要取「确立场景那条 draft 的 choice 或 createdId」，不能靠别名反查（别名只有在挂上之后才存在 —— 循环依赖）；\n4. anchored 的「抽取覆盖」天然很低（verbatim 重复句不重新抽取，usage 靠别名字符串命中场景文本即可），**这个口径只适用于被抽成 draft 的行**，不能拿它去解释 anchored 的 48/60。\n\n**这一轮最重要的发现**：phantom 的漏报可以精确拆成 `抽取未覆盖 8 · 候选未召回 35 · 召回了没挂上 11`（共 51 条可比样本）。之前笼统说「召回层是瓶颈」是对的，但现在有了**可复算的分母**，而且下一层瓶颈也现形了：候选给出后判官只挂上 5/16。"
+}
