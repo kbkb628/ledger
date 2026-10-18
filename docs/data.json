@@ -1,21 +1,21 @@
 {
-  "generatedAt": "2026-10-17T15:57:53.773Z",
+  "generatedAt": "2026-10-18T08:53:01.403Z",
   "script": {
     "name": "九章（演示剧本，23 场 / 2818 字）",
     "scenes": 23,
-    "propositions": 26,
-    "aliases": 39,
-    "knowledge": 24
+    "propositions": 18,
+    "aliases": 37,
+    "knowledge": 18
   },
   "ingest": {
-    "ms": 14053,
+    "ms": 14882,
     "result": {
       "ok": true,
       "series": "default",
       "ledgerPath": "E:\\恺英\\.ledger\\default\\ledger.json",
-      "propositions": 26,
-      "aliases": 39,
-      "knowledge": 24,
+      "propositions": 18,
+      "aliases": 37,
+      "knowledge": 18,
       "waivers": 0,
       "scenes": 23,
       "progress": {
@@ -81,23 +81,14 @@
             "leak": false,
             "waived": false,
             "reason": "苏婉 在 此前 已得知，合法"
-          },
-          {
-            "propositionId": "E-006",
-            "canonical": "陈默经手了那份东西",
-            "surface": "那份东西",
-            "knownAt": null,
-            "leak": false,
-            "waived": false,
-            "reason": "苏婉 在 此前 已得知，合法"
           }
         ],
-        "summary": "没有泄漏（命中 2 条命题，说话人均已知情或已豁免）"
+        "summary": "没有泄漏（命中 1 条命题，说话人均已知情或已豁免）"
       }
     }
   },
   "audit": {
-    "count": 22,
+    "count": 15,
     "issues": [
       {
         "id": "沈知微|E-001",
@@ -122,17 +113,6 @@
         "reason": "全剧没有记录 沈知微 得知过这条命题"
       },
       {
-        "id": "沈父|E-003",
-        "scene": "S03-05",
-        "character": "沈父",
-        "surface": "那份协议，你签不签？",
-        "line": "沈父：那份协议，你签不签？",
-        "propositionId": "E-003",
-        "canonical": "陆见深三年前在码头与沈父争执，沈父后退踩空落水，陆见深未施救",
-        "knownAt": null,
-        "reason": "全剧没有记录 沈父 得知过这条命题"
-      },
-      {
         "id": "苏婉|E-004",
         "scene": "S04-02",
         "character": "苏婉",
@@ -144,200 +124,134 @@
         "reason": "全剧没有记录 苏婉 得知过这条命题"
       },
       {
-        "id": "苏婉|E-006",
-        "scene": "S04-02",
-        "character": "苏婉",
-        "surface": "那份东西",
-        "line": "苏婉：老爷留下的那份东西，还在你手上？",
-        "propositionId": "E-006",
-        "canonical": "陈默经手了那份东西",
-        "knownAt": null,
-        "reason": "全剧没有记录 苏婉 得知过这条命题"
-      },
-      {
-        "id": "律师|E-007",
+        "id": "律师|E-006",
         "scene": "S06-03",
         "character": "律师",
         "surface": "苏女士手上那份是唯一在册的遗嘱",
         "line": "律师：沈小姐，苏女士手上那份是唯一在册的遗嘱。",
-        "propositionId": "E-007",
+        "propositionId": "E-006",
         "canonical": "苏婉手上那份遗嘱是唯一在册的遗嘱",
         "knownAt": null,
         "reason": "全剧没有记录 律师 得知过这条命题"
       },
       {
-        "id": "沈知微|E-008",
+        "id": "沈知微|E-007",
         "scene": "S06-03",
         "character": "沈知微",
         "surface": "我父亲三年前立过一份遗嘱",
         "line": "沈知微：我父亲三年前立过一份遗嘱。",
-        "propositionId": "E-008",
+        "propositionId": "E-007",
         "canonical": "沈父三年前立过一份遗嘱",
         "knownAt": null,
         "reason": "全剧没有记录 沈知微 得知过这条命题"
       },
       {
-        "id": "沈知微|E-009",
+        "id": "沈知微|E-008",
         "scene": "S06-03",
         "character": "沈知微",
         "surface": "那不是他留下的那一份",
         "line": "沈知微：那不是他留下的那一份。",
-        "propositionId": "E-009",
+        "propositionId": "E-008",
         "canonical": "苏婉手上那份遗嘱不是沈父留下的那一份",
         "knownAt": null,
         "reason": "全剧没有记录 沈知微 得知过这条命题"
       },
       {
-        "id": "沈知微|E-011",
+        "id": "沈知微|E-010",
         "scene": "S08-04",
         "character": "沈知微",
         "surface": "那份遗嘱是伪造的",
         "line": "沈知微：那份遗嘱是伪造的。",
-        "propositionId": "E-011",
+        "propositionId": "E-010",
         "canonical": "苏婉伪造了沈父的遗嘱",
         "knownAt": null,
         "reason": "全剧没有记录 沈知微 得知过这条命题"
       },
       {
-        "id": "沈知微|E-012",
+        "id": "沈知微|E-011",
         "scene": "S09-01",
         "character": "沈知微",
         "surface": "你和苏婉的婚约",
         "line": "沈知微：你和苏婉的婚约，什么时候的事？",
-        "propositionId": "E-012",
+        "propositionId": "E-011",
         "canonical": "陆见深与苏婉存在婚约",
         "knownAt": null,
         "reason": "全剧没有记录 沈知微 得知过这条命题"
       },
       {
-        "id": "陈默|E-014",
-        "scene": "S10-02",
-        "character": "陈默",
-        "surface": "老爷真正留下的那份，被她换掉了",
-        "line": "陈默：当年是苏小姐让我改的遗嘱。老爷真正留下的那份，被她换掉了。",
-        "propositionId": "E-014",
-        "canonical": "苏婉调换了沈父真正的遗嘱",
-        "knownAt": null,
-        "reason": "全剧没有记录 陈默 得知过这条命题"
-      },
-      {
-        "id": "沈知微|E-015",
-        "scene": "S11-01",
-        "character": "沈知微",
-        "surface": "我父亲真正的遗嘱，在这里",
-        "line": "沈知微：我父亲真正的遗嘱，在这里。",
-        "propositionId": "E-015",
-        "canonical": "沈父真正的遗嘱藏在怀表里",
-        "knownAt": null,
-        "reason": "全剧没有记录 沈知微 得知过这条命题"
-      },
-      {
-        "id": "财务总监|E-016",
+        "id": "财务总监|E-013",
         "scene": "S13-02",
         "character": "财务总监",
         "surface": "两千三百万",
         "line": "财务总监：两千三百万。走的都是同一个离岸账户。",
-        "propositionId": "E-016",
+        "propositionId": "E-013",
         "canonical": "苏婉三年间通过同一个离岸账户转走两千三百万",
         "knownAt": null,
         "reason": "全剧没有记录 财务总监 得知过这条命题"
       },
       {
-        "id": "陆见深|E-018",
+        "id": "陆见深|E-015",
         "scene": "S15-03",
         "character": "陆见深",
         "surface": "那是你伪造的",
         "line": "陆见深：我从来没签过。那是你伪造的。",
-        "propositionId": "E-018",
+        "propositionId": "E-015",
         "canonical": "苏婉伪造了备忘录",
         "knownAt": null,
         "reason": "全剧没有记录 陆见深 得知过这条命题"
       },
       {
-        "id": "沈知微|E-019",
-        "scene": "S16-02",
-        "character": "沈知微",
-        "surface": "三年间，两千三百万从这个账户转走",
-        "line": "沈知微：三年间，两千三百万从这个账户转走。",
-        "propositionId": "E-019",
-        "canonical": "苏婉在三年间从该账户转走两千三百万",
-        "knownAt": null,
-        "reason": "全剧没有记录 沈知微 得知过这条命题"
-      },
-      {
-        "id": "陆见深|E-020",
+        "id": "陆见深|E-016",
         "scene": "S17-01",
         "character": "陆见深",
         "surface": "你用了我的名义，签了那份婚约",
         "line": "陆见深：你用了我的名义，签了那份婚约？",
-        "propositionId": "E-020",
+        "propositionId": "E-016",
         "canonical": "苏婉以陆见深的名义签署了婚约",
         "knownAt": null,
         "reason": "全剧没有记录 陆见深 得知过这条命题"
       },
       {
-        "id": "陆见深|E-023",
-        "scene": "S17-01",
-        "character": "陆见深",
-        "surface": "那份婚约",
-        "line": "陆见深：你用了我的名义，签了那份婚约？",
-        "propositionId": "E-023",
-        "canonical": "苏婉伪造了婚约",
-        "knownAt": null,
-        "reason": "全剧没有记录 陆见深 得知过这条命题"
-      },
-      {
-        "id": "沈知微|E-022",
-        "scene": "S19-02",
-        "character": "沈知微",
-        "surface": "那份假遗嘱",
-        "line": "沈知微：那笔钱，那份假遗嘱，还有那份婚约——都是你做的。",
-        "propositionId": "E-022",
-        "canonical": "苏婉伪造了遗嘱",
-        "knownAt": null,
-        "reason": "全剧没有记录 沈知微 得知过这条命题"
-      },
-      {
-        "id": "沈知微|E-023",
+        "id": "沈知微|E-016",
         "scene": "S19-02",
         "character": "沈知微",
         "surface": "那份婚约",
         "line": "沈知微：那笔钱，那份假遗嘱，还有那份婚约——都是你做的。",
-        "propositionId": "E-023",
-        "canonical": "苏婉伪造了婚约",
+        "propositionId": "E-016",
+        "canonical": "苏婉以陆见深的名义签署了婚约",
         "knownAt": null,
         "reason": "全剧没有记录 沈知微 得知过这条命题"
       },
       {
-        "id": "沈知微|E-024",
+        "id": "沈知微|E-017",
         "scene": "S19-02",
         "character": "沈知微",
-        "surface": "那笔钱",
-        "line": "沈知微：那笔钱，那份假遗嘱，还有那份婚约——都是你做的。",
-        "propositionId": "E-024",
-        "canonical": "苏婉侵吞了那笔钱",
+        "surface": "你根本不是沈家的远亲",
+        "line": "沈知微：苏婉，你根本不是沈家的远亲。",
+        "propositionId": "E-017",
+        "canonical": "苏婉不是沈家的远亲",
         "knownAt": null,
         "reason": "全剧没有记录 沈知微 得知过这条命题"
       },
       {
-        "id": "沈知微|E-025",
+        "id": "沈知微|E-018",
         "scene": "S19-02",
         "character": "沈知微",
         "surface": "陈叔留着的原件",
         "line": "沈知微：陈叔留着的原件，就是证据。",
-        "propositionId": "E-025",
-        "canonical": "陈叔保留了原件",
+        "propositionId": "E-018",
+        "canonical": "陈叔留着的原件是证据",
         "knownAt": null,
         "reason": "全剧没有记录 沈知微 得知过这条命题"
       },
       {
-        "id": "沈知微|E-026",
+        "id": "沈知微|E-003",
         "scene": "S20-01",
         "character": "沈知微",
         "surface": "码头那天，你明明可以伸手",
         "line": "沈知微：码头那天，你明明可以伸手。",
-        "propositionId": "E-026",
-        "canonical": "陆见深在码头那天没有伸手救沈父",
+        "propositionId": "E-003",
+        "canonical": "陆见深三年前在码头与沈父争执，沈父后退踩空落水，陆见深未施救",
         "knownAt": null,
         "reason": "全剧没有记录 沈知微 得知过这条命题"
       }
@@ -350,7 +264,7 @@
     "ledgerPath": "E:\\恺英\\.ledger\\default\\ledger.json"
   },
   "auditAfter": {
-    "count": 21
+    "count": 14
   },
   "page": {
     "id": "E-001",
@@ -360,22 +274,51 @@
         "surface": "爸走之前跟我说，这块表里有他最要紧的东西",
         "firstSeen": "S01-03",
         "kind": "descriptive"
+      },
+      {
+        "surface": "我父亲真正的遗嘱，在这里",
+        "firstSeen": "S11-01",
+        "kind": "descriptive"
+      },
+      {
+        "surface": "最要紧的东西在表里",
+        "firstSeen": "S11-01",
+        "kind": "descriptive"
       }
     ],
     "scenes": [
-      "S01-03"
+      "S01-03",
+      "S11-01"
     ],
     "agents": [],
     "establishedAt": "S01-03",
     "auditUnit": null,
     "aliasSource": {
-      "爸走之前跟我说，这块表里有他最要紧的东西": "extracted"
+      "爸走之前跟我说，这块表里有他最要紧的东西": "extracted",
+      "我父亲真正的遗嘱，在这里": "extracted",
+      "最要紧的东西在表里": "extracted"
     },
     "aliasSourceInfo": "extracted = 从剧本原文抽出；human = 人工添加（评测不认）",
-    "knowledge": [],
+    "knowledge": [
+      {
+        "character": "苏婉",
+        "propositionId": "E-001",
+        "scene": "S11-01",
+        "kind": "learns",
+        "evidence": "我父亲真正的遗嘱，在这里"
+      },
+      {
+        "character": "董事",
+        "propositionId": "E-001",
+        "scene": "S11-01",
+        "kind": "learns",
+        "evidence": "我父亲真正的遗嘱，在这里"
+      }
+    ],
     "decisions": [
       "{\"at\":\"2026-10-17T15:41:00.586Z\",\"kind\":\"waive\",\"series\":\"default\",\"key\":\"沈知微|E-001\",\"reason\":\"冒烟测试：人工确认为误报\"}",
-      "{\"at\":\"2026-10-17T15:57:53.729Z\",\"kind\":\"waive\",\"series\":\"default\",\"key\":\"沈知微|E-001\",\"reason\":\"演示：这是一条应当放过的事实\"}"
+      "{\"at\":\"2026-10-17T15:57:53.729Z\",\"kind\":\"waive\",\"series\":\"default\",\"key\":\"沈知微|E-001\",\"reason\":\"演示：这是一条应当放过的事实\"}",
+      "{\"at\":\"2026-10-18T08:53:01.361Z\",\"kind\":\"waive\",\"series\":\"default\",\"key\":\"沈知微|E-001\",\"reason\":\"演示：这是一条应当放过的事实\"}"
     ]
   },
   "metrics": {
@@ -387,12 +330,23 @@
       "median": 25,
       "total": 48,
       "trials": [
+        27,
+        25,
         25
-      ]
+      ],
+      "mean": 25.67,
+      "wilson95": [
+        39.6,
+        66.8
+      ],
+      "note": "回合 41：K=3，均值 53.5%（95% Wilson 39.6–66.8%）。单次 e2e 不再有裁决权。"
     },
     "real": {
-      "issues": 4,
-      "usages": 241
+      "issues": 7,
+      "usages": 269,
+      "testset": "chaguan@2#a2323ea00ae9",
+      "ledger": "lg@294963d704e4",
+      "note": "回合 39 重建：删掉第二/三幕人物表残留后全量重抽（新抽样，与旧 4/241、3/249 不可比）。旧账本归档在 pipeline-chaguan-20261017.json。"
     }
   }
 }

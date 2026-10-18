@@ -46,6 +46,7 @@ import { mergeScenes } from "../extraction/merge.js";
 import { parseScenes, type Scene } from "../extraction/script.js";
 import type { DraftProposition } from "../extraction/types.js";
 import { JevProvider } from "../judgment/jev-provider.js";
+import type { JudgmentProvider } from "../judgment/types.js";
 import {
   appendDecision,
   decisionsPath,
@@ -71,16 +72,47 @@ function loadEnv(path: string): void {
 loadEnv(join(process.cwd(), ".env"));
 
 /**
- * 判定层**延迟创建**。
+ * 判定层**延迟创建 + 失败计数**。
  *
- * 以前是模块级 `new JevProvider()`：缺 key 时 server 在 import 阶段就抛异常退出，
- * MCP 客户端看到的是 `-32000 Connection closed` —— 信息量为零，用户不知道是缺 key。
- * 现在改成第一次真要用时才创建，异常落进那一次工具调用的错误里，客户端能读到原因。
+ * 两次踩过的坑都在这一个函数里：
+ *  1. 以前是模块级 `new JevProvider()`：缺 key 时 server 在 import 阶段就抛异常退出，
+ *     MCP 客户端看到的是 `-32000 Connection closed` —— 信息量为零。
+ *  2. 判定层会**静默降级**：TypeSafe 按地区 451 拒答时，归并每次都退回「NEW」、
+ *     usage 校验每次都「保留」，于是工具照样返回一个像样的结果 —— 账本其实一条都没归并。
+ *     eval 侧用 `judgeWatch` 治了，产品侧一直没治（回合 44 补上）：
+ *     失败计数一非零就在**写盘之前**中止，宁可报错，也不产出「看起来成功」的垃圾账本。
  */
-let providerRef: JevProvider | null = null;
-function provider(): JevProvider {
-  providerRef ??= new JevProvider();
+let providerRef: JudgmentProvider | null = null;
+const judgeStats = { calls: 0, failed: 0, message: "" };
+
+function provider(): JudgmentProvider {
+  if (!providerRef) {
+    const inner = new JevProvider();
+    providerRef = {
+      name: inner.name,
+      async judge(req) {
+        judgeStats.calls += 1;
+        try {
+          return await inner.judge(req);
+        } catch (err) {
+          judgeStats.failed += 1;
+          if (!judgeStats.message) {
+            judgeStats.message = (err instanceof Error ? err.message : String(err)).slice(0, 200);
+          }
+          throw err;
+        }
+      },
+    };
+  }
   return providerRef;
+}
+
+function assertJudgeHealthy(stage: string): void {
+  if (judgeStats.failed === 0) return;
+  throw new Error(
+    `${stage}：判定层调用失败 ${judgeStats.failed}/${judgeStats.calls} 次 —— 管线已静默降级（归并会退化成「每条都是新命题」），` +
+      `本次结果不可用、也不会写入账本。第一次失败：${judgeStats.message}`,
+  );
 }
 
 /** 把抽出的 DraftProposition 转成落盘形态 */
@@ -119,6 +151,7 @@ async function recordScene(ledger: LedgerFile, scene: Scene, series: string): Pr
     provider: provider(),
     seed: ledger.propositions,
   });
+  assertJudgeHealthy("归并（ledger_record）"); // 写盘之前中止：不让降级结果污染账本
   ledger.propositions = toStored(merged.propositions, ledger.propositions);
   const { facts } = buildKnowledge(ledger.propositions, extracted.scenes);
   const seen = new Set(ledger.knowledge.map((k) => `${k.character}|${k.propositionId}|${k.scene}`));
@@ -281,6 +314,7 @@ server.setRequestHandler(CallToolRequestSchema, async (req) => {
           const extracted = await extractScenes(chunk, {});
           failures.push(...extracted.failures);
           const merged = await mergeScenes(extracted.scenes, chunk, { provider: provider(), seed: ledger.propositions });
+          assertJudgeHealthy("归并（ledger_ingest）"); // 写盘之前中止：这一批不并入账本
           ledger.propositions = toStored(merged.propositions, ledger.propositions);
           const { facts } = buildKnowledge(ledger.propositions, extracted.scenes);
           const seen = new Set(ledger.knowledge.map((k) => `${k.character}|${k.propositionId}|${k.scene}`));
@@ -362,6 +396,8 @@ server.setRequestHandler(CallToolRequestSchema, async (req) => {
         const stamps = { scorer: scorerStamp("r1"), contextProtocol: contextStamp() };
         const rawUsages = buildUsages(ledger.propositions, ledger.scenes, { skipNames: true }).usages;
         const resolvedU = await resolveUsages(ledger.propositions, { usages: ledger.usages, stamps: ledger.usageStamps }, () => rawUsages, { provider: provider(), verify: process.env.R1_USAGE_VERIFY !== "0", stamps });
+        // 校验失败会被「保留该使用点」吞掉 —— 那等于悄悄关掉了 R1_USAGE_VERIFY，账本里别留这种脏缓存
+        assertJudgeHealthy("usage 校验（ledger_audit）");
         if (!resolvedU.fromCache) { ledger.usages = resolvedU.usages; ledger.usageStamps = resolvedU.stamps; saveLedger(ledger); }
         const usages = resolvedU.usages;
         const idx = new Map(ledger.sceneOrder.map((s, i) => [s, i]));

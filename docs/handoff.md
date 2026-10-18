@@ -13,8 +13,9 @@
 | Git 仓库（公开） | ✅ https://github.com/kbkb628/ledger |
 | 线上链接 | ✅ https://kbkb628.github.io/ledger/ （GitHub Pages，源为 `/docs`） |
 | 至少一条用户路径完整走通 | ✅ `npm run mcp:smoke` 八步全通：报错→建账 14s→重复建账被拒→拦截→放过→审计→豁免→读词条 |
-| ≤5 分钟录屏 | ❌ 未做 |
-| `npx -y` 可装 | ❌ 未做（`package.json` 的 `bin` 还指向 `tsx src/mcp/server.ts`，只能在本仓库里跑） |
+| ≤5 分钟录屏 | ❌ 未做（脚本见 next-steps §2.1，需人工录） |
+| `npx -y` 可装 | ✅ 回合 35：esbuild 打 `dist/mcp.js`，`bin` 指向产物，空目录 `npx -y ./ledger-0.1.0.tgz` 全路径通过（未发布 npm registry） |
+| 真客户端实测 | ✅ 回合 35：DSH 已挂上并真实拦截（`mcp__ledger__ledger_check` → `leak:true`）；Claude Code `claude mcp get ledger` ✓ Connected（模型侧调用需 `/login`） |
 | 真实客户端实测（DSH / Claude Code） | ❌ 未做（只有 SDK 冒烟；「挂到用户自己的 agent 上」还没在真客户端里验过） |
 
 ## 2. 当前基线（改任何东西之前先核对这些）
