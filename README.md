@@ -201,7 +201,9 @@ claude mcp add --scope user ledger node /abs/path/to/ledger/dist/mcp.js \
 | `src/audit/` | 使用点构造与校验 · 知识时序 · 泄漏判定 · 使用点缓存（第三条回写通道） |
 | `src/store/file-store.ts` | 账本与流水落盘 |
 | `eval/` | 5 套剧本级测试集 + 判定层黄金集 + 所有评测脚本（全部可复现） |
-| `docs/` | 在线演示页、设计文档、评测纪律（`rsi-protocol.md`）、交接说明 |
+| `evalsets/` · `experiments/` | 测试集版本注册表 · 逐回合实验记录（每回合一条 JSON） |
+| `docs/` | 在线演示页（`index.html`）、设计文档、评测纪律（`rsi-protocol.md`）、交接说明 |
+| `docs/diagrams/` | 架构图 / 数据流图 / 走查图（可交互 HTML） |
 
 ---
 
