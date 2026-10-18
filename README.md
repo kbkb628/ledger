@@ -213,7 +213,7 @@ claude mcp add --scope user ledger node /abs/path/to/ledger/dist/mcp.js \
 |---|---|
 | [`docs/design.md`](docs/design.md) | 总体设计：认知层、事件同一性、三层路由、promotion、审计规则 |
 | [`docs/rsi-protocol.md`](docs/rsi-protocol.md) | **主文档**：评测纪律（两类回合 / 红线 / 三戳）+ 逐回合记录，含被自己推翻的结论 |
-| [`docs/pain-analysis.md`](docs/pain-analysis.md) | **痛点分析**：为什么「知情一致性」值得单独做（含行业报道原文与链接） |
+| [`docs/pain-analysis.md`](docs/pain-analysis.md) | **调研报告**：公开报道 / 学术议程 / 方案扫描 / 自有实验四路调研，推导「这个产品为什么应当存在」 |
 | [`docs/roadmap.md`](docs/roadmap.md) | 后续改进路线：分阶段 + 验收标准 |
 | [`docs/eval-roadmap.md`](docs/eval-roadmap.md) | **以 RSI 为主的评测路线**：五零件、预注册、数字纪律、下一轮计划 |
 | [`docs/handoff.md`](docs/handoff.md) | 交接：当前基线、可复现命令、已知坑 |
