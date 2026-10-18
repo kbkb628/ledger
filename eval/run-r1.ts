@@ -1,4 +1,4 @@
-import { verifyUsages } from "../src/audit/usage-verify.js";
+import { resolveUsages, type StoredUsage, type UsageCacheStamps } from "../src/audit/usage-cache.js";
 import { contextStamp } from "../src/rsi/context-protocol.js";
 import { scorerStamp } from "../src/rsi/scorer.js";
 import { formatRate } from "../src/rsi/metrics.js";
@@ -114,6 +114,9 @@ interface CacheShape {
   extracted: ExtractResult;
   merged: MergeResult;
   characters: CharacterEntry[];
+  /** 第三条通道：使用点与三项戳（打分器 / 上下文 / 账本指纹） */
+  usages?: StoredUsage[];
+  usageStamps?: UsageCacheStamps;
 }
 
 
@@ -294,16 +297,34 @@ async function main(): Promise<void> {
     facts.push({ ...d, kind: "learns", evidence: "(默认:施事/在场)", source: "default" });
   }
   const usagesRes = buildUsages(ledger, scenes, { shortKeys: FLAGS.shortKey, skipNames: FLAGS.nameSkip, minLen: Number(process.env.R1_MIN_SURFACE_LEN ?? 3) });
-  let usages = usagesRes.usages;
 
-  // 语义校验必须在 buildUsages 之后（需要候选使用点）
-  if (FLAGS.usageVerify) {
-    const vr = await verifyUsages(usages, ledger, { provider: judgeWatch.provider });
-    console.log(`【usage 校验】保留 ${vr.kept} / 丢弃 ${vr.dropped} / UNSURE ${vr.unsure}　${vr.calls} 次调用 $${vr.costUsd.toFixed(4)}　${(vr.latencyMs / 1000).toFixed(1)}s`);
-    // 每次失败都被静默「保留」——那等于关掉了 R1_USAGE_VERIFY，不能当真结果
-    if (failIfDegraded("usage 校验")) return;
-    usages = vr.usages;
-  }
+  // ── 使用点走**第三条通道**（usage-cache.ts）：命中就复用、不命中才算+校验并回写 ──
+  //
+  // 为什么 dev 也要接：此前 dev 每跑一次都重跑一遍语义判定（约 50 次调用），
+  // 于是 **判定抖动直接进 dev 数字** —— 同一配置两次跑出不同的 P/R，实验就分不清是改动还是抖动。
+  // 接上之后：三项戳（打分器 / 上下文 / 账本指纹）未变 ⇒ 0 次判定、逐字复现；
+  // 戳一变（改了 R1_FLAGS、改了 buildUsages、换了账本）⇒ 自动作废重算，不会拿旧结论冒充新结果。
+  const resolved = await resolveUsages(
+    ledger,
+    { usages: cache.usages, stamps: cache.usageStamps },
+    () => usagesRes.usages,
+    { provider: judgeWatch.provider, verify: FLAGS.usageVerify, stamps: { scorer: scorerStamp("r1"), contextProtocol: contextStamp() }, verbose: true },
+  );
+  // 每次失败都被静默「保留」——那等于关掉了 R1_USAGE_VERIFY，不能当真结果
+  if (failIfDegraded("usage 校验")) return;
+  const usages = resolved.usages;
+  console.log(
+    `【使用点】${usages.length} 处 · ${
+      resolved.fromCache
+        ? "♻️ 复用缓存（0 次判定，结果逐字复现）"
+        : `重算（${resolved.verifyStats?.calls ?? 0} 次判定 $${(resolved.verifyStats?.costUsd ?? 0).toFixed(4)}）｜作废原因：${resolved.invalidatedBy ?? "—"}`
+    }`,
+  );
+  // 回写：抽查重算得出的结论，下次运行直接复用
+  cache.usages = usages;
+  cache.usageStamps = resolved.stamps;
+  mkdirSync(dirname(CACHE), { recursive: true });
+  writeFileSync(CACHE, JSON.stringify(cache, null, 2), "utf8");
 
   // ── 把知识与使用一并提升到审计单元层，再跑 R1 ──
   //
