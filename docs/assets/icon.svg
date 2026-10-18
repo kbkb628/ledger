@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240" role="img" aria-label="账本 · 剧本设定基准">
+  <title>账本 · 剧本设定基准</title>
+  <!-- 一本会被写下、被查询、被核验的账：账页 + 订口 + 三行命题 + 一个勾 -->
+  <rect x="12" y="12" width="216" height="216" rx="34" fill="#fffdf9" stroke="#b45309" stroke-width="9"/>
+  <path d="M62 58 V182" stroke="#e7c9a9" stroke-width="9" stroke-linecap="round"/>
+  <path d="M92 82 H188" stroke="#c9a98a" stroke-width="9" stroke-linecap="round"/>
+  <path d="M92 118 H188" stroke="#c9a98a" stroke-width="9" stroke-linecap="round"/>
+  <path d="M92 154 H146" stroke="#e7c9a9" stroke-width="9" stroke-linecap="round"/>
+  <path d="M118 172 L146 199 L204 126" fill="none" stroke="#c2410c" stroke-width="15" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

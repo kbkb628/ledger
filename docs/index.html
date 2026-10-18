@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>账本 · 剧本设定基准</title>
+<link rel="icon" type="image/svg+xml" href="assets/icon.svg">
 <style>
   :root {
     --bg: #0f1115; --panel: #171a21; --panel2: #1d212a; --line: #262b36;
@@ -19,7 +20,8 @@
   a { color: var(--accent); text-decoration: none; }
   a:hover { text-decoration: underline; }
   .wrap { max-width: 940px; margin: 0 auto; padding: 48px 24px 96px; }
-  h1 { font-size: 30px; margin: 0 0 6px; letter-spacing: .3px; }
+  h1 { font-size: 30px; margin: 0 0 6px; letter-spacing: .3px; display: flex; align-items: center; gap: 14px; }
+  h1 img { width: 56px; height: 56px; border-radius: 12px; }
   h2 { font-size: 19px; margin: 44px 0 14px; padding-bottom: 8px; border-bottom: 1px solid var(--line); }
   .sub { color: var(--dim); margin: 0 0 26px; }
   .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; margin: 26px 0 0; }
@@ -54,7 +56,7 @@
 <body>
 <div class="wrap">
 
-  <h1>《账本》</h1>
+  <h1><img src="assets/icon.svg" alt="账本图标">《账本》</h1>
   <p class="sub">剧本设定基准 —— 把剧集 bible 变成可查询、可校核、可挂载的基准。
     最锋利的一条判据：<b>这个角色，这时候该知道这件事吗？</b></p>
 
