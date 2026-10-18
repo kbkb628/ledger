@@ -46,6 +46,7 @@ const SCORER_FILES: Record<ScorerKind, string[]> = {
     "src/audit/usage-verify.ts", // usage 语义校验：改变"哪些使用点算数"
     "src/audit/leak-allow.ts", // 报出后的合法渠道复核（should_allow 判定层版）：改变"哪些问题算泄漏"
     "src/extraction/merge.ts", // 归并决策会改变账本，从而改变可报出的东西
+    "src/extraction/recall.ts", // 候选召回第二通道：改变「判官能否看到这条候选」
   ],
   /** 判定层：指令 + provider + 候选呈现 */
   judge: [
@@ -75,6 +76,10 @@ const R1_FLAGS = [
   "R1_MERGE_EXACT",
   "R1_MERGE_OVERLAP",
   "R1_MERGE_OVERLAP_MIN",
+  "R1_MERGE_RECALL",
+  "R1_RECALL_MIN_IDF",
+  "R1_RECALL_TOPK",
+  "R1_RECALL_TRIGGER",
   "R1_SHOULD_ALLOW",
   "R1_LEAK_JUDGE",
   "R1_QUESTION_SKIP",

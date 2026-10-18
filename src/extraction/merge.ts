@@ -1,6 +1,7 @@
-﻿import { MERGE_PROPOSITIONS_INSTRUCTIONS } from "../judgment/prompt.js";
+import { MERGE_PROPOSITIONS_INSTRUCTIONS } from "../judgment/prompt.js";
 import type { JudgmentProvider, JudgmentRequest } from "../judgment/types.js";
 import { renderScene, type Scene } from "./script.js";
+import { rareTermRecall } from "./recall.js";
 import type { DraftProposition, MergeDecision, SceneExtraction, ScenePropositionDraft } from "./types.js";
 
 /**
@@ -134,6 +135,37 @@ export async function mergeScenes(
         .filter((x) => x.score >= minScore)
         .sort((a, b) => b.score - a.score)
         .slice(0, topK);
+
+      // ── 罕见词召回（`R1_MERGE_RECALL=1`）：补上 bigram-Dice 够不着的候选 ──
+      //
+      // 机制：「换了说法」的两句，Dice 往往 < 0.15，判官连看都看不到 → 新建命题 →
+      // 首见场景在场者当场获得许可（幻影集量到的正是这条）。但两句常共享一个**稀有词**
+      // （「密码」「井」「血型」…），它在账本里只属于一条命题 —— 那就该把那条命题端给判官。
+      //
+      // 只在「候选稀薄」时触发会更省（回合 51 试过：花费只降 13%，召回还掉 1 条）——
+      // 所以默认全量补，`R1_RECALL_TRIGGER` 只留作敏感性开关。
+      const trigger = Number(process.env.R1_RECALL_TRIGGER ?? 1);
+      const thin = scored.length === 0 || (scored[0]?.score ?? 0) < trigger;
+      if (process.env.R1_MERGE_RECALL === "1" && thin) {
+        const extra = rareTermRecall({
+          text: draftText,
+          props: propositions.map((p) => ({
+            id: p.id,
+            text: norm(propText(p.canonical, p.aliases.map((a) => a.surface))),
+          })),
+          minIdf: Number(process.env.R1_RECALL_MIN_IDF ?? 1.2),
+          topK: Number(process.env.R1_RECALL_TOPK ?? 4),
+        });
+        const have = new Set(scored.map((x) => x.p.id));
+        for (const id of extra) {
+          if (have.has(id)) continue;
+          const p = propositions.find((x) => x.id === id);
+          if (p) scored.push({ p, score: 0 });
+        }
+        if (opts.verbose && extra.length) {
+          process.stdout.write(`    ${se.scene} 罕见词召回 +${extra.length}（${extra.join("/")}）\n`);
+        }
+      }
 
       if (scored.length === 0) {
         decisions.push({

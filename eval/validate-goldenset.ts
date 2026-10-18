@@ -149,7 +149,9 @@ function validateLeaks(file: LeaksFile): void {
             `${a.id} 的 established=${a.established} 里 ${a.character} 在场 —— 会被「首见场景在场者得知」掩盖`,
           );
         }
-        if (!(sceneText.get(a.established) ?? "").includes(strip(a.surface))) {
+        // phantom 变体的定义就是「不复述确立场景的原话」，这里不重合是**预期**，不算警告
+        const isPhantom = (a as { variant?: string }).variant === "phantom";
+        if (!isPhantom && !(sceneText.get(a.established) ?? "").includes(strip(a.surface))) {
           warnings.push(`${a.id} 的 established=${a.established} 原文里没有「${a.surface}」（别名可能不同，人工确认）`);
         }
       }

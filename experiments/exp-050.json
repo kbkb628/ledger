@@ -1,0 +1,44 @@
+{
+  "id": "exp-050",
+  "parent": "exp-049",
+  "createdAt": "2026-10-19T02:10:00.000Z",
+  "kind": "measurement",
+  "version": {
+    "hash": "4547256edcdd",
+    "commit": "d2587ac",
+    "extractModel": "deepseek-v4-pro",
+    "judgeModel": "openai-compat",
+    "promptHash": "0b8239f6aa03",
+    "flags": {
+      "R1_JUDGE_PROVIDER": "openai"
+    }
+  },
+  "change": {
+    "bucket": "measurement",
+    "hypothesis": "幻影集 v1 只有 8 对（phantom 1/8），Wilson 区间约 2–47% —— 在这么粗的尺子上，任何「换说法」的改进都判不出是真提升还是抖动。先把尺子做细，再谈修。",
+    "file": "eval/script-phantom.md + eval/leaks-phantom.json + eval/build-phantom.mjs",
+    "switch": "NONE",
+    "params": {
+      "facts": 30,
+      "phantom": 30,
+      "anchored": 30,
+      "mustNotFlag": 6,
+      "scenes": 17
+    }
+  },
+  "result": {
+    "phantom": "13/30 = 43.3%",
+    "anchored": "21/30 = 70.0%",
+    "recall": "34/60 = 56.7% [44.1-68.4]",
+    "precision": "34/37 = 91.9% [78.7-97.2]",
+    "falsePositives": 3,
+    "extractCostUsd": 0.0612,
+    "mergeCostUsd": 0.1594
+  },
+  "evalCost": {
+    "usd": 0.2206,
+    "seconds": 1500
+  },
+  "status": "accepted",
+  "note": "**旧读数作废**：v1 的 `phantom 1/8 / anchored 7/8` 与 `leaks-phantom@2#e4077fa003ee` 不再可比 —— 剧本从 10 场扩到 17 场、事实从 8 个扩到 30 个，账本规模与命题分布都变了。此后幻影集只认 v2 这一套数。\n\n**为什么这次仪器一上来就"好看"（56.7%）而 v1 只有 31%**：v2 的 phantom 句是**有意识写的部分重合**（「账上少的那笔」对「公司账上少了一千二百万」），比 v1 的彻底改写更容易被 bigram 抓到；同时 `R1_MERGE_OVERLAP`（回合 38 起默认开）把大量 anchored 直接挂上（21/30）。所以 v2 的分辨力来自**两种变体的差**（43.3% vs 70.0%，26.7pp），不是总量。\n\n**仪器本身的三处加固**：① 由 `eval/build-phantom.mjs` 单表生成剧本与标注，60 条泄漏的说话人/在场/说法唯一性全部由脚本断言，写盘前不通过就不出文件；② `eval/validate-goldenset.ts` 对 `variant: phantom` **不再**报「established 原文里没有该说法」的警告 —— 那正是 phantom 的定义；③ 30 对改成**配对设计**（同一事实的两种说法），可以用 McNemar 而不是只比两个比例。\n\n**已知局限（写下来防止过度解读）**：30 个事实由我一个人编写，句法偏短、实体集中（密码/井/遗嘱/合同/护照/血型）；它测的是「同一事实两种措辞」这一层，不代表任意长度的自然台词。真实剧本上的读数（`real` 2.6% / 4.2%）仍是另一套口径，两者不可混用。\n\n**抽取不确定性的实证**：同一份剧本连跑两次 `--fresh`，P-01 抽出 8 条 vs 14 条命题 —— 这是本轮记在库里最贵的一课：**任何跨回合比较都必须冻结抽取**（`--remerge` 复用同一份抽取缓存），否则量到的是抽取抖动。"
+}
