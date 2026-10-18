@@ -4,7 +4,7 @@
 >
 > **形态是一个 MCP server**：挂到你本地的剧本创作 agent 上，写台词的当下就被拦住。
 
-**在线演示**：https://kbkb628.github.io/ledger/ （静态快照，数据由真实 MCP 调用生成）
+**在线演示**：https://kbkb628.github.io/ledger/ （静态快照，数据由真实 MCP 调用生成）　·　**演示片**：https://kbkb628.github.io/ledger/demo-film.html （4 分 35 秒，自动播放）
 
 ## 它解决什么
 
