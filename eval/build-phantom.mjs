@@ -46,6 +46,41 @@ const FACTS = [
   { id: "F-29", estab: "P-08", knowers: ["沈知微", "陆见深"], anchor: "陈叔的车，那天下午去过医院", anchorLine: "陈叔的车，那天下午去过医院", phantomLine: "那辆车那天下午去过医院" },
 
   { id: "F-30", estab: "P-09", knowers: ["陈叔", "助理"], anchor: "我是董事安排进来的", anchorLine: "我是董事安排进来的，你别声张", phantomLine: "厨房那个人，来路不正" },
+
+  { id: "F-31", estab: "P-10", knowers: ["沈知微", "律师"], anchor: "保险柜第二格的钥匙", anchorLine: "保险柜第二格的钥匙在我这", phantomLine: "那道柜子的钥匙，你收着吧" },
+  { id: "F-32", estab: "P-10", knowers: ["沈知微", "律师"], anchor: "三年前的就诊记录被抽走了一页", anchorLine: "三年前的就诊记录被抽走了一页", phantomLine: "那本病历少了一张纸" },
+  { id: "F-33", estab: "P-10", knowers: ["沈知微", "律师"], anchor: "苏婉签过放弃继承的声明", anchorLine: "苏婉签过放弃继承的声明", phantomLine: "她当年签过一张不要家产的字" },
+  { id: "F-34", estab: "P-10", knowers: ["沈知微", "律师"], anchor: "沈父的私人账户在开曼", anchorLine: "沈父的私人账户在开曼", phantomLine: "钱存在海外一个小岛上" },
+  { id: "F-35", estab: "P-10", knowers: ["沈知微", "律师"], anchor: "律师收过苏婉两次钱", anchorLine: "律师收过苏婉两次钱", phantomLine: "那两笔好处费，都进了他口袋" },
+  { id: "F-36", estab: "P-10", knowers: ["沈知微", "律师"], anchor: "老宅的地契压在律师楼", anchorLine: "老宅的地契压在律师楼", phantomLine: "房契一直搁在他事务所" },
+
+  { id: "F-37", estab: "P-11", knowers: ["陆见深", "助理"], anchor: "助理那晚看见了车牌", anchorLine: "助理那晚看见了车牌", phantomLine: "那天晚上她记住了车号" },
+  { id: "F-38", estab: "P-11", knowers: ["陆见深", "助理"], anchor: "陆见深的车换过一副牌照", anchorLine: "陆见深的车换过一副牌照", phantomLine: "那车挂过两块不同的牌子" },
+  { id: "F-39", estab: "P-11", knowers: ["陆见深", "助理"], anchor: "后备箱里有个牛皮纸袋", anchorLine: "后备箱里有个牛皮纸袋", phantomLine: "后边那个袋子里装了东西" },
+  { id: "F-40", estab: "P-11", knowers: ["陆见深", "助理"], anchor: "助理被苏婉威胁过", anchorLine: "助理被苏婉威胁过", phantomLine: "苏婉放话要收拾她" },
+  { id: "F-41", estab: "P-11", knowers: ["陆见深", "助理"], anchor: "那晚下着雨，地上有脚印", anchorLine: "那晚下着雨，地上有脚印", phantomLine: "雨地里留下一串鞋印" },
+
+  { id: "F-42", estab: "P-12", knowers: ["沈知微", "陈叔"], anchor: "老爷的手抖是中毒", anchorLine: "老爷的手抖是中毒", phantomLine: "老爷一直抖，是被人下了药" },
+  { id: "F-43", estab: "P-12", knowers: ["沈知微", "陈叔"], anchor: "验血单被人换过", anchorLine: "验血单被人换过", phantomLine: "那张化验单不是原件" },
+  { id: "F-44", estab: "P-12", knowers: ["沈知微", "陈叔"], anchor: "护士记得那晚来过一个女人", anchorLine: "护士记得那晚来过一个女人", phantomLine: "值班的人说半夜来过女的" },
+  { id: "F-45", estab: "P-12", knowers: ["沈知微", "陈叔"], anchor: "老爷最后写过一个名字", anchorLine: "老爷最后写过一个名字", phantomLine: "他临了在纸上写了三个字" },
+  { id: "F-46", estab: "P-12", knowers: ["沈知微", "陈叔"], anchor: "病房的监控坏了三天", anchorLine: "病房的监控坏了三天", phantomLine: "那层楼的摄像头停了三天" },
+  { id: "F-47", estab: "P-12", knowers: ["沈知微", "陈叔"], anchor: "陈叔替老爷垫付过药费", anchorLine: "陈叔替老爷垫付过药费", phantomLine: "药钱是老陈先付的" },
+
+  { id: "F-48", estab: "P-13", knowers: ["苏婉", "董事", "律师"], anchor: "董事在国外有个账户", anchorLine: "董事在国外有个账户", phantomLine: "他在外面开过户头" },
+  { id: "F-49", estab: "P-13", knowers: ["苏婉", "董事", "律师"], anchor: "苏婉的孩子不是陆见深的", anchorLine: "苏婉的孩子不是陆见深的", phantomLine: "那孩子跟陆家没关系" },
+  { id: "F-50", estab: "P-13", knowers: ["苏婉", "董事", "律师"], anchor: "律师替董事改过一份报表", anchorLine: "律师替董事改过一份报表", phantomLine: "那套账是他动手做的" },
+  { id: "F-51", estab: "P-13", knowers: ["苏婉", "董事", "律师"], anchor: "酒会请柬是伪造的", anchorLine: "酒会请柬是伪造的", phantomLine: "那张邀请函是假的" },
+  { id: "F-52", estab: "P-13", knowers: ["苏婉", "董事", "律师"], anchor: "苏婉给董事开过一张远期票", anchorLine: "苏婉给董事开过一张远期票", phantomLine: "她给过他一张迟到兑现的条子" },
+  { id: "F-53", estab: "P-13", knowers: ["苏婉", "董事", "律师"], anchor: "董事知道录音的下半段", anchorLine: "董事知道录音的下半段", phantomLine: "后头那段他也听过" },
+
+  { id: "F-54", estab: "P-14", knowers: ["陈叔", "沈知微"], anchor: "井壁上有三道划痕", anchorLine: "井壁上有三道划痕", phantomLine: "井里的石头被划了三下" },
+  { id: "F-55", estab: "P-14", knowers: ["陈叔", "沈知微"], anchor: "后院埋过一只木箱", anchorLine: "后院埋过一只木箱", phantomLine: "院角底下压着个木头匣子" },
+  { id: "F-56", estab: "P-14", knowers: ["陈叔", "沈知微"], anchor: "老宅的佣人换过三批", anchorLine: "老宅的佣人换过三批", phantomLine: "宅子里的帮工换了三茬" },
+  { id: "F-57", estab: "P-14", knowers: ["陈叔", "沈知微"], anchor: "后门那把锁早坏了", anchorLine: "后门那把锁早坏了", phantomLine: "侧门的锁一直是松的" },
+  { id: "F-58", estab: "P-14", knowers: ["陈叔", "沈知微"], anchor: "沈父每晚在院里坐到半夜", anchorLine: "沈父每晚在院里坐到半夜", phantomLine: "老爷每天夜里都在院子里坐到很晚" },
+  { id: "F-59", estab: "P-14", knowers: ["陈叔", "沈知微"], anchor: "院墙东头被人挖开过", anchorLine: "院墙东头被人挖开过", phantomLine: "东边的墙根动过土" },
+  { id: "F-60", estab: "P-14", knowers: ["陈叔", "沈知微"], anchor: "陈叔在院里烧过东西", anchorLine: "陈叔在院里烧过东西", phantomLine: "院里那堆灰是他点的" },
 ];
 
 /* ── 场景 ─────────────────────────────────────────────────────────────── */
@@ -59,17 +94,24 @@ const ESTAB_SCENES = {
   "P-07": { loc: "花园", cast: ["陈叔", "董事"], time: "现在" },
   "P-08": { loc: "车里", cast: ["沈知微", "陆见深"], time: "现在" },
   "P-09": { loc: "厨房", cast: ["陈叔", "助理"], time: "现在" },
+  "P-10": { loc: "档案室深处", cast: ["沈知微", "律师"], time: "现在" },
+  "P-11": { loc: "车库", cast: ["陆见深", "助理"], time: "深夜" },
+  "P-12": { loc: "医院病房", cast: ["沈知微", "陈叔"], time: "现在" },
+  "P-13": { loc: "酒会", cast: ["苏婉", "董事", "律师"], time: "次日" },
+  "P-14": { loc: "老宅后院", cast: ["陈叔", "沈知微"], time: "现在" },
 };
-// 泄漏场次（按顺序挑：第一个能用的场次放 phantom，第二个放 anchored）
+// 泄漏场次（按顺序挑：先把「泄漏者既不在知情者里、又在场」的场次填满最少的那个）
 const LEAK_SCENES = [
-  { id: "P-10", loc: "宴会厅", cast: ["苏婉", "董事", "律师"] },
-  { id: "P-11", loc: "董事会", cast: ["董事", "律师", "助理"] },
-  { id: "P-12", loc: "走廊", cast: ["陈叔", "苏婉"] },
-  { id: "P-13", loc: "车里", cast: ["陆见深", "助理"] },
-  { id: "P-14", loc: "医院走廊", cast: ["沈知微", "律师", "陈叔"] },
-  { id: "P-15", loc: "卧室", cast: ["助理", "沈知微"] },
-  { id: "P-16", loc: "书房", cast: ["董事", "苏婉", "陆见深"] },
-  { id: "P-17", loc: "花园", cast: ["律师", "陈叔", "苏婉"] },
+  { id: "L-01", loc: "宴会厅", cast: ["苏婉", "董事", "律师"] },
+  { id: "L-02", loc: "董事会", cast: ["董事", "律师", "助理"] },
+  { id: "L-03", loc: "走廊", cast: ["陈叔", "苏婉"] },
+  { id: "L-04", loc: "车里", cast: ["陆见深", "助理"] },
+  { id: "L-05", loc: "医院走廊", cast: ["沈知微", "律师", "陈叔"] },
+  { id: "L-06", loc: "卧室", cast: ["助理", "沈知微"] },
+  { id: "L-07", loc: "书房", cast: ["董事", "苏婉", "陆见深"] },
+  { id: "L-08", loc: "花园", cast: ["律师", "陈叔", "苏婉"] },
+  { id: "L-09", loc: "厨房", cast: ["陈叔", "助理", "陆见深"] },
+  { id: "L-10", loc: "档案室", cast: ["律师", "董事", "沈知微"] },
 ];
 
 /* ── 分配：每条事实两条泄漏，选两个「泄漏者既不在知情者里、又在场」的场次 ── */
@@ -108,8 +150,17 @@ for (const f of FACTS) {
 }
 
 /* ── 合法知道（must_not_flag）：知情者在后场用原话提起，必须放过 ── */
+const usedScene = new Map(); // factId → 已被登记为泄漏的场次集合
+for (const l of leaks) {
+  const f = l.id.slice(0, 4);
+  if (!usedScene.has(f)) usedScene.set(f, new Set());
+  usedScene.get(f).add(l.scene);
+}
 const LEGAL = FACTS.filter((_, i) => i % 5 === 0).map((f) => {
-  const scene = leakLines.find((s) => f.knowers.some((k) => s.cast.includes(k)));
+  const taken = usedScene.get(f.id) ?? new Set();
+  const scene = leakLines.find(
+    (s) => !taken.has(s.id) && f.knowers.some((k) => s.cast.includes(k)) && !s.lines.some((t) => t.includes(f.anchor)),
+  );
   const who = f.knowers.find((k) => scene.cast.includes(k));
   scene.lines.push(`${who}：${f.anchorLine}。`);
   return { character: who, scene: scene.id, surface: f.anchor, why: `${who} 在 ${f.estab} 就在场，是被告知/经手的人，合法` };
@@ -125,7 +176,7 @@ for (const l of leaks) {
 }
 
 /* ── 写剧本 ───────────────────────────────────────────────────────────── */
-const head = `# 《幻影》—— 幻影命题专项集（测量仪器 · v2）
+const head = `# 《幻影》—— 幻影命题专项集（测量仪器 · v3）
 
 > **这份剧本只有一个目的**：把「泄漏台词换了说法 ⇒ 抽取层为它新建一条命题 ⇒ 首映场景在场者当场获得许可 ⇒ 泄漏自己把自己掩盖」这条机制**隔离出来量**。
 >
@@ -133,7 +184,7 @@ const head = `# 《幻影》—— 幻影命题专项集（测量仪器 · v2）
 >   - \`phantom\`：换说法（不复述确立场景的原话 —— 这是要修的那一类）
 >   - \`anchored\`：沿用确立场景的原话（对照组 —— 归并应把它挂回原来的命题）
 >
-> 读数**按变体分开报**，不汇总成一个 P/R。v1 只有 8 个事实（phantom 1/8），分辨率不足；v2 扩到 **30 个事实 / 30+30 条**。
+> 读数**按变体分开报**，不汇总成一个 P/R。v1 只有 8 个事实（phantom 1/8）、v2 扩到 30 对仍判不出显著性（McNemar 不一致对 5）；v3 再翻一倍到 **60 个事实 / 60+60 条**。
 > 本文件由 \`eval/build-phantom.mjs\` 生成（单表 → 剧本 + 标注），别手改。
 >
 > 角色：**沈知微**（女主）· **陈叔**（管家）· **苏婉**（反派）· **陆见深**（男主）· **律师** · **董事** · **助理**
@@ -150,11 +201,11 @@ writeFileSync("eval/script-phantom.md", head + "\n" + estab + "\n" + leakBlocks,
 /* ── 写标注 ───────────────────────────────────────────────────────────── */
 const out = {
   meta: {
-    name: "《幻影》幻影命题专项集 v2",
+    name: "《幻影》幻影命题专项集 v3",
     script: "eval/script-phantom.md",
     purpose:
       "量「换了说法就抓不到」这一层：每个事实两条泄漏，phantom 换说法（当前抓不到），anchored 沿用原话（对照）。读数按变体分开报。",
-    revision: "v2：8 → 30 个事实（30 phantom + 30 anchored），另 6 条 must_not_flag 保护合法知道；由 build-phantom.mjs 生成。",
+    revision: "v3：30 → 60 个事实（60 phantom + 60 anchored），另 12 条 must_not_flag 保护合法知道；由 build-phantom.mjs 生成。",
     note: "variant 是本集独有的字段。这不是选版本的决策集（不可用于裁决能力），它是机制探针 —— 价值在两种变体的差。",
     size: leaks.length,
   },

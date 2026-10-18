@@ -1,0 +1,33 @@
+{
+  "id": "exp-052",
+  "parent": "exp-051",
+  "createdAt": "2026-10-19T05:40:00.000Z",
+  "kind": "measurement",
+  "version": {
+    "hash": "4547256edcdd",
+    "commit": "b29d2ee",
+    "extractModel": "deepseek-v4-pro",
+    "judgeModel": "openai-compat",
+    "promptHash": "0b8239f6aa03",
+    "flags": { "R1_JUDGE_PROVIDER": "openai" }
+  },
+  "change": {
+    "bucket": "measurement",
+    "hypothesis": "回合 51 的不一致对只有 5 对（<6）→ 判不出。把幻影集 30 对再翻到 60 对，若效应真实存在，不一致对应随之翻倍到 ~10，才能过 McNemar。",
+    "file": "eval/script-phantom.md + eval/leaks-phantom.json（由 eval/build-phantom.mjs 生成）",
+    "switch": "NONE",
+    "params": { "facts": 60, "phantom": 60, "anchored": 60, "mustNotFlag": 12, "scenes": 24, "leakScenes": 10 }
+  },
+  "result": {
+    "phantom": "17/60 = 28.3% [18.8-40.2]",
+    "anchored": "49/60 = 81.7% [70.0-89.4]",
+    "recall": "66/120 = 55.0% [46.1-63.6]",
+    "precision": "66/71 = 93.0% [84.6-97.0]",
+    "falsePositives": 5,
+    "extractCostUsd": 0.1,
+    "mergeCostUsd": 0.2634
+  },
+  "evalCost": { "usd": 0.3634, "seconds": 1900 },
+  "status": "accepted",
+  "note": "v2（30 对）的读数同时作废：剧本 17 → 24 场、事实 30 → 60 个、泄漏场次重编为 `L-01`–`L-10`，账本规模又变了一层。\n\n**缝更宽了**：phantom 28.3% vs anchored 81.7%，差 **53.4pp**（v2 是 26.7pp）。原因是新加的 30 个事实里，phantom 句改写得更彻底（例：`井壁上有三道划痕` → `井里的石头被划了三下`），说明 v2 的差额里有一部分来自「改写不够狠」。\n\n**代价**：抽取 $0.10（24 场）+ 归并 $0.26，一次跑 ~30 分钟。这个成本决定了不能再靠「继续翻倍」来买分辨率。\n\n**仪器能力判断（本轮的核心产出）**：以 28.3% → 38.3% 这个量级的效应（Δ≈10pp，不一致率约 15%）估算，要 80% 功效需要**150 对以上**；60 对仍会在 p≈0.07–0.18 之间打转。所以下一轮不该再扩仪器，而该**换度量方式**（见 exp-053 的结论）。"
+}
