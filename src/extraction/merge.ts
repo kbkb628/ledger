@@ -266,9 +266,20 @@ export async function mergeScenes(
           context: sceneText,
           kind: "repeated_surface",
         },
-        instructions: opts.characterHint
-          ? `${MERGE_PROPOSITIONS_INSTRUCTIONS}\n\n【人物别称】以下称呼指同一个人，判「施事是否对得上」时按同一人处理：\n${opts.characterHint}`
-          : MERGE_PROPOSITIONS_INSTRUCTIONS,
+        instructions: [
+          MERGE_PROPOSITIONS_INSTRUCTIONS,
+          opts.characterHint
+            ? `【人物别称】以下称呼指同一个人，判「施事是否对得上」时按同一人处理：\n${opts.characterHint}`
+            : "",
+          // `R1_MERGE_SOFT=1`：把「换说法」明确写进判据。
+          // 依据 exp-058 的回放：候选就在表里、原话也在，判官仍判 NEW —— 它按「措辞是否一致」在判，
+          // 而这条链要的是「是否同一件事实」。
+          process.env.R1_MERGE_SOFT === "1"
+            ? "【同一件事实的判法】措辞可以完全不同仍算同一件事实：改了指称（保险箱↔那把锁）、换动词（还清↔抹平）、换语序、省略施事，都应按事实本身是否相同来判；只有当施事、客体或事件类型确实不同时才选 NEW。拿不准时优先选那条命题，不要用 NEW 回避。"
+            : "",
+        ]
+          .filter(Boolean)
+          .join("\n\n"),
         candidates: candidates.map((p) => ({
           id: p.id,
           canonical: p.canonical,
