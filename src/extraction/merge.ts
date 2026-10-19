@@ -91,6 +91,37 @@ function propText(canonical: string, surfaces: string[]): string {
   return [canonical, ...surfaces].join(" ");
 }
 
+
+/**
+ * 抽取保真度修复（`R1_DRAFT_FIDELITY=1`）：canonical 是否还覆盖得住本句的原话？
+ *
+ * 判据是确定性的：把本句最长的那个 span 切成 2-gram，数 canonical 覆盖了多少；
+ * 覆盖不到一半 ⇒ 这句改写已经把事实改成了别的东西（回合 64 的 A/B 两类），退回原话。
+ *
+ * 为什么宁可退原话：账本的价值是「可回查」—— 存一句没润色的原文仍可回查；
+ * 存一句被改写错的事实，后面所有召回与判定都建立在错的东西上（且无法察觉）。
+ */
+function repairCanonical(draft: ScenePropositionDraft): ScenePropositionDraft {
+  if (process.env.R1_DRAFT_FIDELITY !== "1") return draft;
+  const span = draft.surfaces.map((s) => s.text).sort((a, b) => b.length - a.length)[0] ?? "";
+  const canon = draft.canonical ?? "";
+  if (!span || !canon) return draft;
+  const gramsOf = (s: string): string[] => {
+    const t = s.replace(/\s+/g, "");
+    const out: string[] = [];
+    for (let i = 0; i + 2 <= t.length; i += 1) out.push(t.slice(i, i + 2));
+    return out;
+  };
+  const g = gramsOf(span);
+  if (g.length < 3) return draft; // 太短，谈不上保真度
+  const hit = g.filter((x) => canon.includes(x)).length;
+  const cover = hit / g.length;
+  const min = Number(process.env.R1_FIDELITY_MIN ?? 0.5);
+  if (cover >= min) return draft;
+  process.stdout.write(`    [保真度] 改写覆盖率 ${(cover * 100).toFixed(0)}% < ${(min * 100).toFixed(0)}% → 退回原话：「${span.slice(0, 20)}」\n`);
+  return { ...draft, canonical: span };
+}
+
 export async function mergeScenes(
   sceneExtractions: SceneExtraction[],
   scenes: Scene[],
@@ -127,7 +158,16 @@ export async function mergeScenes(
     const scene = scenes.find((s) => s.id === se.scene) ?? { id: se.scene, meta: [], lines: [] };
     const sceneText = renderScene(scene);
 
-    for (const draft of se.propositions) {
+    for (const draftRaw of se.propositions) {
+      // ── 抽取保真度修复（`R1_DRAFT_FIDELITY=1`）──
+      //
+      // 回合 64 回放发现：幻影集里「没挂上」的 16 条中约 12 条**判官判得对** ——
+      // 抽取把「密码」丢了、把苏婉换成陈叔、把签字人换成董事，写出来的 canonical
+      // 已经是另一件事。这种句子无论召回多努力都不该挂回原命题。
+      //
+      // 修法（纯规则、0 次模型调用）：canonical 若连本句 span 的大多数字面都不覆盖，
+      // 就退回**原话**当表述 —— 宁可存一句没有润色的原文，也不存一句被改写错的事实。
+      const draft = repairCanonical(draftRaw);
       const draftText = norm(propText(draft.canonical, draft.surfaces.map((s) => s.text)));
       // 施事名字也归一 —— 否则「施事知道自己做的事」这条规则会因为别称对不上而失效
       const draftAgents = draft.agents.map(norm);
