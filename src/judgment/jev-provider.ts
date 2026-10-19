@@ -82,6 +82,8 @@ export class JevProvider implements JudgmentProvider {
     const body: Record<string, unknown> = {
       state: {
         mention: req.mention.surface,
+        // 原话片段：判定层的判据是字面线索，canonical 已经把线索洗掉了
+        ...(req.mention.rawSurfaces?.length ? { mention_raw: req.mention.rawSurfaces.join(" ｜ ") } : {}),
         scene: req.mention.scene,
         mention_kind: req.mention.kind,
         context: req.mention.context,

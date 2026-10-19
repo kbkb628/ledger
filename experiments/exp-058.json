@@ -1,0 +1,31 @@
+{
+  "id": "exp-058",
+  "parent": "exp-057",
+  "createdAt": "2026-10-19T13:40:00.000Z",
+  "kind": "measurement",
+  "version": {
+    "hash": "4547256edcdd",
+    "commit": "working-tree",
+    "extractModel": "deepseek-v4-pro",
+    "judgeModel": "openai-compat",
+    "promptHash": "0b8239f6aa03",
+    "flags": { "R1_JUDGE_PROVIDER": "openai", "R1_MERGE_RECALL": "1", "R1_MERGE_TRACE": "runs/trace-raw.jsonl" }
+  },
+  "change": {
+    "bucket": "measurement",
+    "hypothesis": "两次改 prompt 都无效（回合 56/57），说明「挂载率 41%」不是提示问题。直接把 16 条「召回了没挂上」逐条摊开看：判官到底看到了什么。",
+    "file": "runs/trace-raw.jsonl（回放，0 次模型调用）",
+    "switch": "NONE",
+    "params": { "sample": "16 条「候选已召回但判官判 NEW」的 phantom item" }
+  },
+  "result": {
+    "causeA": "抽取把**区分性要素**洗掉（F-01：台词含「密码」→ canonical 只剩「打开了那把锁」；F-08：受益人换人被压缩）",
+    "causeB": "抽取把**施事改错**（F-12：原句是苏婉说「编号 S 那份早烧了」→ canonical 变成「陈叔手上有编号S的遗嘱」）",
+    "causeC": "真·同义词替换（F-02 旧纸↔旧账；F-15 护照↔证件）—— 字面判官无解，需要实体/同义归一",
+    "causeD": "挂到相邻命题（F-06 镯子挂到 E-011 而不是 E-010）—— 候选排序/多相似命题",
+    "counts": "16 条里 A/B 类（抽取失真）约一半，C 类（同义词）次之，D 类少量"
+  },
+  "evalCost": { "usd": 0, "seconds": 0 },
+  "status": "accepted",
+  "note": "**诊断结论：瓶颈已经不在召回，也不在提示，而在「内容到达判官之前的失真」。**\n\n判官被问的是 `canonical`（抽取层的改写句）。当改写把「密码」删掉、把施事从苏婉换成陈叔时，**它看到的已经不是原句**——再好的提示也无法把它救回来。这也解释了回合 56/57 的两次零效果/负效果。\n\n**四类失效（按可修性排序）**：\n| 类 | 例子 | 谁来修 |\n|---|---|---|\n| A 区分性要素被洗掉 | 密码消失 → `苏婉打开了那把锁` | 抽取后置校验：canonical 必须与自身 span 有足够的字面交集，否则把 span 原样补进别名 |\n| B 施事/主体被改错 | 苏婉 → 陈叔 | 后置校验：canonical 中的人物必须是本场在场者（`characters` 已在手） |\n| C 真同义词替换 | 旧纸↔旧账、护照↔证件 | 实体/同义归一（roadmap 1.7 的索引层），字面判官无解 |\n| D 挂到相邻命题 | 镯子 → 另一条 | 候选排序（把「共享稀有词」作为排序键，而不是当提示喂给判官） |\n\n**A/B 是这一轮最便宜的修法**：都是**后置校验**，纯规则、0 模型调用、可确定性度量。下一轮先做它们，用同一套三层仪器看 ②/③ 是否动、以及端到端 phantom 是否真的升。"
+}

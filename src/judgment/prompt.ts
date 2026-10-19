@@ -82,7 +82,8 @@ export function renderRequest(req: JudgmentRequest): string {
     .join("\n");
 
   return `【待绑定说法】
-原文：「${mention.surface}」
+原文：「${mention.surface}」${mention.rawSurfaces?.length ? `
+剧本原话（逐字，来自本场台词）：${mention.rawSurfaces.map((s) => `「${s}」`).join(" ｜ ")}` : ""}
 场景：${mention.scene}
 类型：${mention.kind}
 所在上下文：${mention.context}

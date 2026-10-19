@@ -16,6 +16,14 @@ export interface MentionState {
   /** 该说法所在的完整台词或邻近上下文 */
   context: string;
   kind: MentionKind;
+  /**
+   * 这句台词在剧本里的**原话片段**（抽取层给出的逐字 spans）。
+   *
+   * 为什么需要：`surface` 是抽取层改写后的 canonical —— 逐字线索在进入判定层之前就被洗掉了，
+   * 而 JEV 的判据本质是「输入里有没有字面线索」（design.md §6.3.1：三元组 ±0pp、典型表述 +43.8pp）。
+   * 回合 56 用「我们提炼的共享词」补它，反而更差；这一轮改为直接把原文交上去。
+   */
+  rawSurfaces?: string[];
 }
 
 /** 一条候选命题 */

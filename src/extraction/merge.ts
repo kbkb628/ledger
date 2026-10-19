@@ -259,6 +259,8 @@ export async function mergeScenes(
         task: "bind_mention",
         mention: {
           surface: draft.canonical,
+          // 逐字原话：判定层靠字面线索，canonical 是抽取层的改写，线索到这里已经被洗掉一次
+          rawSurfaces: process.env.R1_MERGE_RAW_SURFACE === "0" ? undefined : draft.surfaces.map((s) => s.text),
           scene: se.scene,
           // 上下文给整场：P1-1 实测上下文加宽是最大的一块提升，归并同样需要
           context: sceneText,
