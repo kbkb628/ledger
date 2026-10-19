@@ -1,0 +1,34 @@
+{
+  "id": "exp-063",
+  "parent": "exp-062",
+  "createdAt": "2026-10-19T22:30:00.000Z",
+  "version": {
+    "hash": "4547256edcdd",
+    "commit": "c4e647f",
+    "extractModel": "deepseek-v4-pro",
+    "judgeModel": "openai-compat",
+    "promptHash": "0b8239f6aa03",
+    "flags": {
+      "R1_JUDGE_PROVIDER": "openai",
+      "R1_MERGE_ALIAS_LINK": "1",
+      "R1_MERGE_TRACE": "runs/trace-alias.jsonl"
+    }
+  },
+  "change": {
+    "bucket": "capability",
+    "hypothesis": "回合 62 的失败原因是「确定性挂载会吞掉台词」（挂错 → 说话人凭空获得知情 → 锚定泄漏被掩掉）。换一种更弱的连接：**只把说法记到目标命题的别名表上，命题不合并**（不动 agents / scenes / establishedAt，本 draft 仍走 NEW）。目的是让同一说法下次能被字面命中，而不改变任何知识归属。",
+    "file": "src/extraction/merge.ts",
+    "switch": "R1_MERGE_ALIAS_LINK",
+    "params": { "conditions": "scored.length === 0 ∧ 罕见词唯一命中", "effect": "alias-only，无 merge" }
+  },
+  "result": {
+    "links": "9 次",
+    "phantom": "18/60（基线 17，**+1**）",
+    "anchored": "45/60（基线 49，**-4**）",
+    "recall": "63/120 = 52.5%（基线 66/120 = 55.0%）",
+    "precision": "63/67 = 94.0% · 误报 4（基线 5）"
+  },
+  "evalCost": { "usd": 0.6, "seconds": 2400 },
+  "status": "rejected",
+  "note": "**又是净负**：phantom +1，anchored **-4**。\n\n**为什么更弱的连接也会掉**：别名一旦挂到**错的**目标上，下一次那条锚定台词就会被「字面命中」到错命题 —— 于是它自己那条确立命题不再被认作「首次出现」，锚定泄漏随之被掩掉。**「吞掉」不是合并特有的，只要跨命题连了别名就会发生。** 这是第二次独立验证（第一次是回合 62 的确定性挂载）。\n\n**结论（就此收口）**：在**不改账本数据结构**的前提下，合并/别名层已经没有可动的空间：\n- 扩候选 → 真账本 7 → 13（回合 60）\n- 放开判官口径 → 7 → 16（回合 59）\n- 给判官补线索 → 无效果（回合 56/57）\n- 只重排 → 零效果（回合 61）\n- 确定性挂载 → anchored -4（回合 62）\n- 别名挂链 → anchored -4（本回合）\n\n**唯一残留的正面结论**：罕见词通道能把该挂的**捞进候选表**（16/51 → 27/51，p=0.0010）；但「捞准」要靠语义，字面判官给不了。\n\n**下一层必须换数据类型**：给每条命题落一套**实体/事件要素**（`relation/agent/patient/object` 历史消融证明对**判官**零贡献，所以只能用于**索引/召回**），这需要第二遍抽取（新调用、新成本档），并自带三道门验收。在动它之前，建议先把这十二轮的负面结论写进 README 的「已知短板」，别让读者以为这条路没人走过。"
+}

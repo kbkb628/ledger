@@ -110,6 +110,7 @@ export async function mergeScenes(
   let costUsd = 0;
   let calls = 0;
   let unsure = 0;
+  let aliasLinks = 0;
   // 接着已有账本的 id 继续编，避免与冻结的 id 撞车
   let nextId =
     propositions.reduce((max, p) => {
@@ -175,6 +176,40 @@ export async function mergeScenes(
         }
         if (opts.verbose && extra.length) {
           process.stdout.write(`    ${se.scene} 罕见词召回 +${extra.length}（${extra.map((h) => h.id).join("/")}）\n`);
+        }
+      }
+
+      // ── 别名式挂链（`R1_MERGE_ALIAS_LINK=1`）──
+      //
+      // 回合 62 的教训：**确定性挂载会「吞掉」台词** —— 一旦挂错，这条台词的说话人
+      // 就凭空获得了那条命题的知情记录，于是原本能判出来的锚定泄漏也被掩掉（anchored -4）。
+      //
+      // 这里换成更弱的一种连接：**只把说法记到目标命题的别名表上，命题本身不合并**
+      // （不动 agents / scenes / establishedAt，本 draft 仍然照常走后面的 NEW 路径）。
+      // 目的只是让「以后再出现这个说法」时能被字面命中；不改变任何知识归属。
+      if (process.env.R1_MERGE_ALIAS_LINK === "1" && scored.length === 0) {
+        const hits = rareTermRecall({
+          text: draftText,
+          props: propositions.map((p) => ({
+            id: p.id,
+            text: norm(propText(p.canonical, p.aliases.map((a) => a.surface))),
+          })),
+          minIdf: Number(process.env.R1_RECALL_MIN_IDF ?? 1.2),
+          topK: 2,
+        });
+        const target = hits.length === 1 ? propositions.find((p) => p.id === hits[0]!.id) : undefined;
+        if (target) {
+          for (const s of draft.surfaces) {
+            if (!target.aliases.some((a) => a.surface === s.text)) {
+              target.aliases.push({ surface: s.text, firstSeen: se.scene, kind: s.kind });
+            }
+          }
+          aliasLinks += 1;
+          if (opts.verbose) {
+            process.stdout.write(
+              `    ${se.scene} 「${draft.canonical.slice(0, 22)}」别名挂到 ${target.id}（不合并，共享 ${hits[0]!.shared.join("/")}）\n`,
+            );
+          }
         }
       }
 
