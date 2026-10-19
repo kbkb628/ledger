@@ -5,8 +5,8 @@
  *
  * 归并的 blocking 用字符 bigram 的 Dice 相似度召回候选，下限 0.15。
  * 这个尺子对**同义改写**不友好：「保险箱的密码是小姐的生日」与「那把锁的密码，我试了两次就开了」
- * Dice 只有 0.07，直接掉出候选表 —— 判官连看都看不到，于是新建命题，
- * 「首见场景在场者得知」当场给泄漏者发许可（幻影集量到的就是这条）。
+ * Dice 只有 0.16，稍一改就掉到 0.15 以下 —— 候选表里没有那条原命题，判官连看都看不到，
+ * 于是新建命题，「首见场景在场者得知」当场给泄漏者发了许可（幻影集量到的就是这条）。
  *
  * 但这两句共享一个**很罕见**的词：「密码」。它在这个账本里只出现在一条命题上。
  * 所以正确的召回信号不是「整体像不像」，而是「有没有共享一个稀有词」。
@@ -14,8 +14,11 @@
  * ## 做法
  *
  * 1. 归一化后切成字符 2-gram（与 blocking 同一套切法，便于对齐）；
- * 2. 在**当前账本**上算 IDF（跨命题的文档频率），罕见词权重高、烂大街的词权重低；
- * 3. 只有命中「足够罕见」的词（IDF 达阈）才算候选，再按权重和排序取前 K。
+ * 2. 在**当前账本**上算 IDF（跨命题的文档频率）：罕见词权重高、烂大街的词权重低；
+ * 3. 只有命中「足够罕见」的词（IDF 达阈）才算候选，再按权重和排序取前 K；
+ * 4. 顺带把**命中的那几个词**返回（`shared`）—— 这是给判官的字面线索。
+ *    回合 55 实测：候选递上去以后判官只挂 41%，因为改写句与命题的字面线索太少；
+ *    把这些线索显式写给它，比继续加候选有用（依据 design.md §6.3.1：典型表述 +43.8pp）。
  *
  * 纯确定性：同一账本 + 同一句 → 同一候选表。不调模型。
  */
@@ -38,6 +41,13 @@ export interface RecallInput {
   topK?: number;
 }
 
+export interface RecallHit {
+  id: string;
+  score: number;
+  /** 共享的稀有词（2-gram）—— 给判官的**字面线索**，不是给人看的花絮 */
+  shared: string[];
+}
+
 /** 切成字符 2-gram（去空白；长度不足时退化为单字） */
 export function grams(s: string): string[] {
   const t = s.replace(/\s+/g, "");
@@ -48,10 +58,10 @@ export function grams(s: string): string[] {
 }
 
 /**
- * 罕见词召回：返回按「罕见词权重和」排序的命题 id。
+ * 罕见词召回：返回按「罕见词权重和」排序的候选，含命中的共享词。
  * 一条命题若与文本没有任何达到 `minIdf` 的共同词，则**不进候选**。
  */
-export function rareTermRecall(input: RecallInput): string[] {
+export function rareTermRecall(input: RecallInput): RecallHit[] {
   const minIdf = input.minIdf ?? DEFAULTS.minIdf;
   const topK = input.topK ?? DEFAULTS.topK;
   if (input.props.length === 0) return [];
@@ -75,21 +85,21 @@ export function rareTermRecall(input: RecallInput): string[] {
   const scored = propGrams
     .map(({ id, g }) => {
       let score = 0;
-      let rare = false;
+      const shared: string[] = [];
       for (const tok of g) {
         if (!textGrams.has(tok)) continue;
         const idf = idfOf(tok);
         if (idf < minIdf) continue;
-        rare = true;
+        shared.push(tok);
         score += idf;
       }
-      return { id, score, rare };
+      return { id, score, shared };
     })
-    .filter((x) => x.rare)
+    .filter((x) => x.shared.length > 0)
     .sort((a, b) => b.score - a.score || a.id.localeCompare(b.id))
     .slice(0, topK);
 
-  return scored.map((x) => x.id);
+  return scored;
 }
 
 export const RECALL_DEFAULTS = DEFAULTS;

@@ -151,6 +151,11 @@ export async function mergeScenes(
       // 所以默认全量补，`R1_RECALL_TRIGGER` 只留作敏感性开关。
       const trigger = Number(process.env.R1_RECALL_TRIGGER ?? 1);
       const thin = scored.length === 0 || (scored[0]?.score ?? 0) < trigger;
+      // 召回通道给出的「共享稀有词」，**默认不**随候选交给判官。
+      // 回合 56 实测：加上以后候选召回不变（27/51），挂载反而从 11/27 掉到 9/27 —— 否掉了。
+      // 保留开关只为复核（依据 design.md §6.3.1，字面线索本该有用，但「共享词」这种提示
+      // 显然不是判官需要的形态：它要的是**原话**，而不是我们替它提炼的词）。
+      const recallHint = new Map<string, string[]>();
       if (process.env.R1_MERGE_RECALL === "1" && thin) {
         const extra = rareTermRecall({
           text: draftText,
@@ -162,13 +167,14 @@ export async function mergeScenes(
           topK: Number(process.env.R1_RECALL_TOPK ?? 4),
         });
         const have = new Set(scored.map((x) => x.p.id));
-        for (const id of extra) {
-          if (have.has(id)) continue;
-          const p = propositions.find((x) => x.id === id);
+        for (const hit of extra) {
+          if (process.env.R1_RECALL_HINT === "1") recallHint.set(hit.id, hit.shared);
+          if (have.has(hit.id)) continue;
+          const p = propositions.find((x) => x.id === hit.id);
           if (p) scored.push({ p, score: 0 });
         }
         if (opts.verbose && extra.length) {
-          process.stdout.write(`    ${se.scene} 罕见词召回 +${extra.length}（${extra.join("/")}）\n`);
+          process.stdout.write(`    ${se.scene} 罕见词召回 +${extra.length}（${extra.map((h) => h.id).join("/")}）\n`);
         }
       }
 
@@ -264,7 +270,11 @@ export async function mergeScenes(
         candidates: candidates.map((p) => ({
           id: p.id,
           canonical: p.canonical,
-          keywords: p.aliases.map((a) => a.surface),
+          keywords: [
+            ...p.aliases.map((a) => a.surface),
+            // 召回通道给出的共享稀有词：作为**字面线索**随候选呈现给判官
+            ...(recallHint.get(p.id) ?? []).map((tok) => `与本句共享：${tok}`),
+          ],
           type: "",
         })),
         allowedChoices: [...candidates.map((p) => p.id), "NEW", "UNSURE"],

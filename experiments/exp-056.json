@@ -1,0 +1,34 @@
+{
+  "id": "exp-056",
+  "parent": "exp-055",
+  "createdAt": "2026-10-19T11:20:00.000Z",
+  "version": {
+    "hash": "4547256edcdd",
+    "commit": "f9ed209",
+    "extractModel": "deepseek-v4-pro",
+    "judgeModel": "openai-compat",
+    "promptHash": "0b8239f6aa03",
+    "flags": {
+      "R1_JUDGE_PROVIDER": "openai",
+      "R1_MERGE_RECALL": "1",
+      "R1_RECALL_HINT": "1",
+      "R1_MERGE_TRACE": "runs/trace-hint.jsonl"
+    }
+  },
+  "change": {
+    "bucket": "capability",
+    "hypothesis": "回合 55 显示候选给出后判官只挂 41%。按 design.md §6.3.1（JEV 靠字面线索：三元组 ±0pp、典型表述 +43.8pp），把「本句与这条候选共享哪些稀有词」显式写进候选 keywords，应该提高挂载率。",
+    "file": "src/extraction/recall.ts + src/extraction/merge.ts",
+    "switch": "R1_RECALL_HINT",
+    "params": { "hintForm": "keywords 追加「与本句共享：<2-gram>」", "topK": 4 }
+  },
+  "result": {
+    "candidateRecall": "27/51（与不加提示完全相同 —— 提示不改召回，符合预期）",
+    "attach": "9/51 = 17.6%（不加提示时 11/51 = 21.6%）→ **降 2 条**",
+    "attachGivenRecalled": "9/27 = 33%（不加提示 11/27 = 41%）",
+    "cost": "与不加提示同量级（+121% vs 基线）"
+  },
+  "evalCost": { "usd": 0.6, "seconds": 2400 },
+  "status": "rejected",
+  "note": "**否掉了**：提示没有提高挂载率，反而掉了 2 条（11/27 → 9/27）。\n\n**为什么否掉合理**：`keywords` 里混进「与本句共享：密码」这种**元叙述**，对判官是噪声 —— 它要的是「这句话长什么样」，不是我们自己提炼的中间结论。这和 design.md 那条结论并不矛盾：+43.8pp 来自「补上**命题的典型表述**（原话）」，不是「补上我们算出来的共享词」。\n\n**副作用**：`R1_RECALL_HINT` 默认改为关（`=1` 才开），代码保留以便复核。\n\n**下一轮的假设（已排队）**：判官看到的 `mention.surface` 现在是**抽取层的改写句**（canonical），逐字线索在进入判定层之前就已经被洗掉了。把原话（draft 的 surfaces）一并给它，才符合「JEV 靠字面线索」这条经验。这是一处字段改动、一次跑量，成本与本轮相同。"
+}
