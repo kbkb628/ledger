@@ -178,6 +178,49 @@ export async function mergeScenes(
         }
       }
 
+      // ── 唯一强证据下的确定性挂载（`R1_MERGE_ATTACH_UNIQUE=1`）──
+      //
+      // 设计约束来自回合 60：**候选集不得扩大**（扩集会让真账本 7 → 13 条）。
+      // 所以这里不增加候选，只在「**一条候选都没有**（今天必判 NEW）」且
+      // 「罕见词证据**唯一**指向某一条命题」时直接挂上去，不叫判官。
+      // 唯一性是硬条件 —— 与 `R1_MERGE_OVERLAP` 同一套思路：唯一才短路，多义一律交判官。
+      if (process.env.R1_MERGE_ATTACH_UNIQUE === "1" && scored.length === 0) {
+        const hits = rareTermRecall({
+          text: draftText,
+          props: propositions.map((p) => ({
+            id: p.id,
+            text: norm(propText(p.canonical, p.aliases.map((a) => a.surface))),
+          })),
+          minIdf: Number(process.env.R1_RECALL_MIN_IDF ?? 1.2),
+          topK: 2,
+        });
+        const target = hits.length === 1 ? propositions.find((p) => p.id === hits[0]!.id) : undefined;
+        if (target) {
+          attach(propositions, target, draft, draftAgents, se.scene, false);
+          if (opts.verbose) {
+            process.stdout.write(
+              `    ${se.scene} 「${draft.canonical.slice(0, 24)}」→ ${target.id} (rare_term_unique:${hits[0]!.shared.join("/")})\n`,
+            );
+          }
+          decisions.push({
+            scene: se.scene, canonical: draft.canonical, choice: target.id,
+            candidates: [target.id], confidence: 1, reason: "rare_term_unique",
+          });
+          if (traceRows) {
+            traceRows.push({
+              scene: se.scene,
+              canonical: draft.canonical,
+              surfaces: draft.surfaces.map((s) => s.text),
+              candidates: [target.id],
+              choice: target.id,
+              createdId: null,
+              reason: "rare_term_unique",
+            });
+          }
+          continue;
+        }
+      }
+
       if (scored.length === 0) {
         decisions.push({
           scene: se.scene, canonical: draft.canonical, choice: "NEW",
@@ -202,6 +245,29 @@ export async function mergeScenes(
       }
 
       const candidates = scored.map((x) => x.p);
+
+      // ── 只重排、不扩集（`R1_MERGE_RERANK=1`）──
+      //
+      // 回合 60 的结论：**候选集不得扩大**（只加召回就让茶馆 7 → 13 条）。
+      // 所以召回的证据改成只用在这里：给**已经在候选表里**的命题加权，按「与本句共享的稀有词」
+      // 重新排序 —— 改顺序、不改选项。目的是治 exp-058 里的 D 类（挂到相邻命题）。
+      if (process.env.R1_MERGE_RERANK === "1" && candidates.length > 1) {
+        const weight = new Map(
+          rareTermRecall({
+            text: draftText,
+            props: candidates.map((p) => ({
+              id: p.id,
+              text: norm(propText(p.canonical, p.aliases.map((a) => a.surface))),
+            })),
+            minIdf: Number(process.env.R1_RECALL_MIN_IDF ?? 1.2),
+            topK: candidates.length,
+          }).map((h) => [h.id, h.score]),
+        );
+        candidates.sort((a, b) => (weight.get(b.id) ?? 0) - (weight.get(a.id) ?? 0));
+        if (opts.verbose && weight.size) {
+          process.stdout.write(`    ${se.scene} 重排 ${weight.size}/${candidates.length}（首位 ${candidates[0]!.id}）\n`);
+        }
+      }
 
       // ── 同说法优先归并（`R1_MERGE_EXACT=1`）──
       //

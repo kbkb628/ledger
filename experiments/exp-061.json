@@ -1,0 +1,28 @@
+{
+  "id": "exp-061",
+  "parent": "exp-060",
+  "createdAt": "2026-10-19T19:40:00.000Z",
+  "version": {
+    "hash": "4547256edcdd",
+    "commit": "7c23790",
+    "extractModel": "deepseek-v4-pro",
+    "judgeModel": "openai-compat",
+    "promptHash": "0b8239f6aa03",
+    "flags": { "R1_JUDGE_PROVIDER": "openai", "R1_MERGE_RERANK": "1", "R1_MERGE_TRACE": "runs/trace-rerank.jsonl" }
+  },
+  "change": {
+    "bucket": "capability",
+    "hypothesis": "回合 60 定死「候选集不得扩大」。那就只改顺序：用罕见词证据给**已在候选表里**的命题加权重排（不改选项），应能治 exp-058 的 D 类（挂到相邻命题）。",
+    "file": "src/extraction/merge.ts",
+    "switch": "R1_MERGE_RERANK",
+    "params": { "scope": "仅当 candidates.length > 1 时排序，不新增候选" }
+  },
+  "result": {
+    "candidates": "16/51 = 31.4%（与基线同）",
+    "attach": "5/51 = 9.8%（与基线**完全一致**）",
+    "endToEnd": "未跑（①/②/③ 都没动，跑真账本没有意义）"
+  },
+  "evalCost": { "usd": 0.6, "seconds": 2400 },
+  "status": "rejected",
+  "note": "**零效果**。②候选召回 16/51、③挂载 5/51 与基线逐位相同。\n\n**为什么无效**：需要重排才有救的是 D 类（目标已在候选表里但被判官选了邻近命题），在 phantom 漏报里只占少数；而绝大多数漏报是「**目标根本不在候选表里**」（35/51）。对它们来说顺序无关紧要 —— 不在表里的东西排不到前面。\n\n**顺带说明这个结果的价值**：它把「加召回」和「用召回」分开了 —— 加召回能进表（②16→27）但会伤真账本精度；只重排不伤精度但也帮不上忙。**候选表这一层已经被榨干。**"
+}

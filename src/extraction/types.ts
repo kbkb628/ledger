@@ -116,7 +116,7 @@ export interface MergeDecision {
   candidates: string[];
   confidence: number;
   /** 被判定层拒绝的候选——用 `vague` 说法命中的候选不算证据 */
-  reason: "attached" | "new" | "unsure" | "no_candidate" | "exact_surface" | "overlap_surface";
+  reason: "attached" | "new" | "unsure" | "no_candidate" | "exact_surface" | "overlap_surface" | "rare_term_unique";
 }
 
 export interface LedgerDraft {

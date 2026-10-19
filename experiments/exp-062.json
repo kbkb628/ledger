@@ -1,0 +1,34 @@
+{
+  "id": "exp-062",
+  "parent": "exp-061",
+  "createdAt": "2026-10-19T21:10:00.000Z",
+  "version": {
+    "hash": "4547256edcdd",
+    "commit": "7c23790",
+    "extractModel": "deepseek-v4-pro",
+    "judgeModel": "openai-compat",
+    "promptHash": "0b8239f6aa03",
+    "flags": {
+      "R1_JUDGE_PROVIDER": "openai",
+      "R1_MERGE_ATTACH_UNIQUE": "1",
+      "R1_MERGE_TRACE": "runs/trace-uniq.jsonl"
+    }
+  },
+  "change": {
+    "bucket": "capability",
+    "hypothesis": "既然「扩候选」伤精度、「只重排」没用，那就绕开这两条：只在「**一条候选都没有**（今天必判 NEW）」且「罕见词证据**唯一**指向某一条命题」时，直接确定性挂载、不叫判官。唯一性是硬条件（与 R1_MERGE_OVERLAP 同一思路）。",
+    "file": "src/extraction/merge.ts + src/extraction/types.ts（新增 reason: rare_term_unique）",
+    "switch": "R1_MERGE_ATTACH_UNIQUE",
+    "params": { "conditions": "scored.length === 0 ∧ hits.length === 1（topK=2 取回后判唯一）" }
+  },
+  "result": {
+    "ruleFired": "15 次",
+    "phantom": "17/60（与基线同，**没有提升**）",
+    "anchored": "45/60（基线 49，**-4**）",
+    "recall": "62/120 = 51.7%（基线 66/120 = 55.0%）",
+    "precision": "62/66 = 93.9% · 误报 4（基线 5）"
+  },
+  "evalCost": { "usd": 0.6, "seconds": 2400 },
+  "status": "rejected",
+  "note": "**净负**：触发 15 次，phantom 一条没多抓到，anchored 反而掉 4 条。\n\n**为什么掉**：确定性挂载一旦挂错，被挂上去的那条命题会**吞掉**这条台词的说法与在场者知识 —— 于是原本能靠「新建命题 + 首见在场者」判出来的锚定泄漏（anchored）也被掩掉了。**错误合并不只制造误报，还会消灭真泄漏**，这比赛道上任何一次正向收益都贵。\n\n**仪器自身的一个缺口（已顺手修）**：`rare_term_unique` 分支没写轨迹行，导致轨迹 131 → 115 条。补上以后，任何绕过判官的路径都会留在轨迹里 —— 否则「确定性规则」会变成度量盲区。\n\n---\n\n## 这一系列（回合 51–62）的收口\n\n十二轮里，六次动手、六次被自己的门否掉。把它们排在一起看，结论已经不是「哪条路更好」，而是**这一层已经被榨干**：\n\n| 做法 | 幻影集 phantom | 真账本（茶馆） | 判定 |\n|---|---|---|---|\n| 基线 | 28.3% | 7 条 | — |\n| 扩候选（recall） | ~38% | **13 条** | rejected |\n| 扩候选 + 放开判官口径 | 45.0%（p≈0.013） | **16 条** | rejected |\n| 给判官补线索（共享词 / 原话） | 无变化 / 无变化 | — | rejected |\n| 只重排已有候选 | 无变化 | — | rejected |\n| 唯一强证据确定性挂载 | 无提升，anchored **-4** | — | rejected |\n\n**能确定的正面结论只有一条**（回合 55，确定性、p=0.0010）：**罕见词通道确实能把该挂的命题捞进候选表**（16/51 → 27/51）。它没有变成能力，是因为「捞进来」与「只该捞该捞的」在当前判官上不可兼得。\n\n**所以下一层不是调参，是改账本的数据结构**：把命题的**实体/事件要素**真正落盘（`relation/agent/patient/object` 现在全是空串），让「保险箱↔锁」「旧账↔旧纸」这类替换在**索引层**就对得上，而不是指望判官在字面上猜。这是 roadmap 1.7 里的 A 路线，代价是抽取契约要改（历史上改主抽取 prompt 失败过 3 次，必须独立成第二遍或纯规则后处理），并且要有自己的验收（同样三道门：探针、dev、真账本）。"
+}
